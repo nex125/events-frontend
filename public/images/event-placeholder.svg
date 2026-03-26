@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Event placeholder image">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1e1e" />
+      <stop offset="100%" stop-color="#2e2e2e" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)" />
+  <g fill="#dfcd72" opacity="0.2">
+    <circle cx="220" cy="170" r="120" />
+    <circle cx="980" cy="620" r="170" />
+  </g>
+  <text
+    x="50%"
+    y="50%"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    fill="#e5e2e1"
+    font-family="Inter, Arial, sans-serif"
+    font-size="54"
+    opacity="0.75"
+  >
+    Ticketok Event
+  </text>
+</svg>

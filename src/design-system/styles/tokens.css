@@ -1,0 +1,197 @@
+/*
+  The Curated Canvas — design system tokens
+  Charcoal foundation, Soft Gold primary (#DFCD72), tertiary (#1F6FE0)
+*/
+
+@theme {
+  --color-ds-background: var(--ds-background);
+  --color-ds-surface: var(--ds-surface);
+  --color-ds-surface-low: var(--ds-surface-container-low);
+  --color-ds-surface-container: var(--ds-surface-container);
+  --color-ds-surface-high: var(--ds-surface-container-high);
+  --color-ds-surface-highest: var(--ds-surface-container-highest);
+  --color-ds-surface-lowest: var(--ds-surface-container-lowest);
+  --color-ds-surface-variant: var(--ds-surface-variant);
+  --color-ds-primary: var(--ds-primary);
+  --color-ds-secondary: var(--ds-secondary);
+  --color-ds-on-surface: var(--ds-on-surface);
+  --color-ds-on-surface-variant: var(--ds-on-surface-variant);
+  --color-ds-outline-variant: var(--ds-outline-variant);
+  --color-ds-tertiary: var(--ds-tertiary);
+
+  --font-display: var(--font-display-family);
+  --font-sans: var(--font-body-family);
+
+  --text-display-hero: var(--ds-display-hero-size);
+  --text-display-hero--line-height: var(--ds-display-hero-line-height);
+  --text-display-hero--letter-spacing: var(--ds-display-hero-letter-spacing);
+  --text-display-lg: var(--ds-display-lg-size);
+  --text-display-lg--line-height: var(--ds-display-lg-line-height);
+  --text-display-lg--letter-spacing: var(--ds-display-lg-letter-spacing);
+  --text-display-md: var(--ds-display-md-size);
+  --text-display-md--line-height: var(--ds-display-md-line-height);
+  --text-display-md--letter-spacing: var(--ds-display-md-letter-spacing);
+  --text-display-sm: var(--ds-display-sm-size);
+  --text-display-sm--line-height: var(--ds-display-sm-line-height);
+  --text-display-sm--letter-spacing: var(--ds-display-sm-letter-spacing);
+  --text-heading-lg: var(--ds-heading-lg-size);
+  --text-heading-lg--line-height: var(--ds-heading-lg-line-height);
+  --text-heading-md: var(--ds-heading-md-size);
+  --text-heading-md--line-height: var(--ds-heading-md-line-height);
+  --text-heading-sm: var(--ds-heading-sm-size);
+  --text-heading-sm--line-height: var(--ds-heading-sm-line-height);
+  --text-body-lg: var(--ds-body-lg-size);
+  --text-body-lg--line-height: var(--ds-body-lg-line-height);
+  --text-body-md: var(--ds-body-md-size);
+  --text-body-md--line-height: var(--ds-body-md-line-height);
+  --text-body-sm: var(--ds-body-sm-size);
+  --text-body-sm--line-height: var(--ds-body-sm-line-height);
+  --text-label-sm: var(--ds-label-sm-size);
+  --text-label-sm--line-height: var(--ds-label-sm-line-height);
+
+  --radius-functional: var(--ds-radius-functional);
+  --radius-structural: var(--ds-radius-structural);
+  --radius-pill: var(--ds-radius-pill);
+
+  --shadow-ambient: var(--ds-shadow-ambient);
+  --shadow-ambient-lg: var(--ds-shadow-ambient-lg);
+  --shadow-ambient-sm: var(--ds-shadow-ambient-sm);
+
+  --ease-ds-default: var(--ds-ease-default);
+  --ease-ds-out: var(--ds-ease-out);
+  --ease-ds-in-out: var(--ds-ease-in-out);
+
+  --z-navbar: 50;
+  --z-dropdown: 60;
+  --z-tooltip: 70;
+}
+
+:root {
+  --font-display-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-body-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Surface architecture */
+  --ds-background: #131313;
+  --ds-surface: #131313;
+  --ds-surface-container-low: #181818;
+  --ds-surface-container: #1e1e1e;
+  --ds-surface-container-high: #242424;
+  --ds-surface-container-highest: #2e2e2e;
+  --ds-surface-container-lowest: #0f0f0f;
+  --ds-surface-bright: #1a1a1a;
+  --ds-surface-variant: #2a2826;
+  --ds-surface-dim: #141414;
+
+  /* Accents */
+  --ds-primary: #dfcd72;
+  --ds-on-primary: #1a1816;
+  --ds-primary-gradient-end: #8a7f46;
+  --ds-primary-container: #8a7f46;
+
+  --ds-secondary: #9064f6;
+  --ds-on-secondary: #f7f4f0;
+  --ds-secondary-muted: color-mix(in srgb, var(--ds-secondary) 22%, var(--ds-surface-container-high));
+
+  --ds-tertiary: #1f6fe0;
+  --ds-on-tertiary: #f7f4f0;
+  --ds-tertiary-muted: color-mix(in srgb, var(--ds-tertiary) 22%, var(--ds-surface-container-high));
+
+  --ds-on-surface: #e5e2e1;
+  --ds-on-surface-variant: #9a9694;
+  --ds-outline-variant: #5c5957;
+
+  --ds-shadow-rgb: 229, 226, 225;
+  --ds-accent-glow-rgb: 223, 205, 114;
+
+  /* Type scale */
+  --ds-display-hero-size: clamp(2.25rem, 1.81rem + 1.9vw, 3.5rem);
+  --ds-display-hero-line-height: 1.08;
+  --ds-display-hero-letter-spacing: -0.02em;
+  --ds-display-lg-size: clamp(2rem, 1.56rem + 1.9vw, 3.75rem);
+  --ds-display-lg-line-height: 1.08;
+  --ds-display-lg-letter-spacing: -0.02em;
+  --ds-display-md-size: clamp(1.875rem, 1.6rem + 1.2vw, 3rem);
+  --ds-display-md-line-height: 1.1;
+  --ds-display-md-letter-spacing: -0.02em;
+  --ds-display-sm-size: clamp(1.5rem, 1.35rem + 0.65vw, 2.25rem);
+  --ds-display-sm-line-height: 1.15;
+  --ds-display-sm-letter-spacing: -0.01em;
+  --ds-heading-lg-size: 1.5rem;
+  --ds-heading-lg-line-height: 1.2;
+  --ds-heading-md-size: 1.25rem;
+  --ds-heading-md-line-height: 1.3;
+  --ds-heading-sm-size: 1rem;
+  --ds-heading-sm-line-height: 1.35;
+  --ds-body-lg-size: 1.25rem;
+  --ds-body-lg-line-height: 1.6;
+  --ds-body-md-size: 1.125rem;
+  --ds-body-md-line-height: 1.55;
+  --ds-body-sm-size: 0.875rem;
+  --ds-body-sm-line-height: 1.6;
+  --ds-label-sm-size: 0.625rem;
+  --ds-label-sm-line-height: 0.875rem;
+
+  /* Shape */
+  --ds-radius-functional: 0.375rem;
+  --ds-radius-structural: 0.75rem;
+  --ds-radius-pill: 9999px;
+
+  /* Layout */
+  --ds-page-gutter: 1.5rem;
+  --ds-section-padding-y: 5rem;
+  --ds-section-padding-y-md: 7rem;
+
+  /* Motion */
+  --ds-duration-fast: 150ms;
+  --ds-duration-normal: 300ms;
+  --ds-duration-slow: 500ms;
+  --ds-duration-slower: 800ms;
+  --ds-ease-default: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ds-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Elevation */
+  --ds-shadow-ambient: 0 32px 56px -16px rgb(var(--ds-shadow-rgb) / 0.07);
+  --ds-shadow-ambient-lg: 0 40px 64px -18px rgb(var(--ds-shadow-rgb) / 0.1);
+  --ds-shadow-ambient-sm: 0 24px 48px -14px rgb(var(--ds-shadow-rgb) / 0.06);
+
+  /* Reusable color-mix tokens */
+  --ds-ghost-border: color-mix(in srgb, var(--ds-outline-variant) 15%, transparent);
+  --ds-border-subtle: color-mix(in srgb, var(--ds-outline-variant) 12%, transparent);
+  --ds-input-border: color-mix(in srgb, var(--ds-outline-variant) 22%, transparent);
+  --ds-primary-wash: color-mix(in srgb, var(--ds-primary) 12%, transparent);
+  --ds-primary-wash-strong: color-mix(in srgb, var(--ds-primary) 16%, transparent);
+  --ds-primary-wash-solid: color-mix(in srgb, var(--ds-primary) 14%, var(--ds-surface-container-low));
+  --ds-primary-tint: color-mix(in srgb, var(--ds-primary) 24%, transparent);
+  --ds-primary-border: color-mix(in srgb, var(--ds-primary) 22%, transparent);
+  --ds-primary-border-strong: color-mix(in srgb, var(--ds-primary) 25%, transparent);
+  --ds-primary-ring: color-mix(in srgb, var(--ds-primary) 55%, transparent);
+  --ds-primary-ring-soft: color-mix(in srgb, var(--ds-primary) 22%, transparent);
+  --ds-primary-glow: color-mix(in srgb, var(--ds-primary) 32%, transparent);
+  --ds-primary-focus: color-mix(in srgb, var(--ds-primary) 58%, transparent);
+  --ds-primary-selection: color-mix(in srgb, var(--ds-primary) 28%, transparent);
+  --ds-tertiary-wash: color-mix(in srgb, var(--ds-tertiary) 10%, transparent);
+  --ds-tertiary-wash-strong: color-mix(in srgb, var(--ds-tertiary) 12%, transparent);
+  --ds-tertiary-border: color-mix(in srgb, var(--ds-tertiary) 20%, transparent);
+  --ds-tertiary-ring: color-mix(in srgb, var(--ds-tertiary) 45%, transparent);
+  --ds-tertiary-ring-strong: color-mix(in srgb, var(--ds-tertiary) 48%, transparent);
+  --ds-on-surface-emphasis: color-mix(in srgb, var(--ds-on-surface) 88%, var(--ds-on-surface-variant));
+  --ds-on-primary-muted: color-mix(in srgb, var(--ds-on-primary) 85%, transparent);
+  --ds-on-primary-soft: color-mix(in srgb, var(--ds-on-primary) 18%, transparent);
+  --ds-on-primary-soft-muted: color-mix(in srgb, var(--ds-on-primary) 14%, transparent);
+  --ds-ticket-panel-fill: color-mix(in srgb, var(--ds-surface-container-high) 72%, transparent);
+  --ds-ticket-panel-inner: color-mix(in srgb, var(--ds-surface-container-low) 88%, transparent);
+  --ds-primary-gradient: linear-gradient(135deg, var(--ds-primary) 0%, var(--ds-primary-gradient-end) 100%);
+  --ds-primary-tertiary-gradient: linear-gradient(135deg, var(--ds-primary), var(--ds-tertiary));
+
+  /*
+    Seat map — VIP vs Parter vs Balcony:
+    VIP = lighter champagne. Parter = richer mid gold.
+    Sold = achromatic gray only.
+  */
+  --ds-seat-vip: color-mix(in srgb, var(--ds-primary) 72%, #453c32);
+  --ds-seat-parter: color-mix(in srgb, var(--ds-primary) 58%, #3a322a);
+  --ds-seat-cool: color-mix(in srgb, var(--ds-tertiary) 48%, #222830);
+  --ds-seat-sold-fill: #3f3f3f;
+  --ds-seat-sold-edge: color-mix(in srgb, var(--ds-on-surface) 22%, transparent);
+}

@@ -1,0 +1,45 @@
+html {
+  scroll-padding-top: 6rem;
+  background-color: var(--ds-surface);
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--ds-surface);
+  color: var(--ds-on-surface);
+  font-family: var(--font-body-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display-family);
+  letter-spacing: -0.02em;
+}
+
+.ds-skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: var(--z-tooltip);
+  transform: translateY(-140%);
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--ds-primary) 35%, transparent);
+  background: var(--ds-surface-container-high);
+  color: var(--ds-on-surface);
+  font-weight: 600;
+  transition: transform var(--ds-duration-normal) var(--ds-ease-default);
+}
+
+.ds-skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+:where(a, button, [role='button'], summary, input, textarea, select):focus-visible {
+  outline: 2px solid var(--ds-primary-focus);
+  outline-offset: 2px;
+}

@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "../design-system/styles/tokens.css";
+@import "../design-system/styles/base.css";
+@import "../design-system/styles/components.css";
+
+:root {
+  --font-display-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-body-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
