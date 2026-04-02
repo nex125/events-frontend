@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@ds';
+import { TicketLauncher } from './TicketLauncher';
 import type { SeatCategory } from '@/types/event';
 
 interface BookingCardProps {
@@ -17,6 +20,8 @@ function pluralSeats(n: number): string {
 }
 
 export function BookingCard({ seatCategories }: BookingCardProps) {
+  const [widgetOpen, setWidgetOpen] = useState(false);
+
   const minPrice =
     seatCategories.length > 0
       ? Math.min(...seatCategories.map((s) => s.price))
@@ -25,7 +30,7 @@ export function BookingCard({ seatCategories }: BookingCardProps) {
   return (
     <div className="sticky top-32 ds-glass ds-ghost-border rounded-[var(--ds-radius-structural)] p-8 space-y-8">
       <div>
-        <h2 className="ds-heading-lg tracking-tight mb-2">Забронировать</h2>
+        <h2 className="ds-heading-lg tracking-tight mb-2">Купить билеты</h2>
         <p className="ds-body-sm text-[var(--ds-on-surface-variant)]">
           Ограниченное количество мест.
         </p>
@@ -81,14 +86,17 @@ export function BookingCard({ seatCategories }: BookingCardProps) {
             </span>
           </div>
         )}
-        <Button variant="primary" size="lg" className="w-full">
-          Выбрать билеты
-        </Button>
-        <p className="text-center ds-label-sm text-[var(--ds-on-surface-variant)]">
-          Оплата и выбор мест через партнёрский сервис.
-          <br />
-          Возврат не предусмотрен.
-        </p>
+        <motion.div layoutId="ticket-launcher" className="w-full rounded-[var(--ds-radius-interactive)]">
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full gap-2"
+            onClick={() => setWidgetOpen(true)}
+          >
+            Выбрать билеты
+          </Button>
+        </motion.div>
+        <TicketLauncher isOpen={widgetOpen} onClose={() => setWidgetOpen(false)} />
       </div>
     </div>
   );

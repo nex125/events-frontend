@@ -1,0 +1,102 @@
+.calendar :global(.rdp-months) {
+  display: flex;
+}
+
+.calendar :global(.rdp-month) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.calendar :global(.rdp-caption) {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 2rem;
+}
+
+.calendar :global(.rdp-caption_label) {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ds-on-surface);
+}
+
+.calendar :global(.rdp-nav) {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.calendar :global(.rdp-button_previous),
+.calendar :global(.rdp-button_next) {
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ds-outline-variant);
+  background: transparent;
+  color: var(--ds-on-surface-variant);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.calendar :global(.rdp-button_previous:hover),
+.calendar :global(.rdp-button_next:hover) {
+  background: var(--ds-surface-container-high);
+  color: var(--ds-on-surface);
+}
+
+.calendar :global(.rdp-month_grid) {
+  border-collapse: collapse;
+}
+
+.calendar :global(.rdp-weekdays) {
+  display: flex;
+}
+
+.calendar :global(.rdp-weekday) {
+  width: 2.25rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ds-on-surface-variant);
+  font-weight: 500;
+}
+
+.calendar :global(.rdp-week) {
+  display: flex;
+  margin-top: 0.35rem;
+}
+
+.calendar :global(.rdp-day) {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-on-surface);
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.calendar :global(.rdp-day:hover) {
+  background: var(--ds-surface-container-high);
+}
+
+.calendar :global(.rdp-today:not(.rdp-selected)) {
+  background: var(--ds-surface-container-low);
+  color: var(--ds-primary);
+}
+
+.calendar :global(.rdp-selected) {
+  background: var(--ds-primary);
+  color: var(--ds-on-primary, #fff);
+}
+
+.calendar :global(.rdp-outside) {
+  color: var(--ds-outline);
+  opacity: 0.7;
+}
+
+.calendar :global(.rdp-disabled) {
+  color: var(--ds-outline);
+  opacity: 0.45;
+}

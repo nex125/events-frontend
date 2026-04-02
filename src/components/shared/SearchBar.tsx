@@ -5,23 +5,18 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { dsMotion } from '@ds';
-import { events } from '@/data/events';
-import { searchEvents } from '@/lib/search';
 import Link from 'next/link';
 import { formatEventDateShort } from '@/lib/datetime';
+import { listEvents } from '@/lib/api';
+import type { Event } from '@/types/event';
 
 export function SearchBar() {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
+  const [results, setResults] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
-  const results = query.trim()
-    ? searchEvents(
-        events.filter((e) => !e.isMock),
-        query,
-      ).slice(0, 3)
-    : [];
 
   const showDropdown = focused && query.trim().length > 0;
 
@@ -35,6 +30,45 @@ export function SearchBar() {
     },
     [query, router],
   );
+
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setIsLoading(true);
+      listEvents(
+        {
+          q: trimmedQuery,
+          page: 1,
+          limit: 3,
+          sort: 'date_desc',
+        },
+        {
+          cache: 'no-store',
+          signal: controller.signal,
+        },
+      )
+        .then((response) => {
+          setResults(response.data);
+        })
+        .catch(() => {
+          if (controller.signal.aborted) return;
+          setResults([]);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setIsLoading(false);
+          }
+        });
+    }, 180);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [query]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -60,7 +94,14 @@ export function SearchBar() {
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const nextQuery = e.target.value;
+              setQuery(nextQuery);
+              if (!nextQuery.trim()) {
+                setResults([]);
+                setIsLoading(false);
+              }
+            }}
             onFocus={() => setFocused(true)}
             placeholder="Поиск событий..."
             className="bg-[var(--ds-surface-container-low)] border-none rounded-[var(--ds-radius-pill)] py-2 pl-10 pr-6 ds-body-sm w-64 text-[var(--ds-on-surface)] placeholder:text-[var(--ds-on-surface-variant)] focus:outline-none focus:ring-1 focus:ring-[var(--ds-primary-ring-soft)] transition-all"
@@ -80,7 +121,11 @@ export function SearchBar() {
             }}
             className="absolute top-full left-0 right-0 mt-4 bg-[var(--ds-surface)]/80 backdrop-blur-xl ds-ghost-border rounded-[var(--ds-radius-structural)] overflow-hidden z-[var(--z-dropdown)]"
           >
-            {results.length > 0 ? (
+            {isLoading ? (
+              <div className="px-4 py-3 ds-body-sm text-[var(--ds-on-surface-variant)]">
+                Идет поиск...
+              </div>
+            ) : results.length > 0 ? (
               <>
                 {results.map((event) => (
                   <Link

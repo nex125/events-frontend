@@ -4,8 +4,39 @@ import { motion } from 'framer-motion';
 import { Fingerprint } from 'lucide-react';
 import { dsMotion } from '@ds';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
+import type { Event } from '@/types/event';
+import { formatEventDateShort, formatEventTime } from '@/lib/datetime';
 
-export function TicketPromo() {
+interface TicketPromoProps {
+  event: Event;
+}
+
+function buildDecorativeTicketNumber(event: Event): string {
+  const seed = `${event.id}:${event.slug}`;
+  let hash = 0;
+
+  for (const ch of seed) {
+    hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  }
+
+  const sectionA = hash.toString(36).toUpperCase().slice(0, 4).padStart(4, '0');
+  const sectionB = event.id.replace(/-/g, '').slice(0, 4).toUpperCase().padEnd(4, 'X');
+  const sectionC = event.slug
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 3)
+    .toUpperCase()
+    .padEnd(3, 'X');
+
+  return `#${sectionA}-${sectionB}-${sectionC}`;
+}
+
+export function TicketPromo({ event }: TicketPromoProps) {
+  const decorativeTicketNumber = buildDecorativeTicketNumber(event);
+  const ticketHeadline = event.title.toLocaleUpperCase('ru-RU');
+  const ticketMeta = `${event.location} · ${formatEventDateShort(
+    event.datetimeUtc,
+  )} · ${formatEventTime(event.datetimeUtc)}`;
+
   return (
     <section className="ds-section overflow-hidden">
       <div className="ds-section-inner flex flex-col lg:flex-row items-center gap-20">
@@ -49,13 +80,21 @@ export function TicketPromo() {
         </ScrollReveal>
 
         <ScrollReveal className="lg:w-1/2 relative" delay={0.15}>
-          <div className="absolute inset-0 bg-[var(--ds-primary-wash)] blur-[120px] rounded-full" />
+          <div className="absolute left-1/2 top-1/2 h-[82%] w-[82%] -translate-x-1/2 -translate-y-1/2 bg-[var(--ds-primary-wash)] blur-[108px] rounded-full" />
           <motion.div
             whileHover={{ rotate: 0 }}
             initial={{ rotate: 3 }}
             transition={dsMotion.spring.smooth}
-            className="relative ds-glass ds-ghost-border rounded-[var(--ds-radius-structural)] p-8 w-full max-w-md mx-auto"
+            className="relative overflow-hidden ds-glass ds-ghost-border rounded-[var(--ds-radius-structural)] p-8 w-full max-w-md mx-auto"
           >
+            {/* Side notches to mimic a physical ticket shape */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center">
+              <span className="h-8 w-8 -translate-x-1/2 rounded-full bg-[var(--ds-surface)] ring-1 ring-[var(--ds-ghost-border)]" />
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
+              <span className="h-8 w-8 translate-x-1/2 rounded-full bg-[var(--ds-surface)] ring-1 ring-[var(--ds-ghost-border)]" />
+            </div>
+
             <div className="flex justify-between items-start mb-12">
               <div className="ds-heading-lg ds-gradient-primary-text tracking-tighter">
                 Ticketok
@@ -64,13 +103,13 @@ export function TicketPromo() {
                 <span className="ds-label-sm text-[var(--ds-on-surface-variant)] block">
                   Номер билета
                 </span>
-                <span className="font-mono ds-body-sm">#AX-9920-LXR</span>
+                <span className="font-mono ds-body-sm">{decorativeTicketNumber}</span>
               </div>
             </div>
             <div className="mb-12">
-              <h3 className="ds-heading-lg mb-1">NOCTURNE ELITE</h3>
+              <h3 className="ds-heading-lg mb-1">{ticketHeadline}</h3>
               <p className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-                Главный зал · Ряд A · Место 01
+                {ticketMeta}
               </p>
             </div>
             <div className="flex justify-between items-end">

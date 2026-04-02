@@ -8,12 +8,12 @@ export interface Event {
   datetimeUtc: string;
   location: string;
   image: string;
+  videoUrl?: string;
   category: string;
   tags: string[];
   duration?: string;
   ageRestriction?: string;
   importantInfo?: string;
-  isMock: boolean;
   isFeatured?: boolean;
 }
 

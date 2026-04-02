@@ -1,44 +1,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, Hourglass, Lock, CalendarDays } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import type { Event } from '@/types/event';
 import { cn } from '@ds/utils/cn';
 import { formatEventDateShort } from '@/lib/datetime';
 import { getEventImageSrc } from '@/lib/images';
-
-const mockIcons: Record<string, typeof Hourglass> = {
-  Классика: CalendarDays,
-  Мода: Lock,
-  Вечера: Hourglass,
-};
 
 interface EventCardProps {
   event: Event;
 }
 
 export function EventCard({ event }: EventCardProps) {
-  if (event.isMock) {
-    return (
-      <div className="relative overflow-hidden rounded-[var(--ds-radius-structural)] bg-[var(--ds-surface-container-low)] ds-ghost-border flex flex-col items-center justify-center aspect-[3/4] p-8 text-center">
-        {(() => {
-          const Icon = mockIcons[event.category] || Hourglass;
-          return (
-            <Icon
-              size={36}
-              className="text-[var(--ds-outline-variant)] mb-4"
-            />
-          );
-        })()}
-        <h3 className="ds-heading-md text-[var(--ds-on-surface-variant)] mb-2">
-          {event.title}
-        </h3>
-        <p className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-          {event.subtitle}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <Link
       href={`/events/${event.slug}`}

@@ -11,12 +11,16 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "^16.2.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "@nex125/seatmap-core": "^0.1.0",
+    "@nex125/seatmap-viewer": "^0.1.0",
+    "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
-    "clsx": "^2.1.1",
+    "next": "^16.2.1",
+    "pixi.js": "^8.17.1",
+    "react": "^19.2.4",
+    "react-day-picker": "^9.14.0",
+    "react-dom": "^19.2.4",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
