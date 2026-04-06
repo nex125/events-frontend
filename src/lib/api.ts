@@ -1,6 +1,6 @@
 import type { Event, SeatCategory } from '@/types/event';
 
-const DEFAULT_API_BASE_URL = 'http://localhost:3000/api/v1';
+const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8080/api/v1/public';
 
 function getApiBaseUrl(): string {
   const configured =

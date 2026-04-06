@@ -44,15 +44,18 @@ export function BookingCard({ seatCategories }: BookingCardProps) {
           <div className="space-y-2">
             {seatCategories.map((cat) => (
               <div
-                key={cat.zone}
+                key={cat.name}
                 className="flex justify-between items-center py-3 border-b border-[var(--ds-ghost-border)]"
               >
-                <div>
+                <div className="flex items-center gap-2">
+                  {cat.color && (
+                    <span
+                      className="inline-block w-3 h-3 rounded-full shrink-0"
+                      style={{ backgroundColor: cat.color }}
+                    />
+                  )}
                   <span className="ds-body-sm text-[var(--ds-on-surface)]">
                     {cat.name}
-                  </span>
-                  <span className="ds-label-sm text-[var(--ds-on-surface-variant)] ml-2">
-                    ({cat.zone})
                   </span>
                 </div>
                 <div className="text-right">

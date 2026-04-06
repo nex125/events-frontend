@@ -19,7 +19,7 @@ export interface Event {
 
 export interface SeatCategory {
   name: string;
-  zone: string;
+  color: string;
   price: number;
   currency: 'BYN';
   available: number;
