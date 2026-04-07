@@ -5,9 +5,12 @@ import { motion } from 'framer-motion';
 import { Button } from '@ds';
 import { TicketLauncher } from './TicketLauncher';
 import type { SeatCategory } from '@/types/event';
+import type { Venue } from '@nex125/seatmap-core';
 
 interface BookingCardProps {
   seatCategories: SeatCategory[];
+  venue: Venue;
+  eventId: string;
 }
 
 function pluralSeats(n: number): string {
@@ -19,7 +22,7 @@ function pluralSeats(n: number): string {
   return `${n} мест`;
 }
 
-export function BookingCard({ seatCategories }: BookingCardProps) {
+export function BookingCard({ seatCategories, venue, eventId }: BookingCardProps) {
   const [widgetOpen, setWidgetOpen] = useState(false);
 
   const minPrice =
@@ -99,7 +102,12 @@ export function BookingCard({ seatCategories }: BookingCardProps) {
             Выбрать билеты
           </Button>
         </motion.div>
-        <TicketLauncher isOpen={widgetOpen} onClose={() => setWidgetOpen(false)} />
+        <TicketLauncher
+          isOpen={widgetOpen}
+          onClose={() => setWidgetOpen(false)}
+          venue={venue}
+          eventId={eventId}
+        />
       </div>
     </div>
   );

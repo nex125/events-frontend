@@ -1,4 +1,5 @@
 import type { Event, SeatCategory } from '@/types/event';
+import type { generateVenue } from '@/types/venue';
 
 const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8080/api/v1/public';
 
@@ -7,6 +8,12 @@ declare const process:
     env: {
       NEXT_PUBLIC_API_BASE_URL?: string;
       API_BASE_URL?: string;
+      NEXT_PUBLIC_TICKETING_API_BASE_URL?: string;
+      TICKETING_API_BASE_URL?: string;
+      NEXT_PUBLIC_BO_SERVICE_BASE_URL?: string;
+      BO_SERVICE_BASE_URL?: string;
+      NEXT_PUBLIC_MERCURE_PUBLIC_URL?: string;
+      MERCURE_PUBLIC_URL?: string;
     };
   };
 
@@ -46,6 +53,120 @@ function getApiBaseUrl(): string {
     process.env.API_BASE_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
     DEFAULT_API_BASE_URL;
+
+  return normalize(configured);
+}
+
+const DEFAULT_TICKETING_API_BASE_URL = 'http://127.0.0.1:8080';
+
+function getBrowserTicketingApiBaseUrl(): string {
+  const configured =
+    process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL ??
+    DEFAULT_TICKETING_API_BASE_URL;
+
+  try {
+    const url = new URL(configured);
+    const isLoopbackHost =
+      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const isCurrentLoopback =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if (isLoopbackHost && isCurrentLoopback) {
+      url.hostname = window.location.hostname;
+    }
+
+    return normalize(url.toString());
+  } catch {
+    return normalize(configured);
+  }
+}
+
+function getTicketingApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return getBrowserTicketingApiBaseUrl();
+  }
+
+  const configured =
+    process.env.TICKETING_API_BASE_URL ??
+    process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL ??
+    DEFAULT_TICKETING_API_BASE_URL;
+
+  return normalize(configured);
+}
+
+const DEFAULT_BO_SERVICE_BASE_URL = 'http://127.0.0.1:5175';
+
+function getBrowserBoServiceBaseUrl(): string {
+  const configured =
+    process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL ??
+    DEFAULT_BO_SERVICE_BASE_URL;
+
+  try {
+    const url = new URL(configured);
+    const isLoopbackHost =
+      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const isCurrentLoopback =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if (isLoopbackHost && isCurrentLoopback) {
+      url.hostname = window.location.hostname;
+    }
+
+    return normalize(url.toString());
+  } catch {
+    return normalize(configured);
+  }
+}
+
+function getBoServiceBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return getBrowserBoServiceBaseUrl();
+  }
+
+  const configured =
+    process.env.BO_SERVICE_BASE_URL ??
+    process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL ??
+    DEFAULT_BO_SERVICE_BASE_URL;
+
+  return normalize(configured);
+}
+
+const DEFAULT_MERCURE_PUBLIC_URL = 'http://127.0.0.1:3026/.well-known/mercure';
+
+function getBrowserMercurePublicUrl(): string {
+  const configured =
+    process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL ??
+    DEFAULT_MERCURE_PUBLIC_URL;
+
+  try {
+    const url = new URL(configured);
+    const isLoopbackHost =
+      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const isCurrentLoopback =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if (isLoopbackHost && isCurrentLoopback) {
+      url.hostname = window.location.hostname;
+    }
+
+    return normalize(url.toString());
+  } catch {
+    return normalize(configured);
+  }
+}
+
+function getMercurePublicUrl(): string {
+  if (typeof window !== 'undefined') {
+    return getBrowserMercurePublicUrl();
+  }
+
+  const configured =
+    process.env.MERCURE_PUBLIC_URL ??
+    process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL ??
+    DEFAULT_MERCURE_PUBLIC_URL;
 
   return normalize(configured);
 }
@@ -96,7 +217,8 @@ async function parseJsonSafely<T>(response: Response): Promise<T | null> {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, init);
+  const url = /^https?:\/\//.test(path) ? path : `${getApiBaseUrl()}${path}`;
+  const response = await fetch(url, init);
 
   if (!response.ok) {
     const apiError = await parseJsonSafely<ApiError>(response);
@@ -194,8 +316,69 @@ export async function getEventCategories(init?: RequestInit): Promise<string[]> 
   return apiFetch<string[]>('/events/categories', init);
 }
 
+export async function getVenueEventGrid(
+  venueEventId: string,
+  init?: RequestInit,
+): Promise<ReturnType<typeof generateVenue>> {
+  return apiFetch<ReturnType<typeof generateVenue>>(
+    `${getTicketingApiBaseUrl()}/venue/${encodeURIComponent(venueEventId)}/grid`,
+    init,
+  );
+}
+
 export interface NewsletterSubscribeBody {
   email: string;
+}
+
+export interface VirtualQueueCheckResponse {
+  allowed: boolean;
+  status: 'waiting' | 'allowed';
+  waitMs: number;
+  remainingMs: number;
+  key: string;
+}
+
+export interface ProceedCartResponse {
+  bookingId: string;
+  status: string;
+}
+
+export async function checkVirtualQueue(
+  payload: {
+    clientId?: string;
+    eventId?: string;
+    queueKey?: string;
+  },
+  init?: RequestInit,
+): Promise<VirtualQueueCheckResponse> {
+  return apiFetch<VirtualQueueCheckResponse>(`${getBoServiceBaseUrl()}/api/check`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
+    body: JSON.stringify(payload),
+    ...init,
+  });
+}
+
+export async function proceedCart(
+  payload: {
+    userId: string;
+    venueId: string;
+    seats: string[];
+  },
+  init?: RequestInit,
+): Promise<ProceedCartResponse> {
+  return apiFetch<ProceedCartResponse>(`${getBoServiceBaseUrl()}/api/cart`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
+    body: JSON.stringify(payload),
+    ...init,
+  });
 }
 
 export interface NewsletterSubscribeResponse {
@@ -223,4 +406,74 @@ export async function subscribeToNewsletter(
     body: JSON.stringify(body),
     signal: options?.signal,
   });
+}
+
+export async function lockSeat(
+  seatId: string,
+  userId: string,
+  venueId: string,
+  init?: RequestInit,
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(
+    `${getTicketingApiBaseUrl()}/api/seats/${encodeURIComponent(seatId)}/lock`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {}),
+      },
+      body: JSON.stringify({ userId, venueId }),
+      ...init,
+    },
+  );
+}
+
+export async function releaseSeat(
+  seatId: string,
+  userId: string,
+  venueId: string,
+  init?: RequestInit,
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(
+    `${getTicketingApiBaseUrl()}/api/seats/${encodeURIComponent(seatId)}/release`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {}),
+      },
+      body: JSON.stringify({ userId, venueId }),
+      ...init,
+    },
+  );
+}
+
+export function connectMercure(
+  venueId: string,
+  onSeatUpdate: (seatId: string, status: string, lockedBy: string | null) => void,
+): EventSource {
+  const topic = encodeURIComponent(`http://localhost/venues/${venueId}/seats`);
+  const eventSource = new EventSource(`${getMercurePublicUrl()}?topic=${topic}`);
+
+  eventSource.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data) as {
+        seatId?: string;
+        status?: string;
+        lockedBy?: string | null;
+      };
+
+      if (data.seatId && data.status) {
+        onSeatUpdate(data.seatId, data.status, data.lockedBy ?? null);
+      }
+    } catch {
+      // Ignore malformed Mercure events.
+    }
+  };
+
+  eventSource.onerror = () => {
+    console.error('Mercure EventSource connection lost');
+  };
+
+  return eventSource;
 }

@@ -1,11 +1,10 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
-import { ApiRequestError, getEventBySlug } from '@/lib/api';
+import { ApiRequestError, getEventBySlug, getVenueEventGrid } from '@/lib/api';
 import { fetchSeatInfo } from '@/lib/seatInfo';
 import { EventHero } from '@/components/event/EventHero';
 import { EventDetails, EventLocationNotes } from '@/components/event/EventDetails';
 import { BookingCard } from '@/components/event/BookingCard';
-import { SeatMap } from '@/components/event/SeatMap';
 import { TicketPromo } from '@/components/event/TicketPromo';
 import { VenueSeatmap } from '@/components/event/VenueSeatmap';
 import { generateVenue } from '@/types/venue';
@@ -52,7 +51,9 @@ export default async function EventPage({ params }: EventPageProps) {
 
   const seatCategories = await fetchSeatInfo(slug, { next: { revalidate: 60 } });
 
-  const venue = generateVenue(5000);
+  const venue = event.venueEventId
+    ? await getVenueEventGrid(event.venueEventId).catch(() => generateVenue(5000))
+    : generateVenue(5000);
 
   return (
     <>
@@ -62,12 +63,26 @@ export default async function EventPage({ params }: EventPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           <div className="lg:col-span-8 space-y-16">
             <EventDetails event={event} />
-            <VenueSeatmap venue={venue} />
-            {/* <SeatMap /> */}
+            {venue ? (
+              <VenueSeatmap venue={venue} />
+            ) : (
+              <div className="rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container)] p-6">
+                <h3 className="ds-heading-sm mb-2">Схема зала недоступна</h3>
+                <p className="ds-body-sm text-[var(--ds-on-surface-variant)]">
+                  Для этого события не назначена рассадка. Обратитесь к организатору.
+                </p>
+              </div>
+            )}
             <EventLocationNotes event={event} />
           </div>
           <div className="lg:col-span-4">
-            <BookingCard seatCategories={seatCategories} />
+            {venue ? (
+              <BookingCard
+                seatCategories={seatCategories}
+                venue={venue}
+                eventId={event.id}
+              />
+            ) : null}
           </div>
         </div>
       </section>

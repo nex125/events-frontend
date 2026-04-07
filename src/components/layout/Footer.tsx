@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const footerLinks = [
   { href: '#', label: 'Конфиденциальность' },
@@ -62,10 +63,12 @@ export function Footer() {
               ))}
             </div>
             {/* Payment system logos */}
-            <img
+            <Image
               src="/bepaid_logos.svg"
               alt="Visa, Mastercard, bePaid, Belcart, Google Pay"
-              className="h-8 opacity-60"
+              width={220}
+              height={32}
+              className="h-8 w-auto opacity-60"
             />
           </div>
         </div>
