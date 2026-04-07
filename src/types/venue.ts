@@ -1,3 +1,4 @@
+import { DEFAULT_SEAT_STATUSES } from "@nex125/seatmap-core";
 import type { Venue, Section, Row, Seat, PricingCategory } from "@nex125/seatmap-core";
 
 const CATEGORIES: PricingCategory[] = [
@@ -63,6 +64,7 @@ const CATEGORIES: PricingCategory[] = [
         height: Math.ceil(numSections / cols) * (sectionHeight + 30),
       },
       categories: CATEGORIES,
+      seatStatuses: DEFAULT_SEAT_STATUSES.map((status) => ({ ...status })),
       sections,
       gaAreas: [],
       tables: [],
