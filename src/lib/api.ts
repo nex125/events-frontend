@@ -2,16 +2,53 @@ import type { Event, SeatCategory } from '@/types/event';
 
 const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8080/api/v1/public';
 
-function getApiBaseUrl(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    process.env.API_BASE_URL ??
-    DEFAULT_API_BASE_URL;
+declare const process:
+  {
+    env: {
+      NEXT_PUBLIC_API_BASE_URL?: string;
+      API_BASE_URL?: string;
+    };
+  };
 
-  return configured.endsWith('/') ? configured.slice(0, -1) : configured;
+function normalize(url: string): string {
+  return url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
-const API_BASE_URL = getApiBaseUrl();
+function getBrowserApiBaseUrl(): string {
+  const configured =
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    DEFAULT_API_BASE_URL;
+
+  try {
+    const url = new URL(configured);
+    const isLoopbackHost =
+      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const isCurrentLoopback =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    if (isLoopbackHost && isCurrentLoopback) {
+      url.hostname = window.location.hostname;
+    }
+
+    return normalize(url.toString());
+  } catch {
+    return normalize(configured);
+  }
+}
+
+function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return getBrowserApiBaseUrl();
+  }
+
+  const configured =
+    process.env.API_BASE_URL ??
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    DEFAULT_API_BASE_URL;
+
+  return normalize(configured);
+}
 
 export interface ApiError {
   error: {
@@ -59,7 +96,7 @@ async function parseJsonSafely<T>(response: Response): Promise<T | null> {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, init);
+  const response = await fetch(`${getApiBaseUrl()}${path}`, init);
 
   if (!response.ok) {
     const apiError = await parseJsonSafely<ApiError>(response);
