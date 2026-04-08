@@ -1,7 +1,7 @@
 import type { Event, SeatCategory } from '@/types/event';
 import type { generateVenue } from '@/types/venue';
 
-const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8080/api/v1/public';
+const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8080/api';
 
 declare const process:
   {
@@ -152,6 +152,17 @@ function getBrowserMercurePublicUrl(): string {
       url.hostname = window.location.hostname;
     }
 
+    const currentPort = window.location.port;
+    const isSamePortAsFrontend =
+      currentPort.length > 0 &&
+      (url.port.length > 0 ? url.port === currentPort : currentPort === '80');
+    const isMercurePath = url.pathname.endsWith('/.well-known/mercure');
+
+    // Guard against local Docker misconfiguration where frontend port is used as Mercure hub port.
+    if (isLoopbackHost && isCurrentLoopback && isSamePortAsFrontend && isMercurePath) {
+      url.port = '3026';
+    }
+
     return normalize(url.toString());
   } catch {
     return normalize(configured);
@@ -292,14 +303,14 @@ export async function listEvents(
 
   const queryString = query.toString();
   const suffix = queryString ? `?${queryString}` : '';
-  return apiFetch<ListEventsResponse>(`/events${suffix}`, init);
+  return apiFetch<ListEventsResponse>(`/public-events${suffix}`, init);
 }
 
 export async function getEventBySlug(
   slug: string,
   init?: RequestInit,
 ): Promise<Event> {
-  return apiFetch<Event>(`/events/${encodeURIComponent(slug)}`, init);
+  return apiFetch<Event>(`/public-events/${encodeURIComponent(slug)}`, init);
 }
 
 export async function getSeatCategoriesByEventSlug(
@@ -307,13 +318,13 @@ export async function getSeatCategoriesByEventSlug(
   init?: RequestInit,
 ): Promise<SeatCategory[]> {
   return apiFetch<SeatCategory[]>(
-    `/events/${encodeURIComponent(slug)}/seat-categories`,
+    `/public-events/${encodeURIComponent(slug)}/seat-categories`,
     init,
   );
 }
 
 export async function getEventCategories(init?: RequestInit): Promise<string[]> {
-  return apiFetch<string[]>('/events/categories', init);
+  return apiFetch<string[]>('/public-events/categories', init);
 }
 
 export async function getVenueEventGrid(
@@ -321,7 +332,7 @@ export async function getVenueEventGrid(
   init?: RequestInit,
 ): Promise<ReturnType<typeof generateVenue>> {
   return apiFetch<ReturnType<typeof generateVenue>>(
-    `${getTicketingApiBaseUrl()}/venue/${encodeURIComponent(venueEventId)}/grid`,
+    `${getTicketingApiBaseUrl()}/api/venues/${encodeURIComponent(venueEventId)}/grid`,
     init,
   );
 }
@@ -336,6 +347,7 @@ export interface VirtualQueueCheckResponse {
   waitMs: number;
   remainingMs: number;
   key: string;
+  stickySession?: boolean;
 }
 
 export interface ProceedCartResponse {
@@ -472,7 +484,9 @@ export function connectMercure(
   };
 
   eventSource.onerror = () => {
-    console.error('Mercure EventSource connection lost');
+    if (eventSource.readyState !== EventSource.CLOSED) {
+      console.error('Mercure EventSource connection lost');
+    }
   };
 
   return eventSource;

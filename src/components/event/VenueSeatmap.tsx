@@ -2,47 +2,54 @@
 
 import { SeatmapViewer } from '@nex125/seatmap-viewer';
 import type { SeatStatus, Venue } from '@nex125/seatmap-core';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { connectMercure, lockSeat, releaseSeat } from '@/lib/api';
+import { useCallback, useEffect, useState } from 'react';
+import { connectMercure } from '@/lib/api';
 
 interface VenueSeatmapProps {
   venue: Venue;
   onSeatSelect?: (seatId: string, sectionId: string) => void;
 }
 
-function getOrCreateClientId(): string {
-  if (typeof window === 'undefined') {
-    return 'events-frontend-user';
-  }
-
-  const raw = localStorage.getItem('ticketing_client_id');
-  if (raw) return raw.replace(/^"|"$/g, '');
-  const id = crypto.randomUUID();
-  localStorage.setItem('ticketing_client_id', id);
-  return id;
-}
-
-function findSeatStatus(venue: Venue, seatId: string): SeatStatus | null {
-  for (const section of venue.sections) {
-    for (const row of section.rows) {
-      const seat = row.seats.find((candidate) => candidate.id === seatId);
-      if (seat) return seat.status;
-    }
-  }
-
-  return null;
-}
-
 function patchSeatStatus(venue: Venue, seatId: string, status: SeatStatus): Venue {
+  let sectionChanged = false;
+  const nextSections = venue.sections.map((section) => {
+    let rowChanged = false;
+
+    const nextRows = section.rows.map((row) => {
+      let seatChanged = false;
+
+      const nextSeats = row.seats.map((seat) => {
+        if (seat.id !== seatId || seat.status === status) {
+          return seat;
+        }
+
+        seatChanged = true;
+        return { ...seat, status };
+      });
+
+      if (!seatChanged) {
+        return row;
+      }
+
+      rowChanged = true;
+      return { ...row, seats: nextSeats };
+    });
+
+    if (!rowChanged) {
+      return section;
+    }
+
+    sectionChanged = true;
+    return { ...section, rows: nextRows };
+  });
+
+  if (!sectionChanged) {
+    return venue;
+  }
+
   return {
     ...venue,
-    sections: venue.sections.map((section) => ({
-      ...section,
-      rows: section.rows.map((row) => ({
-        ...row,
-        seats: row.seats.map((seat) => (seat.id === seatId ? { ...seat, status } : seat)),
-      })),
-    })),
+    sections: nextSections,
   };
 }
 
@@ -62,8 +69,6 @@ function mapBackendStatus(status: string): SeatStatus {
 
 export function VenueSeatmap({ venue, onSeatSelect }: VenueSeatmapProps) {
   const [liveVenue, setLiveVenue] = useState(venue);
-  const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
-  const clientId = useMemo(() => getOrCreateClientId(), []);
 
   useEffect(() => {
     setLiveVenue(venue);
@@ -80,34 +85,10 @@ export function VenueSeatmap({ venue, onSeatSelect }: VenueSeatmapProps) {
   }, [liveVenue.id]);
 
   const handleSeatClick = useCallback(
-    async (seatId: string, sectionId: string) => {
-      if (pendingSeatIds.has(seatId)) return;
+    (seatId: string, sectionId: string) => {
       onSeatSelect?.(seatId, sectionId);
-
-      const currentStatus = findSeatStatus(liveVenue, seatId);
-      if (currentStatus !== 'available' && currentStatus !== 'locked') return;
-
-      setPendingSeatIds((prev) => new Set(prev).add(seatId));
-
-      try {
-        if (currentStatus === 'available') {
-          await lockSeat(seatId, clientId, liveVenue.id);
-          setLiveVenue((prev) => patchSeatStatus(prev, seatId, 'locked'));
-        } else {
-          await releaseSeat(seatId, clientId, liveVenue.id);
-          setLiveVenue((prev) => patchSeatStatus(prev, seatId, 'available'));
-        }
-      } catch (error) {
-        console.error('Seat toggle failed:', error);
-      } finally {
-        setPendingSeatIds((prev) => {
-          const next = new Set(prev);
-          next.delete(seatId);
-          return next;
-        });
-      }
     },
-    [clientId, liveVenue, onSeatSelect, pendingSeatIds],
+    [onSeatSelect],
   );
 
   return (

@@ -1,6 +1,14 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  experimental: {
+    externalDir: true,
+  },
+  transpilePackages: [
+    '@nex125/seatmap-core',
+    '@nex125/seatmap-react',
+    '@nex125/seatmap-viewer',
+  ],
   allowedDevOrigins: [
     '127.0.0.1',
     'localhost',

@@ -34,7 +34,12 @@ function getOrCreateClientId(): string {
   return id;
 }
 
-export function TicketLauncher({ isOpen, onClose, venue, eventId }: TicketLauncherProps) {
+export function TicketLauncher({
+  isOpen,
+  onClose,
+  venue,
+  eventId,
+}: TicketLauncherProps) {
   const [liveVenue, setLiveVenue] = useState(venue);
   const clientId = useMemo(() => getOrCreateClientId(), []);
   const [queueState, setQueueState] = useState<QueueState>({
@@ -46,6 +51,7 @@ export function TicketLauncher({ isOpen, onClose, venue, eventId }: TicketLaunch
   const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
+  const queueKeyRef = useRef<string>('');
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -81,11 +87,15 @@ export function TicketLauncher({ isOpen, onClose, venue, eventId }: TicketLaunch
     let isCancelled = false;
     let timerId: number | null = null;
 
-    const queueKey = `${eventId}:${clientId}`;
+    queueKeyRef.current = `${eventId}:${clientId}:${Date.now()}`;
 
     const poll = async () => {
       try {
-        const response = await checkVirtualQueue({ clientId, eventId, queueKey });
+        const response = await checkVirtualQueue({
+          clientId,
+          eventId,
+          queueKey: queueKeyRef.current,
+        });
         if (isCancelled) return;
 
         if (response.allowed) {
@@ -308,14 +318,44 @@ function findSeatStatus(venue: Venue, seatId: string): SeatStatus | null {
 }
 
 function patchSeatStatus(venue: Venue, seatId: string, status: SeatStatus): Venue {
+  let sectionChanged = false;
+  const nextSections = venue.sections.map((section) => {
+    let rowChanged = false;
+
+    const nextRows = section.rows.map((row) => {
+      let seatChanged = false;
+
+      const nextSeats = row.seats.map((seat) => {
+        if (seat.id !== seatId || seat.status === status) {
+          return seat;
+        }
+
+        seatChanged = true;
+        return { ...seat, status };
+      });
+
+      if (!seatChanged) {
+        return row;
+      }
+
+      rowChanged = true;
+      return { ...row, seats: nextSeats };
+    });
+
+    if (!rowChanged) {
+      return section;
+    }
+
+    sectionChanged = true;
+    return { ...section, rows: nextRows };
+  });
+
+  if (!sectionChanged) {
+    return venue;
+  }
+
   return {
     ...venue,
-    sections: venue.sections.map((section) => ({
-      ...section,
-      rows: section.rows.map((row) => ({
-        ...row,
-        seats: row.seats.map((seat) => (seat.id === seatId ? { ...seat, status } : seat)),
-      })),
-    })),
+    sections: nextSections,
   };
 }

@@ -22,7 +22,11 @@ function pluralSeats(n: number): string {
   return `${n} мест`;
 }
 
-export function BookingCard({ seatCategories, venue, eventId }: BookingCardProps) {
+export function BookingCard({
+  seatCategories,
+  venue,
+  eventId,
+}: BookingCardProps) {
   const [widgetOpen, setWidgetOpen] = useState(false);
 
   const minPrice =
