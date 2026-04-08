@@ -6,17 +6,20 @@ import { listEvents } from '@/lib/api';
 import { fetchSeatInfo } from '@/lib/seatInfo';
 import type { Event } from '@/types/event';
 
+export const dynamic = 'force-dynamic';
+
 const EMPTY_LIST = { data: [] as Event[], meta: { page: 1, limit: 12, total: 0, totalPages: 1 } };
+const FETCH_TIMEOUT_MS = 8000;
 
 export default async function HomePage() {
   const [featuredResult, pulseResult] = await Promise.all([
     listEvents(
       { featured: true, sort: 'featured', limit: 5 },
-      { next: { revalidate: 60 } },
+      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     ).catch(() => EMPTY_LIST),
     listEvents(
       { page: 1, limit: 4, sort: 'date_desc' },
-      { next: { revalidate: 60 } },
+      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     ).catch(() => EMPTY_LIST),
   ]);
 
@@ -25,7 +28,10 @@ export default async function HomePage() {
   const heroEvent = featured[0];
 
   const seatInfo = heroEvent
-    ? await fetchSeatInfo(heroEvent.slug, { next: { revalidate: 60 } }).catch(() => [])
+    ? await fetchSeatInfo(
+      heroEvent.slug,
+      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
+    ).catch(() => [])
     : [];
   const minPrice =
     seatInfo.length > 0 ? Math.min(...seatInfo.map((s) => s.price)) : undefined;

@@ -4,6 +4,9 @@ import { ApiRequestError, getEventCategories, listEvents } from '@/lib/api';
 import { AllEventsContent } from './AllEventsContent';
 import { DateFilters } from './DateFilters';
 
+export const dynamic = 'force-dynamic';
+const FETCH_TIMEOUT_MS = 8000;
+
 interface AllEventsPageProps {
   searchParams: Promise<{
     q?: string;
@@ -46,7 +49,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
         limit: PER_PAGE,
         sort: 'date_desc',
       },
-      { next: { revalidate: 60 } },
+      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     )
       .then((response) => ({ response, validationError: null as string | null }))
       .catch((error: unknown) => {
@@ -55,7 +58,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
         }
         throw error;
       }),
-    getEventCategories({ next: { revalidate: 60 } }),
+    getEventCategories({ next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }),
   ]);
 
   const pageEvents = eventsResult.response?.data ?? [];
