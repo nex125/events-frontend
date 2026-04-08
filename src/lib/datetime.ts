@@ -1,4 +1,4 @@
-const DEFAULT_EVENT_TIME_ZONE = 'Europe/Minsk';
+const DEFAULT_EVENT_TIME_ZONE = 'Europe/Bratislava';
 
 function resolveEventTimeZone(): string {
   const configured = process.env.NEXT_PUBLIC_EVENT_TIME_ZONE;
