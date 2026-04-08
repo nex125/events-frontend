@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ticket, X } from 'lucide-react';
+import { nanoid } from 'nanoid';
 import { checkVirtualQueue, connectMercure, lockSeat, proceedCart, releaseSeat } from '@/lib/api';
 
 interface TicketLauncherProps {
@@ -29,7 +30,7 @@ function getOrCreateClientId(): string {
   const raw = localStorage.getItem('ticketing_client_id');
   if (raw) return raw.replace(/^"|"$/g, '');
 
-  const id = crypto.randomUUID();
+  const id = nanoid();
   localStorage.setItem('ticketing_client_id', id);
   return id;
 }
