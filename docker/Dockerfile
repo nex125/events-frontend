@@ -5,10 +5,9 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 # --- Stage 2: Development ---
-FROM oven/bun:1-alpine AS dev
+FROM base AS dev
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+COPY . .
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 EXPOSE 3000
