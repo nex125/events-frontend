@@ -21,27 +21,32 @@ function normalize(url: string): string {
   return url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
-function getBrowserApiBaseUrl(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    DEFAULT_API_BASE_URL;
-
+function remapLoopbackToCurrentOrigin(configured: string): string {
   try {
     const url = new URL(configured);
     const isLoopbackHost =
       url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    const isCurrentLoopback =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1';
 
-    if (isLoopbackHost && isCurrentLoopback) {
-      url.hostname = window.location.hostname;
+    if (!isLoopbackHost) {
+      return normalize(url.toString());
     }
+
+    url.protocol = window.location.protocol;
+    url.hostname = window.location.hostname;
+    url.port = window.location.port;
 
     return normalize(url.toString());
   } catch {
     return normalize(configured);
   }
+}
+
+function getBrowserApiBaseUrl(): string {
+  const configured =
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    DEFAULT_API_BASE_URL;
+
+  return remapLoopbackToCurrentOrigin(configured);
 }
 
 function getApiBaseUrl(): string {
@@ -64,22 +69,7 @@ function getBrowserTicketingApiBaseUrl(): string {
     process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL ??
     DEFAULT_TICKETING_API_BASE_URL;
 
-  try {
-    const url = new URL(configured);
-    const isLoopbackHost =
-      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    const isCurrentLoopback =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1';
-
-    if (isLoopbackHost && isCurrentLoopback) {
-      url.hostname = window.location.hostname;
-    }
-
-    return normalize(url.toString());
-  } catch {
-    return normalize(configured);
-  }
+  return remapLoopbackToCurrentOrigin(configured);
 }
 
 function getTicketingApiBaseUrl(): string {
@@ -102,22 +92,7 @@ function getBrowserBoServiceBaseUrl(): string {
     process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL ??
     DEFAULT_BO_SERVICE_BASE_URL;
 
-  try {
-    const url = new URL(configured);
-    const isLoopbackHost =
-      url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    const isCurrentLoopback =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1';
-
-    if (isLoopbackHost && isCurrentLoopback) {
-      url.hostname = window.location.hostname;
-    }
-
-    return normalize(url.toString());
-  } catch {
-    return normalize(configured);
-  }
+  return remapLoopbackToCurrentOrigin(configured);
 }
 
 function getBoServiceBaseUrl(): string {
@@ -144,12 +119,11 @@ function getBrowserMercurePublicUrl(): string {
     const url = new URL(configured);
     const isLoopbackHost =
       url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    const isCurrentLoopback =
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1';
 
-    if (isLoopbackHost && isCurrentLoopback) {
+    if (isLoopbackHost) {
+      url.protocol = window.location.protocol;
       url.hostname = window.location.hostname;
+      url.port = window.location.port;
     }
 
     const currentPort = window.location.port;
@@ -159,7 +133,7 @@ function getBrowserMercurePublicUrl(): string {
     const isMercurePath = url.pathname.endsWith('/.well-known/mercure');
 
     // Guard against local Docker misconfiguration where frontend port is used as Mercure hub port.
-    if (isLoopbackHost && isCurrentLoopback && isSamePortAsFrontend && isMercurePath) {
+    if (isLoopbackHost && isSamePortAsFrontend && isMercurePath) {
       url.port = '3026';
     }
 
