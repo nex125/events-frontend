@@ -21,6 +21,10 @@ function normalize(url: string): string {
   return url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
+function hasUsableValue(value: string | undefined): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && !value.includes('${');
+}
+
 function remapLoopbackToCurrentOrigin(configured: string): string {
   try {
     const url = new URL(configured);
@@ -42,9 +46,9 @@ function remapLoopbackToCurrentOrigin(configured: string): string {
 }
 
 function getBrowserApiBaseUrl(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    DEFAULT_API_BASE_URL;
+  const configured = hasUsableValue(process.env.NEXT_PUBLIC_API_BASE_URL)
+    ? process.env.NEXT_PUBLIC_API_BASE_URL
+    : DEFAULT_API_BASE_URL;
 
   return remapLoopbackToCurrentOrigin(configured);
 }
@@ -55,8 +59,8 @@ function getApiBaseUrl(): string {
   }
 
   const configured =
-    process.env.API_BASE_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    (hasUsableValue(process.env.API_BASE_URL) && process.env.API_BASE_URL) ||
+    (hasUsableValue(process.env.NEXT_PUBLIC_API_BASE_URL) && process.env.NEXT_PUBLIC_API_BASE_URL) ||
     DEFAULT_API_BASE_URL;
 
   return normalize(configured);
@@ -65,9 +69,9 @@ function getApiBaseUrl(): string {
 const DEFAULT_TICKETING_API_BASE_URL = 'http://127.0.0.1:8080';
 
 function getBrowserTicketingApiBaseUrl(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL ??
-    DEFAULT_TICKETING_API_BASE_URL;
+  const configured = hasUsableValue(process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL)
+    ? process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL
+    : DEFAULT_TICKETING_API_BASE_URL;
 
   return remapLoopbackToCurrentOrigin(configured);
 }
@@ -78,8 +82,8 @@ function getTicketingApiBaseUrl(): string {
   }
 
   const configured =
-    process.env.TICKETING_API_BASE_URL ??
-    process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL ??
+    (hasUsableValue(process.env.TICKETING_API_BASE_URL) && process.env.TICKETING_API_BASE_URL) ||
+    (hasUsableValue(process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL) && process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL) ||
     DEFAULT_TICKETING_API_BASE_URL;
 
   return normalize(configured);
@@ -88,9 +92,9 @@ function getTicketingApiBaseUrl(): string {
 const DEFAULT_BO_SERVICE_BASE_URL = 'http://127.0.0.1:5175';
 
 function getBrowserBoServiceBaseUrl(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL ??
-    DEFAULT_BO_SERVICE_BASE_URL;
+  const configured = hasUsableValue(process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL)
+    ? process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL
+    : DEFAULT_BO_SERVICE_BASE_URL;
 
   return remapLoopbackToCurrentOrigin(configured);
 }
@@ -101,8 +105,8 @@ function getBoServiceBaseUrl(): string {
   }
 
   const configured =
-    process.env.BO_SERVICE_BASE_URL ??
-    process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL ??
+    (hasUsableValue(process.env.BO_SERVICE_BASE_URL) && process.env.BO_SERVICE_BASE_URL) ||
+    (hasUsableValue(process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL) && process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL) ||
     DEFAULT_BO_SERVICE_BASE_URL;
 
   return normalize(configured);
@@ -111,9 +115,9 @@ function getBoServiceBaseUrl(): string {
 const DEFAULT_MERCURE_PUBLIC_URL = 'http://127.0.0.1:3026/.well-known/mercure';
 
 function getBrowserMercurePublicUrl(): string {
-  const configured =
-    process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL ??
-    DEFAULT_MERCURE_PUBLIC_URL;
+  const configured = hasUsableValue(process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL)
+    ? process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL
+    : DEFAULT_MERCURE_PUBLIC_URL;
 
   try {
     const url = new URL(configured);
@@ -149,8 +153,8 @@ function getMercurePublicUrl(): string {
   }
 
   const configured =
-    process.env.MERCURE_PUBLIC_URL ??
-    process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL ??
+    (hasUsableValue(process.env.MERCURE_PUBLIC_URL) && process.env.MERCURE_PUBLIC_URL) ||
+    (hasUsableValue(process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL) && process.env.NEXT_PUBLIC_MERCURE_PUBLIC_URL) ||
     DEFAULT_MERCURE_PUBLIC_URL;
 
   return normalize(configured);
