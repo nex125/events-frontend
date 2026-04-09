@@ -89,7 +89,7 @@ function getTicketingApiBaseUrl(): string {
   return normalize(configured);
 }
 
-const DEFAULT_BO_SERVICE_BASE_URL = 'http://127.0.0.1:5175';
+const DEFAULT_BO_SERVICE_BASE_URL = '/bo';
 
 function getBrowserBoServiceBaseUrl(): string {
   const configured = hasUsableValue(process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL)
@@ -107,7 +107,7 @@ function getBoServiceBaseUrl(): string {
   const configured =
     (hasUsableValue(process.env.BO_SERVICE_BASE_URL) && process.env.BO_SERVICE_BASE_URL) ||
     (hasUsableValue(process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL) && process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL) ||
-    DEFAULT_BO_SERVICE_BASE_URL;
+    'http://bo-service:5175';
 
   return normalize(configured);
 }
