@@ -96,6 +96,10 @@ function getBrowserBoServiceBaseUrl(): string {
     ? process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL
     : DEFAULT_BO_SERVICE_BASE_URL;
 
+  if (configured.startsWith('/')) {
+    return normalize(`${window.location.origin}${configured}`);
+  }
+
   return remapLoopbackToCurrentOrigin(configured);
 }
 
