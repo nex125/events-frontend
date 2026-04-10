@@ -1,13 +1,14 @@
 'use client';
 
 import type { SeatStatus, Venue } from '@nex125/seatmap-core';
-import { SeatmapViewer } from '@nex125/seatmap-viewer';
+import { SeatmapViewerContent } from '@nex125/seatmap-viewer';
 import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ticket, X } from 'lucide-react';
 import { nanoid } from 'nanoid';
+import { SeatmapProvider, useSeatStatus } from '@nex125/seatmap-react';
 import { checkVirtualQueue, connectMercure, lockSeat, proceedCart, releaseSeat } from '@/lib/api';
 
 interface TicketLauncherProps {
@@ -41,7 +42,6 @@ export function TicketLauncher({
   venue,
   eventId,
 }: TicketLauncherProps) {
-  const [liveVenue, setLiveVenue] = useState(venue);
   const clientId = useMemo(() => getOrCreateClientId(), []);
   const [queueState, setQueueState] = useState<QueueState>({
     phase: 'checking',
@@ -53,6 +53,8 @@ export function TicketLauncher({
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
   const queueKeyRef = useRef<string>('');
+  const updateSeatStatusRef = useRef<(seatId: string, status: SeatStatus) => void>(() => {});
+  const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(venue));
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -67,20 +69,12 @@ export function TicketLauncher({
   }, [isOpen]);
 
   useEffect(() => {
-    setLiveVenue(venue);
+    seatStatusByIdRef.current = buildSeatStatusMap(venue);
   }, [venue]);
 
   useEffect(() => {
     lockSetRef.current = pendingSeatIds;
   }, [pendingSeatIds]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const eventSource = connectMercure(liveVenue.id, (seatId, status) => {
-      setLiveVenue((prev) => patchSeatStatus(prev, seatId, mapBackendStatus(status)));
-    });
-    return () => eventSource.close();
-  }, [isOpen, liveVenue.id]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -137,17 +131,17 @@ export function TicketLauncher({
       if (cartStatus === 'loading') return;
       if (lockSetRef.current.has(seatId)) return;
 
-      const currentStatus = findSeatStatus(liveVenue, seatId);
+      const currentStatus = seatStatusByIdRef.current.get(seatId) ?? findSeatStatus(venue, seatId);
       if (currentStatus !== 'available' && currentStatus !== 'locked') return;
 
       setPendingSeatIds((prev) => new Set(prev).add(seatId));
       try {
         if (currentStatus === 'available') {
-          await lockSeat(seatId, clientId, liveVenue.id);
-          setLiveVenue((prev) => patchSeatStatus(prev, seatId, 'locked'));
+          await lockSeat(seatId, clientId, venue.id);
+          updateSeatStatusRef.current(seatId, 'locked');
         } else {
-          await releaseSeat(seatId, clientId, liveVenue.id);
-          setLiveVenue((prev) => patchSeatStatus(prev, seatId, 'available'));
+          await releaseSeat(seatId, clientId, venue.id);
+          updateSeatStatusRef.current(seatId, 'available');
         }
       } catch (error) {
         console.error('Seat toggle failed in launcher:', error);
@@ -159,7 +153,7 @@ export function TicketLauncher({
         });
       }
     },
-    [cartStatus, clientId, liveVenue],
+    [cartStatus, clientId, venue],
   );
 
   const handleCartEvent = useCallback(
@@ -177,7 +171,7 @@ export function TicketLauncher({
       try {
         const response = await proceedCart({
           userId: clientId,
-          venueId: liveVenue.id,
+          venueId: venue.id,
           seats: selectedSeatIds,
         });
         setCartStatus('success');
@@ -189,7 +183,7 @@ export function TicketLauncher({
         setCartMessage(message);
       }
     },
-    [cartStatus, clientId, liveVenue.id],
+    [cartStatus, clientId, venue.id],
   );
 
   const modal = (
@@ -242,12 +236,25 @@ export function TicketLauncher({
               <div className="flex-1 overflow-hidden">
                 {queueState.phase === 'ready' ? (
                   <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
-                    <SeatmapViewer
-                      key={`${liveVenue.id}-${viewerResetToken}`}
-                      venue={liveVenue}
-                      onSeatClick={handleSeatClick}
-                      onCartEvent={handleCartEvent}
-                    />
+                    <SeatmapProvider venue={venue}>
+                      <LiveSeatStatusSync
+                        enabled={isOpen}
+                        venueId={venue.id}
+                        onSeatStatus={(seatId, status) => {
+                          seatStatusByIdRef.current.set(seatId, status);
+                        }}
+                        registerSeatStatusUpdater={(updater) => {
+                          updateSeatStatusRef.current = updater;
+                        }}
+                      />
+                      <SeatmapViewerContent
+                        key={`${venue.id}-${viewerResetToken}`}
+                        venue={venue}
+                        onSeatClick={handleSeatClick}
+                        onCartEvent={handleCartEvent}
+                        showLabels
+                      />
+                    </SeatmapProvider>
                     {cartStatus === 'loading' && (
                       <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-10">
                         <div className="rounded-xl bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]">
@@ -318,45 +325,66 @@ function findSeatStatus(venue: Venue, seatId: string): SeatStatus | null {
   return null;
 }
 
-function patchSeatStatus(venue: Venue, seatId: string, status: SeatStatus): Venue {
-  let sectionChanged = false;
-  const nextSections = venue.sections.map((section) => {
-    let rowChanged = false;
+function buildSeatStatusMap(venue: Venue): Map<string, SeatStatus> {
+  const next = new Map<string, SeatStatus>();
 
-    const nextRows = section.rows.map((row) => {
-      let seatChanged = false;
-
-      const nextSeats = row.seats.map((seat) => {
-        if (seat.id !== seatId || seat.status === status) {
-          return seat;
-        }
-
-        seatChanged = true;
-        return { ...seat, status };
-      });
-
-      if (!seatChanged) {
-        return row;
+  for (const section of venue.sections) {
+    for (const row of section.rows) {
+      for (const seat of row.seats) {
+        next.set(seat.id, seat.status);
       }
-
-      rowChanged = true;
-      return { ...row, seats: nextSeats };
-    });
-
-    if (!rowChanged) {
-      return section;
     }
-
-    sectionChanged = true;
-    return { ...section, rows: nextRows };
-  });
-
-  if (!sectionChanged) {
-    return venue;
   }
 
-  return {
-    ...venue,
-    sections: nextSections,
-  };
+  for (const table of venue.tables) {
+    for (const seat of table.seats) {
+      next.set(seat.id, seat.status);
+    }
+  }
+
+  return next;
+}
+
+function LiveSeatStatusSync({
+  enabled,
+  venueId,
+  onSeatStatus,
+  registerSeatStatusUpdater,
+}: {
+  enabled: boolean;
+  venueId: string;
+  onSeatStatus: (seatId: string, status: SeatStatus) => void;
+  registerSeatStatusUpdater: (updater: (seatId: string, status: SeatStatus) => void) => void;
+}) {
+  const { updateSeatStatus } = useSeatStatus();
+
+  const applySeatStatus = useCallback(
+    (seatId: string, status: SeatStatus) => {
+      updateSeatStatus(seatId, status);
+      onSeatStatus(seatId, status);
+    },
+    [onSeatStatus, updateSeatStatus],
+  );
+
+  useEffect(() => {
+    registerSeatStatusUpdater(applySeatStatus);
+
+    return () => {
+      registerSeatStatusUpdater(() => {});
+    };
+  }, [applySeatStatus, registerSeatStatusUpdater]);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const eventSource = connectMercure(venueId, (seatId, status) => {
+      applySeatStatus(seatId, mapBackendStatus(status));
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [applySeatStatus, enabled, venueId]);
+
+  return null;
 }
