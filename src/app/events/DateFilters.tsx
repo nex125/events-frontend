@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, X } from 'lucide-react';
 import { DayPicker, type Matcher } from 'react-day-picker';
+import { useTranslations } from 'next-intl';
 import styles from './DateFilters.module.css';
+import { resolveLocaleTag } from '@/lib/i18n/config';
 
 interface DateFiltersProps {
   query: string;
@@ -23,6 +25,7 @@ interface DatePickerFieldProps {
   disabled?: Matcher | Matcher[];
   onOpenChange: (open: boolean) => void;
   onChange: (nextDate: Date | undefined) => void;
+  locale: string;
 }
 
 function parseDateParam(value: string): Date | undefined {
@@ -41,8 +44,8 @@ function formatDateParam(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function formatDateLabel(date: Date): string {
-  return new Intl.DateTimeFormat('ru-RU', {
+function formatDateLabel(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -58,6 +61,7 @@ function DatePickerField({
   disabled,
   onOpenChange,
   onChange,
+  locale,
 }: DatePickerFieldProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +105,7 @@ function DatePickerField({
                 : 'text-[var(--ds-on-surface-variant)]'
             }
           >
-            {value ? formatDateLabel(value) : placeholder}
+            {value ? formatDateLabel(value, locale) : placeholder}
           </span>
           <Calendar className="h-4 w-4 text-[var(--ds-on-surface-variant)]" />
         </button>
@@ -133,6 +137,8 @@ export function DateFilters({
   dateTo,
   validationError,
 }: DateFiltersProps) {
+  const t = useTranslations('dates');
+  const locale = resolveLocaleTag();
   const router = useRouter();
   const [fromDate, setFromDate] = useState<Date | undefined>(() =>
     parseDateParam(dateFrom),
@@ -174,7 +180,7 @@ export function DateFilters({
       <div className="rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container-low)] p-4">
         <div className="mb-3 flex items-center justify-between">
           <span className="ds-label-sm tracking-[0.2em] text-[var(--ds-primary)]">
-            Даты
+            {t('label')}
           </span>
           {(fromDate || toDate) && (
             <button
@@ -187,7 +193,7 @@ export function DateFilters({
               className="inline-flex items-center gap-1 text-xs text-[var(--ds-on-surface-variant)] transition-colors hover:text-[var(--ds-on-surface)]"
             >
               <X className="h-3.5 w-3.5" />
-              Очистить
+              {t('clear')}
             </button>
           )}
         </div>
@@ -195,12 +201,13 @@ export function DateFilters({
         <div className="grid gap-3">
           <DatePickerField
             id="dateFrom"
-            label="Дата с"
+            label={t('from')}
             value={fromDate}
-            placeholder="Выберите дату"
+            placeholder={t('placeholder')}
             open={openPicker === 'from'}
             onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'from' : null)}
             disabled={fromDisabled}
+            locale={locale}
             onChange={(nextDate) => {
               setFromDate(nextDate);
               if (nextDate && toDate && nextDate > toDate) {
@@ -211,12 +218,13 @@ export function DateFilters({
 
           <DatePickerField
             id="dateTo"
-            label="Дата по"
+            label={t('to')}
             value={toDate}
-            placeholder="Выберите дату"
+            placeholder={t('placeholder')}
             open={openPicker === 'to'}
             onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'to' : null)}
             disabled={toDisabled}
+            locale={locale}
             onChange={setToDate}
           />
         </div>
@@ -226,7 +234,7 @@ export function DateFilters({
           onClick={() => router.push(buildCatalogUrl(fromDate, toDate))}
           className="mt-4 w-full rounded-[var(--ds-radius-pill)] px-4 py-2 ds-label-sm ds-accent-primary"
         >
-          Применить
+          {t('apply')}
         </button>
       </div>
 

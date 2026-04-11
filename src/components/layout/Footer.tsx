@@ -1,14 +1,18 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
-
-const footerLinks = [
-  { href: '#', label: 'Конфиденциальность' },
-  { href: '#', label: 'Условия' },
-  { href: '#', label: 'Контакты' },
-  { href: '#', label: 'Партнеры' },
-];
+import { useTranslations } from 'next-intl';
 
 export function Footer() {
+  const t = useTranslations('footer');
+  const footerLinks = [
+    { href: '#', label: t('privacy') },
+    { href: '#', label: t('terms') },
+    { href: '#', label: t('contacts') },
+    { href: '#', label: t('partners') },
+  ];
+
   return (
     <footer className="relative w-full border-t border-[var(--ds-border-subtle)] bg-[var(--ds-surface)] overflow-hidden">
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none opacity-[0.04] select-none">
@@ -26,19 +30,18 @@ export function Footer() {
             >
               Ticketok
             </Link>
-            {/* Wider max-width so each <br>-separated line stays on one line */}
             <div className="text-[var(--ds-on-surface-variant)] ds-body-sm max-w-xl text-center md:text-left space-y-1">
               <p>
-                ООО «Левол Групп»
-                <br></br>
-                Юридический адрес: 211969, Республика Беларусь, Витебская область, г. Браслав, ул. Красноармейская д. 1/2
-                <br></br>
-                УНП 391029259. Свидетельство о государственной регистрации выдано 30.10.2024 Браславским районным исполнительным комитетом.
-                <br></br>
-                Удостоверение Nº2-16/706 от 23.12.2025. Выдано Управлением культуры Витебского облисполкома.
+                {t('companyName')}
+                <br />
+                {t('legalLine1')}
+                <br />
+                {t('legalLine2')}
+                <br />
+                {t('legalLine3')}
               </p>
               <p>
-                Инфолиния{' '}
+                {t('infoLine')}{' '}
                 <a
                   href="tel:+375292771059"
                   className="text-[var(--ds-primary)] underline decoration-[var(--ds-primary-border)] underline-offset-2 hover:decoration-[var(--ds-primary)] transition-colors"
@@ -46,7 +49,9 @@ export function Footer() {
                   +375 29 277-10-59
                 </a>
               </p>
-              <p>&copy; {new Date().getFullYear()} ticketok. Все права защищены.</p>
+              <p>
+                &copy; {new Date().getFullYear()} ticketok. {t('copyright')}
+              </p>
             </div>
           </div>
 
@@ -65,7 +70,7 @@ export function Footer() {
             {/* Payment system logos */}
             <Image
               src="/bepaid_logos.svg"
-              alt="Visa, Mastercard, bePaid, Belcart, Google Pay"
+              alt={t('paymentAlt')}
               width={220}
               height={32}
               className="h-8 w-auto opacity-60"

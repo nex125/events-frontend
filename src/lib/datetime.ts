@@ -1,4 +1,5 @@
 const DEFAULT_EVENT_TIME_ZONE = 'Europe/Bratislava';
+const DEFAULT_LOCALE_TAG = 'ru-RU';
 
 function resolveEventTimeZone(): string {
   const configured = process.env.NEXT_PUBLIC_EVENT_TIME_ZONE;
@@ -13,9 +14,13 @@ function resolveEventTimeZone(): string {
 }
 
 const EVENT_TIME_ZONE = resolveEventTimeZone();
+const EVENT_LOCALE_TAG =
+  process.env.NEXT_PUBLIC_LOCALE_TAG && !process.env.NEXT_PUBLIC_LOCALE_TAG.includes('${')
+    ? process.env.NEXT_PUBLIC_LOCALE_TAG
+    : DEFAULT_LOCALE_TAG;
 
 export function formatEventDateShort(datetimeUtc: string): string {
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat(EVENT_LOCALE_TAG, {
     timeZone: EVENT_TIME_ZONE,
     day: 'numeric',
     month: 'short',
@@ -23,7 +28,7 @@ export function formatEventDateShort(datetimeUtc: string): string {
 }
 
 export function formatEventDateLong(datetimeUtc: string): string {
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat(EVENT_LOCALE_TAG, {
     timeZone: EVENT_TIME_ZONE,
     day: 'numeric',
     month: 'long',
@@ -32,7 +37,7 @@ export function formatEventDateLong(datetimeUtc: string): string {
 }
 
 export function formatEventTime(datetimeUtc: string): string {
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat(EVENT_LOCALE_TAG, {
     timeZone: EVENT_TIME_ZONE,
     hour: '2-digit',
     minute: '2-digit',

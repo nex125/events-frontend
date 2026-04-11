@@ -1,5 +1,6 @@
 import type { Event, SeatCategory } from '@/types/event';
 import type { generateVenue } from '@/types/venue';
+import { DEFAULT_LOCALE } from '@/lib/i18n/config';
 
 const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8080/api';
 
@@ -211,7 +212,15 @@ async function parseJsonSafely<T>(response: Response): Promise<T | null> {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = /^https?:\/\//.test(path) ? path : `${getApiBaseUrl()}${path}`;
-  const response = await fetch(url, init);
+  const headers = new Headers(init?.headers);
+  if (!headers.has('Accept-Language')) {
+    headers.set('Accept-Language', DEFAULT_LOCALE);
+  }
+
+  const response = await fetch(url, {
+    ...init,
+    headers,
+  });
 
   if (!response.ok) {
     const apiError = await parseJsonSafely<ApiError>(response);

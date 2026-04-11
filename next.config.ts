@@ -1,4 +1,8 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+const shouldTranspileSeatmap = process.env.SEATMAP_TRANSPILE !== '0';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -6,11 +10,13 @@ const nextConfig: NextConfig = {
   experimental: {
     externalDir: true,
   },
-  transpilePackages: [
-    '@nex125/seatmap-core',
-    '@nex125/seatmap-react',
-    '@nex125/seatmap-viewer',
-  ],
+  transpilePackages: shouldTranspileSeatmap
+    ? [
+        '@nex125/seatmap-core',
+        '@nex125/seatmap-react',
+        '@nex125/seatmap-viewer',
+      ]
+    : [],
   allowedDevOrigins: [
     '127.0.0.1',
     'localhost',
@@ -41,4 +47,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

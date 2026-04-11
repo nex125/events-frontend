@@ -1,15 +1,16 @@
 'use client';
 
 import type { SeatStatus, Venue } from '@nex125/seatmap-core';
-import { SeatmapViewerContent } from '@nex125/seatmap-viewer';
-import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
+import {
+  SeatmapViewer,
+} from '@nex125/seatmap-viewer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ticket, X } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import { SeatmapProvider, useSeatStatus } from '@nex125/seatmap-react';
-import { checkVirtualQueue, connectMercure, lockSeat, proceedCart, releaseSeat } from '@/lib/api';
+import { useTranslations } from 'next-intl';
+import { checkVirtualQueue, lockSeat, proceedCart, releaseSeat } from '@/lib/api';
 
 interface TicketLauncherProps {
   isOpen: boolean;
@@ -21,6 +22,13 @@ interface TicketLauncherProps {
 interface QueueState {
   phase: 'checking' | 'waiting' | 'ready' | 'error';
   remainingMs: number;
+}
+
+interface CartProceedEvent {
+  type: 'cart-proceed-clicked';
+  payload: {
+    seats: Array<{ seatId: string }>;
+  };
 }
 
 function getOrCreateClientId(): string {
@@ -42,6 +50,7 @@ export function TicketLauncher({
   venue,
   eventId,
 }: TicketLauncherProps) {
+  const t = useTranslations('ticketLauncher');
   const clientId = useMemo(() => getOrCreateClientId(), []);
   const [queueState, setQueueState] = useState<QueueState>({
     phase: 'checking',
@@ -53,7 +62,6 @@ export function TicketLauncher({
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
   const queueKeyRef = useRef<string>('');
-  const updateSeatStatusRef = useRef<(seatId: string, status: SeatStatus) => void>(() => {});
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(venue));
 
   useEffect(() => {
@@ -138,11 +146,12 @@ export function TicketLauncher({
       try {
         if (currentStatus === 'available') {
           await lockSeat(seatId, clientId, venue.id);
-          updateSeatStatusRef.current(seatId, 'locked');
+          seatStatusByIdRef.current.set(seatId, 'locked');
         } else {
           await releaseSeat(seatId, clientId, venue.id);
-          updateSeatStatusRef.current(seatId, 'available');
+          seatStatusByIdRef.current.set(seatId, 'available');
         }
+        setViewerResetToken((current) => current + 1);
       } catch (error) {
         console.error('Seat toggle failed in launcher:', error);
       } finally {
@@ -157,7 +166,7 @@ export function TicketLauncher({
   );
 
   const handleCartEvent = useCallback(
-    async (event: SeatmapCartEvent) => {
+    async (event: CartProceedEvent) => {
       if (event.type !== 'cart-proceed-clicked') return;
       if (cartStatus === 'loading') return;
 
@@ -167,7 +176,7 @@ export function TicketLauncher({
       }
 
       setCartStatus('loading');
-      setCartMessage('Создаем бронирование...');
+      setCartMessage(t('creatingBooking'));
       try {
         const response = await proceedCart({
           userId: clientId,
@@ -175,15 +184,15 @@ export function TicketLauncher({
           seats: selectedSeatIds,
         });
         setCartStatus('success');
-        setCartMessage(`Бронирование ${response.bookingId} создано.`);
+        setCartMessage(t('bookingCreated', { bookingId: response.bookingId }));
         setViewerResetToken((current) => current + 1);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Не удалось создать бронирование.';
+        const message = error instanceof Error ? error.message : t('bookingFailed');
         setCartStatus('error');
         setCartMessage(message);
       }
     },
-    [cartStatus, clientId, venue.id],
+    [cartStatus, clientId, t, venue.id],
   );
 
   const modal = (
@@ -214,7 +223,7 @@ export function TicketLauncher({
               exit={{ opacity: 0, scale: 0.7 }}
               transition={{ delay: 0.2, duration: 0.2 }}
               onClick={onClose}
-              aria-label="Закрыть"
+              aria-label={t('close')}
               className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[var(--ds-surface-container-high)] hover:bg-[var(--ds-surface-container-highest)] transition-colors"
             >
               <X size={18} />
@@ -230,31 +239,19 @@ export function TicketLauncher({
             >
               <div className="flex items-center gap-3 px-8 py-6 border-b border-[var(--ds-border-subtle)] shrink-0">
                 <Ticket size={22} className="text-[var(--ds-primary)]" />
-                <h2 className="ds-heading-md tracking-tight">Выбор билетов</h2>
+                <h2 className="ds-heading-md tracking-tight">{t('ticketSelection')}</h2>
               </div>
 
               <div className="flex-1 overflow-hidden">
                 {queueState.phase === 'ready' ? (
                   <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
-                    <SeatmapProvider venue={venue}>
-                      <LiveSeatStatusSync
-                        enabled={isOpen}
-                        venueId={venue.id}
-                        onSeatStatus={(seatId, status) => {
-                          seatStatusByIdRef.current.set(seatId, status);
-                        }}
-                        registerSeatStatusUpdater={(updater) => {
-                          updateSeatStatusRef.current = updater;
-                        }}
-                      />
-                      <SeatmapViewerContent
-                        key={`${venue.id}-${viewerResetToken}`}
-                        venue={venue}
-                        onSeatClick={handleSeatClick}
-                        onCartEvent={handleCartEvent}
-                        showLabels
-                      />
-                    </SeatmapProvider>
+                    <SeatmapViewer
+                      key={`${venue.id}-${viewerResetToken}`}
+                      venue={venue}
+                      onSeatClick={handleSeatClick}
+                      onCartEvent={handleCartEvent}
+                      showLabels
+                    />
                     {cartStatus === 'loading' && (
                       <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-10">
                         <div className="rounded-xl bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]">
@@ -276,15 +273,15 @@ export function TicketLauncher({
                     <Ticket size={36} className="text-[var(--ds-primary)]" />
                     <h3 className="ds-heading-sm">
                       {queueState.phase === 'error'
-                        ? 'Пробуем подключиться к очереди...'
-                        : 'Вы в виртуальной очереди'}
+                        ? t('queueReconnect')
+                        : t('queueWaiting')}
                     </h3>
                     <p className="ds-body-sm text-[var(--ds-on-surface-variant)] max-w-md">
                       {queueState.phase === 'checking'
-                        ? 'Проверяем доступ к выбору мест.'
+                        ? t('queueChecking')
                         : queueState.phase === 'error'
-                          ? 'Временная ошибка проверки очереди. Продолжаем попытки автоматически.'
-                          : `Ожидайте ${remainingSeconds} сек., после чего откроется выбор мест.`}
+                          ? t('queueError')
+                          : t('queueEta', { seconds: remainingSeconds })}
                     </p>
                   </div>
                 )}
@@ -298,20 +295,6 @@ export function TicketLauncher({
 
   if (typeof document === 'undefined') return null;
   return createPortal(modal, document.body);
-}
-
-function mapBackendStatus(status: string): SeatStatus {
-  switch (status.toUpperCase()) {
-    case 'LOCKED':
-    case 'HELD':
-    case 'BLOCKED':
-      return 'locked';
-    case 'BOOKED':
-    case 'SOLD':
-      return 'booked';
-    default:
-      return 'available';
-  }
 }
 
 function findSeatStatus(venue: Venue, seatId: string): SeatStatus | null {
@@ -345,46 +328,3 @@ function buildSeatStatusMap(venue: Venue): Map<string, SeatStatus> {
   return next;
 }
 
-function LiveSeatStatusSync({
-  enabled,
-  venueId,
-  onSeatStatus,
-  registerSeatStatusUpdater,
-}: {
-  enabled: boolean;
-  venueId: string;
-  onSeatStatus: (seatId: string, status: SeatStatus) => void;
-  registerSeatStatusUpdater: (updater: (seatId: string, status: SeatStatus) => void) => void;
-}) {
-  const { updateSeatStatus } = useSeatStatus();
-
-  const applySeatStatus = useCallback(
-    (seatId: string, status: SeatStatus) => {
-      updateSeatStatus(seatId, status);
-      onSeatStatus(seatId, status);
-    },
-    [onSeatStatus, updateSeatStatus],
-  );
-
-  useEffect(() => {
-    registerSeatStatusUpdater(applySeatStatus);
-
-    return () => {
-      registerSeatStatusUpdater(() => {});
-    };
-  }, [applySeatStatus, registerSeatStatusUpdater]);
-
-  useEffect(() => {
-    if (!enabled) return;
-
-    const eventSource = connectMercure(venueId, (seatId, status) => {
-      applySeatStatus(seatId, mapBackendStatus(status));
-    });
-
-    return () => {
-      eventSource.close();
-    };
-  }, [applySeatStatus, enabled, venueId]);
-
-  return null;
-}

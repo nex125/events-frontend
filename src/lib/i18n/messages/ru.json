@@ -1,0 +1,90 @@
+{
+  "layout": {
+    "title": "Ticketok - Билеты на события",
+    "description": "Актуальная информация о предстоящих событиях и возможность покупки билетов",
+    "skipToContent": "Перейти к содержимому"
+  },
+  "navbar": {
+    "home": "Главная",
+    "allEvents": "Все события",
+    "closeMenu": "Закрыть меню",
+    "openMenu": "Открыть меню",
+    "searchPlaceholder": "Поиск событий...",
+    "search": "Найти"
+  },
+  "footer": {
+    "privacy": "Конфиденциальность",
+    "terms": "Условия",
+    "contacts": "Контакты",
+    "partners": "Партнеры",
+    "companyName": "ООО «Левол Групп»",
+    "legalLine1": "Юридический адрес: 211969, Республика Беларусь, Витебская область, г. Браслав, ул. Красноармейская д. 1/2",
+    "legalLine2": "УНП 391029259. Свидетельство о государственной регистрации выдано 30.10.2024 Браславским районным исполнительным комитетом.",
+    "legalLine3": "Удостоверение Nº2-16/706 от 23.12.2025. Выдано Управлением культуры Витебского облисполкома.",
+    "infoLine": "Инфолиния",
+    "copyright": "Все права защищены.",
+    "paymentAlt": "Visa, Mastercard, bePaid, Belcart, Google Pay"
+  },
+  "errors": {
+    "title": "Что-то пошло не так",
+    "description": "Не удалось загрузить страницу. Проверьте, что API-сервер доступен, и попробуйте ещё раз.",
+    "retry": "Попробовать снова"
+  },
+  "ticketLauncher": {
+    "creatingBooking": "Создаем бронирование...",
+    "bookingCreated": "Бронирование {bookingId} создано.",
+    "bookingFailed": "Не удалось создать бронирование.",
+    "close": "Закрыть",
+    "ticketSelection": "Выбор билетов",
+    "queueReconnect": "Пробуем подключиться к очереди...",
+    "queueWaiting": "Вы в виртуальной очереди",
+    "queueChecking": "Проверяем доступ к выбору мест.",
+    "queueError": "Временная ошибка проверки очереди. Продолжаем попытки автоматически.",
+    "queueEta": "Ожидайте {seconds} сек., после чего откроется выбор мест.",
+    "seatmap": {
+      "uncategorizedCategoryName": "Без категории",
+      "sectionFallbackLabel": "Секция",
+      "tableLabel": "Стол {tableLabel}",
+      "legendAriaLabel": "Легенда схемы зала",
+      "legendStatusesTitle": "Статусы мест",
+      "legendPricesTitle": "Цены",
+      "cartChipLabel": "Корзина ({count})",
+      "cartAriaLabel": "Корзина выбранных мест",
+      "cartHeaderTitle": "Корзина выбранных мест",
+      "cartCloseLabel": "Закрыть корзину",
+      "cartEmptyState": "Пока нет выбранных мест.",
+      "cartGroupMeta": "{count} бил. - {unitPrice} / шт.",
+      "cartRemoveOneAriaLabel": "Убрать одно место из категории {categoryName}",
+      "cartAddOneAriaLabel": "Добавить одно место в категорию {categoryName}",
+      "cartRemoveSeatTitle": "Убрать место",
+      "cartRemoveSeatAriaLabel": "Убрать место {seatLabel}",
+      "cartSummary": "{count} мест - Итого {totalCost}",
+      "cartProceedButton": "Продолжить"
+    }
+  },
+  "bookingCard": {
+    "title": "Купить билеты",
+    "limitedSeats": "Ограниченное количество мест.",
+    "seatCategories": "Категории мест",
+    "availableSuffix": "свободно",
+    "soldOut": "Распродано",
+    "from": "От",
+    "selectTickets": "Выбрать билеты",
+    "seat_one": "{count} место",
+    "seat_few": "{count} места",
+    "seat_many": "{count} мест"
+  },
+  "hero": {
+    "headlineTag": "Сейчас: Главная Премьера",
+    "buyTicket": "Купить Билет",
+    "from": "От"
+  },
+  "dates": {
+    "label": "Даты",
+    "clear": "Очистить",
+    "from": "Дата с",
+    "to": "Дата по",
+    "placeholder": "Выберите дату",
+    "apply": "Применить"
+  }
+}

@@ -5,21 +5,22 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@ds/utils/cn';
 import { dsMotion } from '@ds';
 import { SearchBar } from '@/components/shared/SearchBar';
 import { ComingSoonTooltip } from '@/components/shared/ComingSoonTooltip';
 
-const navLinks = [
-  { href: '/', label: 'Главная' },
-  { href: '/events', label: 'Все события' },
-];
-
 export function Navbar() {
+  const t = useTranslations('navbar');
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileQuery, setMobileQuery] = useState('');
+  const navLinks = [
+    { href: '/', label: t('home') },
+    { href: '/events', label: t('allEvents') },
+  ];
 
   function handleMobileSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -68,7 +69,7 @@ export function Navbar() {
           <SearchBar />
           <ComingSoonTooltip />
           <button
-            aria-label={mobileOpen ? 'Закрыть меню' : 'Открыть меню'}
+            aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
             onClick={() => setMobileOpen((v) => !v)}
             className="md:hidden flex items-center justify-center w-8 h-8 text-[var(--ds-on-surface-variant)] hover:text-[var(--ds-on-surface)] transition-colors"
           >
@@ -126,14 +127,14 @@ export function Navbar() {
                     enterKeyHint="search"
                     value={mobileQuery}
                     onChange={(e) => setMobileQuery(e.target.value)}
-                    placeholder="Поиск событий..."
+                    placeholder={t('searchPlaceholder')}
                     className="w-full bg-[var(--ds-surface-container-low)] border-none rounded-[var(--ds-radius-pill)] py-2.5 pl-10 pr-4 ds-body-sm text-[var(--ds-on-surface)] placeholder:text-[var(--ds-on-surface-variant)] focus:outline-none focus:ring-1 focus:ring-[var(--ds-primary-ring-soft)]"
                   />
                 </div>
                 <button
                   type="submit"
                   className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-[var(--ds-primary-wash)] text-[var(--ds-primary)] hover:bg-[var(--ds-primary-wash-strong)] transition-colors"
-                  aria-label="Найти"
+                  aria-label={t('search')}
                 >
                   <Search size={18} />
                 </button>

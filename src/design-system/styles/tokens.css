@@ -87,6 +87,8 @@
   --ds-on-primary: #1a1816;
   --ds-primary-gradient-end: #8a7f46;
   --ds-primary-container: #8a7f46;
+  --ds-error: #ad3f3f;
+  --ds-on-error: #ffffff;
 
   --ds-secondary: #9064f6;
   --ds-on-secondary: #f7f4f0;
@@ -133,6 +135,7 @@
 
   /* Shape */
   --ds-radius-functional: 0.375rem;
+  --ds-radius-structural-sm: 0.5rem;
   --ds-radius-structural: 0.75rem;
   --ds-radius-pill: 9999px;
 

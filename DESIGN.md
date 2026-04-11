@@ -21,9 +21,9 @@ This is a **dark-only** system. The runtime sets `data-theme="dark"` and there i
 
 The design system is implemented in layered CSS and thin React wrappers:
 
-- `src/styles/tokens.css`: theme tokens and CSS variables
-- `src/styles/base.css`: base element styles, focus states, skip link
-- `src/styles/components.css`: semantic utility classes and component primitives
+- `src/design-system/styles/tokens.css`: theme tokens and CSS variables
+- `src/design-system/styles/base.css`: base element styles, focus states, skip link
+- `src/design-system/styles/components.css`: semantic utility classes and component primitives
 - `src/components/ui/Button.tsx`: button wrapper
 - `src/components/ui/FormField.tsx`: form field wrapper
 - `src/lib/motion.ts`: shared Framer Motion settings
@@ -38,17 +38,24 @@ The design system is implemented in layered CSS and thin React wrappers:
 
 | Token | Value | Usage |
 | --- | --- | --- |
+| `--ds-background` | `#131313` | Global page background |
 | `--ds-surface` | `#131313` | Page canvas |
 | `--ds-surface-container-low` | `#181818` | Secondary sections |
 | `--ds-surface-container` | `#1e1e1e` | Standard cards and panels |
 | `--ds-surface-container-high` | `#242424` | Floating panels |
 | `--ds-surface-container-highest` | `#2e2e2e` | Focused interactive surfaces |
 | `--ds-surface-container-lowest` | `#0f0f0f` | Wells, inset areas, map shells |
+| `--ds-surface-bright` | `#1a1a1a` | Slightly elevated neutral surface |
 | `--ds-surface-variant` | `#2a2826` | Glass backgrounds |
+| `--ds-surface-dim` | `#141414` | Dimmed base surface |
 | `--ds-primary` | `#dfcd72` | Primary actions, prestige accents |
+| `--ds-on-primary` | `#1a1816` | Text/icons on primary surfaces |
 | `--ds-primary-gradient-end` | `#8a7f46` | Primary gradient end |
+| `--ds-primary-container` | `#8a7f46` | Darker primary-toned container |
 | `--ds-secondary` | `#9064f6` | Secondary support accent |
 | `--ds-tertiary` | `#1f6fe0` | Cool informational accent |
+| `--ds-error` | `#ad3f3f` | Error and destructive emphasis |
+| `--ds-on-error` | `#ffffff` | Text/icons on error surfaces |
 | `--ds-on-surface` | `#e5e2e1` | Primary text |
 | `--ds-on-surface-variant` | `#9a9694` | Muted text |
 | `--ds-outline-variant` | `#5c5957` | Ghost borders and low-emphasis outlines |
@@ -82,6 +89,18 @@ These exist to prevent inline `color-mix(...)` values inside JSX:
 | `--ds-on-primary-muted` | Muted text on primary gradient |
 | `--ds-on-primary-soft` | Soft translucent fill on primary |
 | `--ds-on-primary-soft-muted` | Softer translucent fill on primary |
+| `--ds-ticket-panel-fill` | Ticket panel glass fill |
+| `--ds-ticket-panel-inner` | Inner ticket panel tonal layer |
+
+### Material 3 role mapping (adopted)
+
+The current token model maps directly to Material 3 role intent:
+
+- surfaces: `--ds-background`, `--ds-surface`, `--ds-surface-container-*`, `--ds-surface-variant`
+- on-color text: `--ds-on-surface`, `--ds-on-surface-variant`, `--ds-on-primary`, `--ds-on-error`
+- boundaries: `--ds-outline-variant`, plus derived borders like `--ds-ghost-border` and `--ds-input-border`
+- key roles: `--ds-primary`, `--ds-secondary`, `--ds-tertiary`, `--ds-error`
+- state layers/rings: `--ds-primary-wash*`, `--ds-tertiary-wash*`, `--ds-primary-ring*`, `--ds-primary-focus`
 
 ### Typography scale
 
@@ -360,6 +379,8 @@ Use:
 - `.ds-seat-free-cool`
 - `.ds-seat-sold`
 
+These are app-level seat states for consumer-facing surfaces. The editor/viewer packages consume the same palette through their `--seatmap-*` bridge tokens, not by importing app CSS directly.
+
 Seat selection behavior must use:
 
 - `role="group"` on the seat region
@@ -423,6 +444,7 @@ All motion should use `src/lib/motion.ts`.
 - Use `ds-section` and `ds-section-inner` for section rhythm.
 - Use `.ds-display-*`, `.ds-heading-*`, `.ds-body-*`, and `.ds-label*` for typography.
 - Keep contrast calm but readable: muted text should remain clearly legible on dark surfaces.
+- Keep seatmap integration on semantic token bridges (`--seatmap-*` defaults resolving from `--ds-*`).
 
 ### Don’t
 
@@ -431,6 +453,7 @@ All motion should use `src/lib/motion.ts`.
 - Don’t use full-width divider lines to separate sections.
 - Don’t add motion values ad hoc when `dsMotion` already provides an equivalent.
 - Don’t inline `color-mix(...)` in component class strings unless you are adding a new reusable token immediately after.
+- Don’t couple shared seatmap packages to app CSS file imports.
 
 ---
 

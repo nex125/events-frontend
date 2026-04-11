@@ -1,0 +1,90 @@
+{
+  "layout": {
+    "title": "Ticketok - Event tickets",
+    "description": "Up-to-date event information and ticket purchasing",
+    "skipToContent": "Skip to content"
+  },
+  "navbar": {
+    "home": "Home",
+    "allEvents": "All events",
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu",
+    "searchPlaceholder": "Search events...",
+    "search": "Search"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contacts": "Contacts",
+    "partners": "Partners",
+    "companyName": "LLC \"Levol Group\"",
+    "legalLine1": "Legal address: 211969, Republic of Belarus, Vitebsk region, Braslav, Krasnoarmeyskaya st. 1/2",
+    "legalLine2": "Tax ID 391029259. State registration certificate issued on 30.10.2024 by Braslav district executive committee.",
+    "legalLine3": "Certificate No. 2-16/706 dated 23.12.2025. Issued by the Vitebsk regional executive committee Department of Culture.",
+    "infoLine": "Info line",
+    "copyright": "All rights reserved.",
+    "paymentAlt": "Visa, Mastercard, bePaid, Belcart, Google Pay"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "description": "Failed to load the page. Make sure the API server is available and try again.",
+    "retry": "Try again"
+  },
+  "ticketLauncher": {
+    "creatingBooking": "Creating booking...",
+    "bookingCreated": "Booking {bookingId} created.",
+    "bookingFailed": "Failed to create booking.",
+    "close": "Close",
+    "ticketSelection": "Ticket selection",
+    "queueReconnect": "Reconnecting to queue...",
+    "queueWaiting": "You are in a virtual queue",
+    "queueChecking": "Checking access to seat selection.",
+    "queueError": "Temporary queue check error. Retrying automatically.",
+    "queueEta": "Please wait {seconds} sec., seat selection will open after that.",
+    "seatmap": {
+      "uncategorizedCategoryName": "Uncategorized",
+      "sectionFallbackLabel": "Section",
+      "tableLabel": "Table {tableLabel}",
+      "legendAriaLabel": "Seatmap legend",
+      "legendStatusesTitle": "Seat statuses",
+      "legendPricesTitle": "Prices",
+      "cartChipLabel": "Cart ({count})",
+      "cartAriaLabel": "Selected seats cart",
+      "cartHeaderTitle": "Selected seats cart",
+      "cartCloseLabel": "Close cart",
+      "cartEmptyState": "No seats selected yet.",
+      "cartGroupMeta": "{count} tickets - {unitPrice} each",
+      "cartRemoveOneAriaLabel": "Remove one seat from {categoryName}",
+      "cartAddOneAriaLabel": "Add one seat to {categoryName}",
+      "cartRemoveSeatTitle": "Remove seat",
+      "cartRemoveSeatAriaLabel": "Remove seat {seatLabel}",
+      "cartSummary": "{count} seats - Total {totalCost}",
+      "cartProceedButton": "Proceed"
+    }
+  },
+  "bookingCard": {
+    "title": "Buy tickets",
+    "limitedSeats": "Limited number of seats.",
+    "seatCategories": "Seat categories",
+    "availableSuffix": "available",
+    "soldOut": "Sold out",
+    "from": "From",
+    "selectTickets": "Select tickets",
+    "seat_one": "{count} seat",
+    "seat_few": "{count} seats",
+    "seat_many": "{count} seats"
+  },
+  "hero": {
+    "headlineTag": "Now: Main Premiere",
+    "buyTicket": "Buy Ticket",
+    "from": "From"
+  },
+  "dates": {
+    "label": "Dates",
+    "clear": "Clear",
+    "from": "Date from",
+    "to": "Date to",
+    "placeholder": "Choose date",
+    "apply": "Apply"
+  }
+}

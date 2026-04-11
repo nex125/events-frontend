@@ -5,9 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { dsMotion } from '@ds';
 import type { Event } from '@/types/event';
 import { getEventImageSrc } from '@/lib/images';
+import { DEFAULT_CURRENCY, resolveLocaleTag } from '@/lib/i18n/config';
 
 interface HeroSectionProps {
   event: Event;
@@ -15,6 +17,11 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ event, minPrice }: HeroSectionProps) {
+  const t = useTranslations('hero');
+  const locale = resolveLocaleTag();
+  const formatPrice = (value: number) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency: DEFAULT_CURRENCY }).format(value);
+
   const containerRef = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
@@ -63,7 +70,7 @@ export function HeroSection({ event, minPrice }: HeroSectionProps) {
         >
           <span className="w-2 h-2 rounded-full bg-[var(--ds-primary)] animate-pulse" />
           <span className="ds-label-sm text-[var(--ds-primary)]">
-            Сейчас: Главная Премьера
+            {t('headlineTag')}
           </span>
         </motion.div>
 
@@ -107,7 +114,7 @@ export function HeroSection({ event, minPrice }: HeroSectionProps) {
               href={`/events/${event.slug}`}
               className="group flex items-center gap-4 ds-btn ds-btn-primary ds-btn-lg"
             >
-              Купить Билет
+              {t('buyTicket')}
               <ArrowRight
                 size={20}
                 className="group-hover:translate-x-1 transition-transform"
@@ -116,9 +123,9 @@ export function HeroSection({ event, minPrice }: HeroSectionProps) {
             {minPrice && (
               <div className="flex flex-col">
                 <span className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-                  От
+                  {t('from')}
                 </span>
-                <span className="ds-heading-lg">{minPrice} BYN</span>
+                <span className="ds-heading-lg">{formatPrice(minPrice)}</span>
               </div>
             )}
           </div>

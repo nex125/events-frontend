@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { Button } from '@ds';
 import { TicketLauncher } from './TicketLauncher';
 import type { SeatCategory } from '@/types/event';
 import type { Venue } from '@nex125/seatmap-core';
+import { DEFAULT_CURRENCY, resolveLocaleTag } from '@/lib/i18n/config';
 
 interface BookingCardProps {
   seatCategories: SeatCategory[];
@@ -13,20 +15,24 @@ interface BookingCardProps {
   eventId: string;
 }
 
-function pluralSeats(n: number): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 19) return `${n} мест`;
-  if (mod10 === 1) return `${n} место`;
-  if (mod10 >= 2 && mod10 <= 4) return `${n} места`;
-  return `${n} мест`;
-}
-
 export function BookingCard({
   seatCategories,
   venue,
   eventId,
 }: BookingCardProps) {
+  const t = useTranslations('bookingCard');
+  const locale = resolveLocaleTag();
+  const formatPrice = (value: number) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency: DEFAULT_CURRENCY }).format(value);
+  const pluralSeats = (n: number): string => {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 19) return t('seat_many', { count: n });
+    if (mod10 === 1) return t('seat_one', { count: n });
+    if (mod10 >= 2 && mod10 <= 4) return t('seat_few', { count: n });
+    return t('seat_many', { count: n });
+  };
+
   const [widgetOpen, setWidgetOpen] = useState(false);
 
   const minPrice =
@@ -37,16 +43,16 @@ export function BookingCard({
   return (
     <div className="sticky top-32 ds-glass ds-ghost-border rounded-[var(--ds-radius-structural)] p-8 space-y-8">
       <div>
-        <h2 className="ds-heading-lg tracking-tight mb-2">Купить билеты</h2>
+        <h2 className="ds-heading-lg tracking-tight mb-2">{t('title')}</h2>
         <p className="ds-body-sm text-[var(--ds-on-surface-variant)]">
-          Ограниченное количество мест.
+          {t('limitedSeats')}
         </p>
       </div>
 
       {seatCategories.length > 0 && (
         <div className="space-y-3">
           <span className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-            Категории мест
+            {t('seatCategories')}
           </span>
           <div className="space-y-2">
             {seatCategories.map((cat) => (
@@ -66,15 +72,15 @@ export function BookingCard({
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="ds-heading-sm">{cat.price} BYN</span>
+                  <span className="ds-heading-sm">{formatPrice(cat.price)}</span>
                   <p className="ds-label-sm text-[var(--ds-on-surface-variant)]">
                     {cat.available > 0 ? (
                       <span className="text-[var(--ds-primary)]">
-                        {pluralSeats(cat.available)} свободно
+                        {pluralSeats(cat.available)} {t('availableSuffix')}
                       </span>
                     ) : (
                       <span className="text-[var(--ds-outline-variant)]">
-                        Распродано
+                        {t('soldOut')}
                       </span>
                     )}
                   </p>
@@ -89,10 +95,10 @@ export function BookingCard({
         {minPrice && (
           <div className="flex justify-between items-center">
             <span className="ds-body-sm text-[var(--ds-on-surface-variant)]">
-              От
+              {t('from')}
             </span>
             <span className="ds-heading-lg tracking-tight">
-              {minPrice} BYN
+              {formatPrice(minPrice)}
             </span>
           </div>
         )}
@@ -103,7 +109,7 @@ export function BookingCard({
             className="w-full gap-2"
             onClick={() => setWidgetOpen(true)}
           >
-            Выбрать билеты
+            {t('selectTickets')}
           </Button>
         </motion.div>
         <TicketLauncher
