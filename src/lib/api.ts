@@ -11,8 +11,7 @@ declare const process:
       API_BASE_URL?: string;
       NEXT_PUBLIC_TICKETING_API_BASE_URL?: string;
       TICKETING_API_BASE_URL?: string;
-      NEXT_PUBLIC_BO_SERVICE_BASE_URL?: string;
-      BO_SERVICE_BASE_URL?: string;
+      BO_PROXY_BASE_URL?: string;
       NEXT_PUBLIC_MERCURE_PUBLIC_URL?: string;
       MERCURE_PUBLIC_URL?: string;
     };
@@ -90,29 +89,14 @@ function getTicketingApiBaseUrl(): string {
   return normalize(configured);
 }
 
-const DEFAULT_BO_SERVICE_BASE_URL = '/bo';
-
-function getBrowserBoServiceBaseUrl(): string {
-  const configured = hasUsableValue(process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL)
-    ? process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL
-    : DEFAULT_BO_SERVICE_BASE_URL;
-
-  if (configured.startsWith('/')) {
-    return normalize(`${window.location.origin}${configured}`);
-  }
-
-  return remapLoopbackToCurrentOrigin(configured);
-}
-
-function getBoServiceBaseUrl(): string {
+function getBoProxyBaseUrl(): string {
   if (typeof window !== 'undefined') {
-    return getBrowserBoServiceBaseUrl();
+    return normalize(`${window.location.origin}/bo-proxy`);
   }
 
   const configured =
-    (hasUsableValue(process.env.BO_SERVICE_BASE_URL) && process.env.BO_SERVICE_BASE_URL) ||
-    (hasUsableValue(process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL) && process.env.NEXT_PUBLIC_BO_SERVICE_BASE_URL) ||
-    'http://bo-service:5175';
+    (hasUsableValue(process.env.BO_PROXY_BASE_URL) && process.env.BO_PROXY_BASE_URL) ||
+    'http://events-frontend:3000/bo-proxy';
 
   return normalize(configured);
 }
@@ -354,7 +338,7 @@ export async function checkVirtualQueue(
   },
   init?: RequestInit,
 ): Promise<VirtualQueueCheckResponse> {
-  return apiFetch<VirtualQueueCheckResponse>(`${getBoServiceBaseUrl()}/api/check`, {
+  return apiFetch<VirtualQueueCheckResponse>(`${getBoProxyBaseUrl()}/check`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -373,7 +357,7 @@ export async function proceedCart(
   },
   init?: RequestInit,
 ): Promise<ProceedCartResponse> {
-  return apiFetch<ProceedCartResponse>(`${getBoServiceBaseUrl()}/api/cart`, {
+  return apiFetch<ProceedCartResponse>(`${getBoProxyBaseUrl()}/cart`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
