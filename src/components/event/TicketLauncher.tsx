@@ -4,6 +4,7 @@ import type { SeatStatus, Venue } from '@nex125/seatmap-core';
 import {
   SeatmapViewer,
 } from '@nex125/seatmap-viewer';
+import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,13 +23,6 @@ interface TicketLauncherProps {
 interface QueueState {
   phase: 'checking' | 'waiting' | 'ready' | 'error';
   remainingMs: number;
-}
-
-interface CartProceedEvent {
-  type: 'cart-proceed-clicked';
-  payload: {
-    seats: Array<{ seatId: string }>;
-  };
 }
 
 function getOrCreateClientId(): string {
@@ -166,7 +160,7 @@ export function TicketLauncher({
   );
 
   const handleCartEvent = useCallback(
-    async (event: CartProceedEvent) => {
+    async (event: SeatmapCartEvent) => {
       if (event.type !== 'cart-proceed-clicked') return;
       if (cartStatus === 'loading') return;
 

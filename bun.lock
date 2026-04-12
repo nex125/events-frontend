@@ -5,9 +5,9 @@
     "": {
       "name": "ticketok-events-frontend",
       "dependencies": {
-        "@nex125/seatmap-core": "^0.1.8",
-        "@nex125/seatmap-react": "^0.1.8",
-        "@nex125/seatmap-viewer": "^0.1.8",
+        "@nex125/seatmap-core": "^0.1.9",
+        "@nex125/seatmap-react": "^0.1.9",
+        "@nex125/seatmap-viewer": "^0.1.9",
         "clsx": "^2.1.1",
         "framer-motion": "^12.38.0",
         "lucide-react": "^1.7.0",
@@ -175,11 +175,11 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.12", "", { "dependencies": { "@emnapi/core": "^1.4.3", "@emnapi/runtime": "^1.4.3", "@tybys/wasm-util": "^0.10.0" } }, "sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ=="],
 
-    "@nex125/seatmap-core": ["@nex125/seatmap-core@0.1.8", "", { "dependencies": { "rbush": "^4.0.1", "uuid": "^13.0.0" }, "peerDependencies": { "pixi.js": "^8" } }, "sha512-kgUodyyCadeJ6QNj84m2BXqVD56Cp1YRRm09oGeQgwcJCE3sB6kDlJshijcL56hskSqtKUwPDCWEMP6x/c2E6A=="],
+    "@nex125/seatmap-core": ["@nex125/seatmap-core@0.1.9", "", { "dependencies": { "rbush": "^4.0.1", "uuid": "^13.0.0" }, "peerDependencies": { "pixi.js": "^8" } }, "sha512-tNGa11sOLB9zo+6K1yKatI2c06lDhaXMBfi+A25+uSAuJkAomwIW0/uu8hYMCYp8khXD3lGLgfmc2oxvRieDEA=="],
 
-    "@nex125/seatmap-react": ["@nex125/seatmap-react@0.1.8", "", { "dependencies": { "@nex125/seatmap-core": "*", "@pixi/react": "^8", "pixi.js": "^8", "zustand": "^5" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-P4tbzY0VurlyShc1Xvuoak38zcWgWEkBPvAokqyrMBw0cuPseI2ifI18ydd8cHy9x0MkTm8mrLKEeEA2NMgQGw=="],
+    "@nex125/seatmap-react": ["@nex125/seatmap-react@0.1.9", "", { "dependencies": { "@nex125/seatmap-core": "*", "@pixi/react": "^8", "pixi.js": "^8", "zustand": "^5" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-FrlqkG0JzwHxFCH5QYDbSZqiDQCWleN3eJRCZkhGS6rrjB5/i/SL2Z1w0CyI9JsE2zozuqc3FrHFHzV4d2WhNA=="],
 
-    "@nex125/seatmap-viewer": ["@nex125/seatmap-viewer@0.1.8", "", { "dependencies": { "@nex125/seatmap-core": "*", "@nex125/seatmap-react": "*" }, "peerDependencies": { "pixi.js": "^8", "react": "^19", "react-dom": "^19" } }, "sha512-VEy4sTKpGnGFWa3WoWjV6YMqEiO7mUtGrtq8ZY18TAitYu5G7Ml1tTkKlQRe6WT7ZaJbqkHwOBdXFSmq0zzAIw=="],
+    "@nex125/seatmap-viewer": ["@nex125/seatmap-viewer@0.1.9", "", { "dependencies": { "@nex125/seatmap-core": "*", "@nex125/seatmap-react": "*" }, "peerDependencies": { "pixi.js": "^8", "react": "^19", "react-dom": "^19" } }, "sha512-g7J/fFZNa7rF7Ji6uy84xY+MzuBJKAQ/bAjIKssazDXLosx+R8IjsFDiNae4+gwqVmUmOmPg3Qu68Ebj9oKv/Q=="],
 
     "@next/env": ["@next/env@16.2.3", "", {}, "sha512-ZWXyj4uNu4GCWQw9cjRxWlbD+33mcDszIo9iQxFnBX3Wmgq9ulaSJcl6VhuWx5pCWqqD+9W6Wfz7N0lM5lYPMA=="],
 
