@@ -5,6 +5,7 @@ import type { SeatStatus, Venue } from '@nex125/seatmap-core';
 import { useSeatStatus } from '@nex125/seatmap-react';
 import { useEffect, useRef, useState } from 'react';
 import { connectMercure } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface VenueSeatmapProps {
   venue: Venue;
@@ -41,6 +42,7 @@ function LiveSeatStatusSync({ venueId }: { venueId: string }) {
 }
 
 function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
+  const t = useTranslations('venueSeatmap');
   const { viewport } = useSeatmapContext();
   const [isDragging, setIsDragging] = useState(false);
   const dragStateRef = useRef<{ dragging: boolean; x: number; y: number }>({
@@ -88,11 +90,11 @@ function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
       <TooltipOverlay />
 
       <aside className="pointer-events-none absolute top-2 left-2 z-10 max-w-[170px] rounded-md border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-2 text-[11px] leading-tight text-[var(--ds-on-surface)] md:top-3 md:left-3 md:max-w-[220px] md:rounded-lg md:p-3 md:text-xs">
-        <div className="font-semibold mb-1.5 md:mb-2">Legend</div>
+        <div className="font-semibold mb-1.5 md:mb-2">{t('legendTitle')}</div>
 
         {venue.seatStatuses.length > 0 && (
           <div className={venue.categories.length > 0 ? 'mb-2' : ''}>
-            <div className="text-[var(--ds-on-surface-variant)] mb-1">Statuses</div>
+            <div className="text-[var(--ds-on-surface-variant)] mb-1">{t('statusesTitle')}</div>
             {venue.seatStatuses.map((status) => (
               <div key={status.id} className="flex items-center gap-1.5 mb-0.5 md:mb-1">
                 <span className="inline-block h-2 w-2 rounded-[2px] md:h-2.5 md:w-2.5" style={{ background: status.color }} />
@@ -104,7 +106,7 @@ function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
 
         {venue.categories.length > 0 && (
           <div>
-            <div className="text-[var(--ds-on-surface-variant)] mb-1">Categories</div>
+            <div className="text-[var(--ds-on-surface-variant)] mb-1">{t('categoriesTitle')}</div>
             {venue.categories.map((category) => (
               <div key={category.id} className="flex items-center gap-1.5 mb-0.5 md:mb-1">
                 <span className="inline-block h-2 w-2 rounded-[2px] md:h-2.5 md:w-2.5" style={{ background: category.color }} />

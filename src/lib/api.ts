@@ -35,9 +35,16 @@ function remapLoopbackToCurrentOrigin(configured: string): string {
       return normalize(url.toString());
     }
 
+    const hasExplicitPort = url.port.length > 0;
+
     url.protocol = window.location.protocol;
     url.hostname = window.location.hostname;
-    url.port = window.location.port;
+
+    // Preserve explicit service ports (e.g. backend on :8080) so browser calls
+    // do not get redirected to the frontend app port.
+    if (!hasExplicitPort) {
+      url.port = window.location.port;
+    }
 
     return normalize(url.toString());
   } catch {
@@ -330,6 +337,62 @@ export interface ProceedCartResponse {
   status: string;
 }
 
+export interface TicketokSessionContract {
+  venueId?: string;
+  eventId: number;
+  language: string;
+  token?: string;
+  status: string;
+  healthy: boolean;
+  cached: boolean;
+  ttlSeconds?: number;
+  expiresAt?: string;
+  checkedAt?: string;
+  upstreamStatus?: number;
+  message?: string;
+}
+
+export interface TicketokSessionCreateResponse {
+  session: TicketokSessionContract;
+}
+
+export interface TicketokSessionCheckResponse {
+  session: TicketokSessionContract;
+}
+
+export interface TicketokProductsSnapshotItem {
+  itemId: number;
+  title: string;
+  categoryId?: string;
+  countTotal: number;
+  countAvailable: number;
+  countReserved: number;
+  price?: number;
+}
+
+export interface TicketokProductsSnapshotProduct {
+  productId: number;
+  title: string;
+  color?: string;
+  items: TicketokProductsSnapshotItem[];
+}
+
+export interface TicketokProductsSnapshotResponse {
+  venueId: string;
+  eventId: number;
+  source: 'upstream' | 'cache' | 'stale-cache' | string;
+  stale: boolean;
+  fetchedAt: string;
+  products: TicketokProductsSnapshotProduct[];
+  totals: {
+    products: number;
+    items: number;
+    total: number;
+    available: number;
+    reserved: number;
+  };
+}
+
 export async function checkVirtualQueue(
   payload: {
     clientId?: string;
@@ -366,6 +429,54 @@ export async function proceedCart(
     body: JSON.stringify(payload),
     ...init,
   });
+}
+
+export async function createTicketokSession(
+  payload: {
+    venueId?: string;
+    eventId?: number;
+    language?: string;
+    forceRefresh?: boolean;
+  },
+  init?: RequestInit,
+): Promise<TicketokSessionCreateResponse> {
+  return apiFetch<TicketokSessionCreateResponse>(`${getBoProxyBaseUrl()}/session/create`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
+    body: JSON.stringify(payload),
+    ...init,
+  });
+}
+
+export async function checkTicketokSession(
+  payload: {
+    venueId?: string;
+    eventId?: number;
+    language?: string;
+    token?: string;
+  },
+  init?: RequestInit,
+): Promise<TicketokSessionCheckResponse> {
+  return apiFetch<TicketokSessionCheckResponse>(`${getBoProxyBaseUrl()}/session/check`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers ?? {}),
+    },
+    body: JSON.stringify(payload),
+    ...init,
+  });
+}
+
+export async function getTicketokProductsSnapshot(
+  venueId: string,
+  init?: RequestInit,
+): Promise<TicketokProductsSnapshotResponse> {
+  const query = new URLSearchParams({ venueId }).toString();
+  return apiFetch<TicketokProductsSnapshotResponse>(`${getBoProxyBaseUrl()}/products/snapshot?${query}`, init);
 }
 
 export interface NewsletterSubscribeResponse {
@@ -439,8 +550,27 @@ export function connectMercure(
   venueId: string,
   onSeatUpdate: (seatId: string, status: string, lockedBy: string | null) => void,
 ): EventSource {
-  const topic = encodeURIComponent(`http://localhost/venues/${venueId}/seats`);
-  const eventSource = new EventSource(`${getMercurePublicUrl()}?topic=${topic}`);
+  const hubUrl = getMercurePublicUrl();
+  const topics = new Set<string>();
+
+  try {
+    const parsedHub = new URL(hubUrl);
+    topics.add(`${parsedHub.origin}${parsedHub.pathname.replace(/\/$/, '')}/venues/${venueId}/seats`);
+  } catch {
+    // Fall through to static topic candidates below.
+  }
+
+  topics.add(`http://localhost/venues/${venueId}/seats`);
+  topics.add(`http://127.0.0.1/venues/${venueId}/seats`);
+  topics.add(`${window.location.protocol}//localhost/venues/${venueId}/seats`);
+  topics.add(`${window.location.protocol}//127.0.0.1/venues/${venueId}/seats`);
+
+  const mercureUrl = new URL(hubUrl);
+  for (const topic of topics) {
+    mercureUrl.searchParams.append('topic', topic);
+  }
+
+  const eventSource = new EventSource(mercureUrl.toString());
 
   eventSource.onmessage = (event) => {
     try {

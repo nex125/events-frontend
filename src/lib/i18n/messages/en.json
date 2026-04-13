@@ -86,5 +86,10 @@
     "to": "Date to",
     "placeholder": "Choose date",
     "apply": "Apply"
+  },
+  "venueSeatmap": {
+    "legendTitle": "Legend",
+    "statusesTitle": "Statuses",
+    "categoriesTitle": "Categories"
   }
 }

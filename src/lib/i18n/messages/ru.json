@@ -86,5 +86,10 @@
     "to": "Дата по",
     "placeholder": "Выберите дату",
     "apply": "Применить"
+  },
+  "venueSeatmap": {
+    "legendTitle": "Легенда",
+    "statusesTitle": "Статусы",
+    "categoriesTitle": "Категории"
   }
 }
