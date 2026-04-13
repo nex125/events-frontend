@@ -7,7 +7,6 @@ import { EventDetails, EventLocationNotes } from '@/components/event/EventDetail
 import { BookingCard } from '@/components/event/BookingCard';
 import { TicketPromo } from '@/components/event/TicketPromo';
 import { VenueSeatmap } from '@/components/event/VenueSeatmap';
-import { generateVenue } from '@/types/venue';
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -52,8 +51,8 @@ export default async function EventPage({ params }: EventPageProps) {
   const seatCategories = await fetchSeatInfo(slug, { next: { revalidate: 60 } });
 
   const venue = event.venueEventId
-    ? await getVenueEventGrid(event.venueEventId).catch(() => generateVenue(5000))
-    : generateVenue(5000);
+    ? await getVenueEventGrid(event.venueEventId).catch(() => null)
+    : null;
 
   return (
     <>

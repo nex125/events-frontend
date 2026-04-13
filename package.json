@@ -13,9 +13,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "@nex125/seatmap-core": "^0.1.13",
-    "@nex125/seatmap-react": "^0.1.13",
-    "@nex125/seatmap-viewer": "^0.1.13",
+    "@nex125/seatmap-core": "^0.1.14",
+    "@nex125/seatmap-react": "^0.1.15",
+    "@nex125/seatmap-viewer": "^0.1.16",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
@@ -30,12 +30,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
-    "@types/node": "^22.19.17",
+    "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.4",
+    "eslint": "^10.2.0",
     "eslint-config-next": "^16.2.3",
     "tailwindcss": "^4.2.2",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.2"
   }
 }

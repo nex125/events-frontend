@@ -1,5 +1,6 @@
 export interface Event {
   id: string;
+  venueId?: string;
   venueEventId?: string;
   slug: string;
   title: string;
