@@ -116,7 +116,7 @@ function getBrowserMercurePublicUrl(): string {
     : DEFAULT_MERCURE_PUBLIC_URL;
 
   try {
-    const url = new URL(configured);
+    const url = new URL(configured, window.location.origin);
     const isLoopbackHost =
       url.hostname === 'localhost' || url.hostname === '127.0.0.1';
 
@@ -551,21 +551,19 @@ export function connectMercure(
   onSeatUpdate: (seatId: string, status: string, lockedBy: string | null) => void,
 ): EventSource {
   const hubUrl = getMercurePublicUrl();
+  const mercureUrl = new URL(hubUrl, window.location.origin);
   const topics = new Set<string>();
 
-  try {
-    const parsedHub = new URL(hubUrl);
-    topics.add(`${parsedHub.origin}${parsedHub.pathname.replace(/\/$/, '')}/venues/${venueId}/seats`);
-  } catch {
-    // Fall through to static topic candidates below.
-  }
+  topics.add(`${mercureUrl.origin}${mercureUrl.pathname.replace(/\/$/, '')}/venues/${venueId}/seats`);
+
+  // Backends often publish with an internal service-origin topic in Docker.
+  topics.add(`http://mercure/.well-known/mercure/venues/${venueId}/seats`);
 
   topics.add(`http://localhost/venues/${venueId}/seats`);
   topics.add(`http://127.0.0.1/venues/${venueId}/seats`);
   topics.add(`${window.location.protocol}//localhost/venues/${venueId}/seats`);
   topics.add(`${window.location.protocol}//127.0.0.1/venues/${venueId}/seats`);
 
-  const mercureUrl = new URL(hubUrl);
   for (const topic of topics) {
     mercureUrl.searchParams.append('topic', topic);
   }
