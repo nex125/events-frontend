@@ -3,6 +3,7 @@
 import type { SeatStatus, Venue } from '@nex125/seatmap-core';
 import {
   SeatmapViewer,
+  seatmapViewerSharedThemeRootClassName,
 } from '@nex125/seatmap-viewer';
 import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -341,6 +342,7 @@ export function TicketLauncher({
                   <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
                     <SeatmapViewer
                       key={`${venue.id}-${viewerResetToken}`}
+                      className={seatmapViewerSharedThemeRootClassName}
                       venue={liveVenue}
                       onSeatClick={handleSeatClick}
                       onCartEvent={handleCartEvent}
