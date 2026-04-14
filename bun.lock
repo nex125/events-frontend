@@ -6,8 +6,8 @@
       "name": "ticketok-events-frontend",
       "dependencies": {
         "@nex125/seatmap-core": "^0.1.14",
-        "@nex125/seatmap-react": "^0.1.15",
-        "@nex125/seatmap-viewer": "^0.1.16",
+        "@nex125/seatmap-react": "^0.1.16",
+        "@nex125/seatmap-viewer": "^0.1.17",
         "clsx": "^2.1.1",
         "framer-motion": "^12.38.0",
         "lucide-react": "^1.8.0",
@@ -173,9 +173,9 @@
 
     "@nex125/seatmap-core": ["@nex125/seatmap-core@0.1.14", "", { "dependencies": { "rbush": "^4.0.1", "uuid": "^13.0.0" }, "peerDependencies": { "pixi.js": "^8" } }, "sha512-WzWy+Bc8QwDpM1uhYUEpxWAbu+Nbn3ZVUaRArCgHxGNjo6zdUXp1LC3T72a3dvlGI8qiqCOHru8SXpqGHOxSxw=="],
 
-    "@nex125/seatmap-react": ["@nex125/seatmap-react@0.1.15", "", { "dependencies": { "@nex125/seatmap-core": "*", "@pixi/react": "^8", "pixi.js": "^8", "zustand": "^5" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-aPpXCzFQlhViHnYx+Ulna/S/FJtGDQE7cQm53hK2r+z+6+u/Q1t/o6X7HhKs5lPf9Z83d7kxquWOwJkh6nhKRQ=="],
+    "@nex125/seatmap-react": ["@nex125/seatmap-react@0.1.16", "", { "dependencies": { "@nex125/seatmap-core": "*", "@pixi/react": "^8", "pixi.js": "^8", "zustand": "^5" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-W9reaSFRWXEdHp5HQN6K9Zs06N+qXltce842AIfYyUldbw46R0j9v6xA5IQGdsW5FwxXm3Yh4QVS/iTiSYgEsA=="],
 
-    "@nex125/seatmap-viewer": ["@nex125/seatmap-viewer@0.1.16", "", { "dependencies": { "@nex125/seatmap-core": "*", "@nex125/seatmap-react": "*" }, "peerDependencies": { "pixi.js": "^8", "react": "^19", "react-dom": "^19" } }, "sha512-zjUxDk1a/18xaBCN2FaHS18xmBX/oqgnb4C45aq+QTYOf0CbYx4mSjxl8LruOyhnN/5A6hbe/CWZ72EUCC10Nw=="],
+    "@nex125/seatmap-viewer": ["@nex125/seatmap-viewer@0.1.17", "", { "dependencies": { "@nex125/seatmap-core": "*", "@nex125/seatmap-react": "*" }, "peerDependencies": { "pixi.js": "^8", "react": "^19", "react-dom": "^19" } }, "sha512-APpX0lkqivmRzyvFbkr9qyCejSu3tg0QQYbbR5gjx/HX3tF3JeRcoiFBsu7+rop0B49FPL2FmBwQ+TLNvgCI7A=="],
 
     "@next/env": ["@next/env@16.2.3", "", {}, "sha512-ZWXyj4uNu4GCWQw9cjRxWlbD+33mcDszIo9iQxFnBX3Wmgq9ulaSJcl6VhuWx5pCWqqD+9W6Wfz7N0lM5lYPMA=="],
 

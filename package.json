@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@nex125/seatmap-core": "^0.1.14",
-    "@nex125/seatmap-react": "^0.1.15",
-    "@nex125/seatmap-viewer": "^0.1.16",
+    "@nex125/seatmap-react": "^0.1.16",
+    "@nex125/seatmap-viewer": "^0.1.17",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
