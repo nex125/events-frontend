@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarDays } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { dsMotion } from '@ds';
 import type { Event } from '@/types/event';
@@ -19,6 +19,7 @@ interface HeroSectionProps {
 export function HeroSection({ event, minPrice }: HeroSectionProps) {
   const t = useTranslations('hero');
   const locale = resolveLocaleTag();
+  const eventSchedule = event.displayScheduleLong ?? event.displayDateLong ?? event.displayDateShort;
   const formatPrice = (value: number) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency: DEFAULT_CURRENCY }).format(value);
 
@@ -106,9 +107,17 @@ export function HeroSection({ event, minPrice }: HeroSectionProps) {
           }}
           className="flex flex-col md:flex-row md:items-center gap-12 max-w-4xl"
         >
-          <p className="ds-body-lg text-[var(--ds-on-surface-variant)] max-w-md">
-            {event.description}
-          </p>
+          <div className="max-w-md space-y-3">
+            {eventSchedule && (
+              <div className="flex items-center gap-2 ds-label-md text-[var(--ds-primary)]">
+                <CalendarDays size={18} />
+                <span>{eventSchedule}</span>
+              </div>
+            )}
+            <p className="ds-body-lg text-[var(--ds-on-surface-variant)]">
+              {event.description}
+            </p>
+          </div>
           <div className="flex items-center gap-6">
             <Link
               href={`/events/${event.slug}`}
