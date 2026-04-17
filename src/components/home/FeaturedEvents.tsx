@@ -59,7 +59,7 @@ export function FeaturedEvents({ events }: FeaturedEventsProps) {
                     src={getEventImageSrc(event.image)}
                     fill
                     sizes="(min-width: 768px) 40vw, 100vw"
-                    className="absolute inset-0 object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
+                    className="absolute inset-0 object-cover transition-all duration-700 scale-110 group-hover:scale-100"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[var(--ds-surface)]/90 via-[var(--ds-surface)]/20 to-transparent" />
                   <div className="absolute bottom-8 left-8 right-8">
