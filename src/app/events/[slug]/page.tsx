@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { ApiRequestError, getEventBySlug, getVenueEventGrid } from '@/lib/api';
 import { fetchSeatInfo } from '@/lib/seatInfo';
 import { EventHero } from '@/components/event/EventHero';
@@ -24,6 +25,7 @@ function isEventNotFoundError(error: unknown): boolean {
 }
 
 export async function generateMetadata({ params }: EventPageProps) {
+  const t = await getTranslations('eventPage');
   const { slug } = await params;
   try {
     const event = await getEvent(slug);
@@ -33,7 +35,7 @@ export async function generateMetadata({ params }: EventPageProps) {
     };
   } catch (error) {
     if (isEventNotFoundError(error)) {
-      return { title: 'Событие не найдено' };
+      return { title: t('notFoundTitle') };
     }
     throw error;
   }

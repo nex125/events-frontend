@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { Button } from '@ds';
@@ -10,6 +11,7 @@ import { ApiRequestError, subscribeToNewsletter } from '@/lib/api';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function InnerCircle() {
+  const t = useTranslations('innerCircle');
   const [submittedStatus, setSubmittedStatus] = useState<
     'created' | 'existing' | 'reactivated' | null
   >(null);
@@ -29,8 +31,8 @@ export function InnerCircle() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
-    if (!email.trim()) return showError('Введите email');
-    if (!EMAIL_RE.test(email)) return showError('Некорректный email');
+    if (!email.trim()) return showError(t('errorEmailRequired'));
+    if (!EMAIL_RE.test(email)) return showError(t('errorInvalidEmail'));
 
     setIsSubmitting(true);
     try {
@@ -46,9 +48,9 @@ export function InnerCircle() {
       setEmail('');
     } catch (cause) {
       if (cause instanceof ApiRequestError && cause.code === 'VALIDATION_ERROR') {
-        showError('Некорректный email');
+        showError(t('errorInvalidEmail'));
       } else {
-        showError('Не удалось оформить подписку. Попробуйте позже.');
+        showError(t('errorSubscribeFailed'));
       }
     } finally {
       setIsSubmitting(false);
@@ -57,25 +59,24 @@ export function InnerCircle() {
 
   const submitted = submittedStatus !== null;
   const successTitle =
-    submittedStatus === 'existing' ? 'Вы уже в списке' : 'Вы в списке';
+    submittedStatus === 'existing' ? t('successTitleExisting') : t('successTitleNew');
   const successSubtitle =
     submittedStatus === 'reactivated'
-      ? 'Подписка восстановлена. Ждите новостей.'
-      : 'Ждите новостей — мы напишем первыми.';
+      ? t('successSubtitleReactivated')
+      : t('successSubtitleDefault');
 
   return (
     <section className="ds-section bg-[var(--ds-surface)]">
       <ScrollReveal>
         <div className="ds-section-inner text-center">
           <span className="ds-label-sm text-[var(--ds-primary)] tracking-[0.4em] mb-6 block">
-            Закрытый круг
+            {t('eyebrow')}
           </span>
           <h2 className="ds-display-md font-extrabold tracking-tighter mb-8">
-            Доступ к тому, что недоступно другим.
+            {t('headline')}
           </h2>
           <p className="ds-body-lg text-[var(--ds-on-surface-variant)] mb-12 max-w-xl mx-auto">
-            Подпишитесь на нашу рассылку, чтобы получать уведомления о секретных
-            ивентах, раннем доступе к билетам и эксклюзивных мероприятиях.
+            {t('description')}
           </p>
 
           <div className="relative flex justify-center items-center min-h-[72px]">
@@ -97,7 +98,7 @@ export function InnerCircle() {
                       autoComplete="email"
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); setError(null); }}
-                      placeholder="email@address.com"
+                      placeholder={t('emailPlaceholder')}
                       className="bg-[var(--ds-surface-container-high)] border-none rounded-[var(--ds-radius-functional)] px-6 py-4 w-full text-[var(--ds-on-surface)] placeholder:text-[var(--ds-on-surface-variant)] focus:ring-1 focus:ring-[var(--ds-primary-ring-soft)] outline-none ds-body-sm"
                     />
 
@@ -131,7 +132,7 @@ export function InnerCircle() {
                     loading={isSubmitting}
                     className="w-full md:w-auto"
                   >
-                    Подписаться
+                    {t('subscribe')}
                   </Button>
                 </motion.form>
               ) : (

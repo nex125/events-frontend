@@ -4,13 +4,47 @@
     "description": "Актуальная информация о предстоящих событиях и возможность покупки билетов",
     "skipToContent": "Перейти к содержимому"
   },
+  "eventsCatalog": {
+    "pageTitle": "Все события | Ticketok",
+    "pageDescription": "Каталог всех событий на Ticketok",
+    "catalogLabel": "Каталог",
+    "allEventsTitle": "Все события",
+    "searchResultsPrefix": "Результаты поиска:",
+    "searchResultsEvents": "{count, plural, one {# событие} few {# события} many {# событий} other {# событий}}",
+    "allCategories": "Все категории",
+    "noEventsFound": "Событий не найдено"
+  },
+  "eventPage": {
+    "notFoundTitle": "Событие не найдено"
+  },
+  "innerCircle": {
+    "eyebrow": "Закрытый круг",
+    "headline": "Доступ к тому, что недоступно другим.",
+    "description": "Подпишитесь на нашу рассылку, чтобы получать уведомления о секретных ивентах, раннем доступе к билетам и эксклюзивных мероприятиях.",
+    "emailPlaceholder": "email@address.com",
+    "subscribe": "Подписаться",
+    "errorEmailRequired": "Введите email",
+    "errorInvalidEmail": "Некорректный email",
+    "errorSubscribeFailed": "Не удалось оформить подписку. Попробуйте позже.",
+    "successTitleExisting": "Вы уже в списке",
+    "successTitleNew": "Вы в списке",
+    "successSubtitleReactivated": "Подписка восстановлена. Ждите новостей.",
+    "successSubtitleDefault": "Ждите новостей — мы напишем первыми."
+  },
+  "pagination": {
+    "navAriaLabel": "Навигация по страницам",
+    "previousPage": "Предыдущая страница",
+    "nextPage": "Следующая страница"
+  },
   "navbar": {
     "home": "Главная",
     "allEvents": "Все события",
     "closeMenu": "Закрыть меню",
     "openMenu": "Открыть меню",
     "searchPlaceholder": "Поиск событий...",
-    "search": "Найти"
+    "search": "Найти",
+    "accountAriaLabel": "Личный кабинет",
+    "comingSoonTooltip": "Скоро"
   },
   "footer": {
     "privacy": "Конфиденциальность",
@@ -91,5 +125,264 @@
     "legendTitle": "Легенда",
     "statusesTitle": "Статусы",
     "categoriesTitle": "Категории"
+  },
+  "seatmapEditor": {
+    "common": {
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "edit": "Изменить",
+      "add": "Добавить",
+      "close": "Закрыть",
+      "remove": "Удалить",
+      "mixed": "Смешано"
+    },
+    "toolbar": {
+      "tools": {
+        "pan": "Панорама",
+        "select": "Выбор",
+        "addSection": "Секция",
+        "addRow": "Ряд",
+        "addSeat": "Место"
+      },
+      "undo": "Отменить",
+      "undoTitle": "Отменить (Ctrl+Z)",
+      "redo": "Повторить",
+      "redoTitle": "Повторить (Ctrl+Shift+Z)",
+      "fit": "Подогнать",
+      "fitTitle": "Подогнать под область",
+      "grid": "Сетка",
+      "gridTitle": "Параметры сетки",
+      "hints": "Подсказки",
+      "hintsTitle": "Показать встроенные подсказки",
+      "settings": "Настройки",
+      "settingsTitle": "Настройки редактора",
+      "save": "Сохранить",
+      "saveTitle": "Экспортировать площадку в JSON",
+      "load": "Загрузить",
+      "loadTitle": "Импортировать площадку из JSON",
+      "shortcuts": {
+        "ariaLabel": "Горячие клавиши",
+        "title": "Горячие клавиши",
+        "addSection": "Добавить секцию",
+        "addRow": "Добавить ряд",
+        "addSeat": "Добавить место",
+        "togglePan": "Переключить панораму"
+      }
+    },
+    "layerPanel": {
+      "title": "Слои",
+      "ariaLabel": "Секции площадки",
+      "sectionMeta": "{rows} рядов, {seats} мест",
+      "empty": "Секций пока нет. Используйте инструмент добавления секции."
+    },
+    "statusManager": {
+      "title": "Статусы мест",
+      "pickStatusColor": "Выберите цвет статуса",
+      "enableEditForColor": "Включите режим редактирования для смены цвета",
+      "availableCannotBeRemoved": "Статус available нельзя удалить",
+      "deleteStatus": "Удалить статус",
+      "pickNewStatusColor": "Выберите цвет нового статуса",
+      "statusName": "Название статуса",
+      "addCustomStatus": "Добавить свой статус"
+    },
+    "categoryManager": {
+      "title": "Ценовые категории",
+      "pickCategoryColor": "Выберите цвет категории",
+      "enableEditModeForColor": "Включите режим редактирования для смены цвета",
+      "atLeastOneCategory": "Должна быть минимум одна категория",
+      "deleteCategory": "Удалить категорию",
+      "pickNewCategoryColor": "Выберите цвет новой категории",
+      "categoryName": "Название категории",
+      "managePrices": "Управление ценами",
+      "categoryPrices": "Цены категорий",
+      "failedToLoadPrices": "Не удалось загрузить цены.",
+      "loadLatestPrices": "Загрузить последние цены из backend",
+      "backendSyncNotConfigured": "Синхронизация цен с backend не настроена",
+      "syncing": "Синхронизация...",
+      "syncWithBackend": "Синхронизировать с backend",
+      "backendReadOnlyNote": "Цены backend доступны только для чтения. Override временно использует кастомную цену категории для этой схемы зала.",
+      "syncStatus": "Статус синхронизации:",
+      "disableOverride": "Выключить override",
+      "enableOverride": "Включить override",
+      "increaseOverridePrice": "Увеличить цену override",
+      "decreaseOverridePrice": "Уменьшить цену override",
+      "applyOverridePrice": "Применить цену override",
+      "revertOverrideChanges": "Отменить изменения override",
+      "status": {
+        "notSynced": "Не синхронизировано",
+        "syncing": "Синхронизация...",
+        "synced": "Синхронизировано",
+        "error": "Ошибка"
+      },
+      "table": {
+        "category": "Категория",
+        "backend": "Бэкенд",
+        "override": "Своя",
+        "overridePrice": "Цена своя",
+        "effectivePrice": "Итоговая цена"
+      }
+    },
+    "propertyPanel": {
+      "noVenueLoaded": "Площадка не загружена",
+      "seatConfig": "Настройки мест ({count} выбрано)",
+      "deleteSelectedTitle": "Удалить выбранные объекты",
+      "deleteSelected": "Удалить выбранное",
+      "seatStatus": "Статус мест",
+      "selectedSeats": "Выбранные места ({count})",
+      "seatItem": "{section} · Ряд {row}, Место {seat}",
+      "deleteSeat": "Удалить место",
+      "sectionConfig": "Настройки секции / сцены / танцпола{suffix}",
+      "labelApplyAll": "Метка (применить ко всем выбранным)",
+      "mixedLabels": "Смешанные метки",
+      "categoryApplyAll": "Категория (применить ко всем выбранным)",
+      "notApplicableForStage": "Не применяется к сцене",
+      "stageSelectionExcluded": "Выбор сцены исключен из изменений категории.",
+      "label": "Метка",
+      "category": "Категория",
+      "stageNoPricingCategory": "Для сцены ценовая категория не используется.",
+      "stageNoRowsSeats": "Для областей сцены ряды и места не поддерживаются.",
+      "dancefloorNote": "Танцпол работает как одна выбираемая область-место. Меняйте форму секции, чтобы изменить ее размер.",
+      "rowsMeta": "Ряды ({rows}) · {seats} мест",
+      "addSingleSeatTitle": "Добавить одно место в последний ряд",
+      "addSeat": "+ Место",
+      "rowLabel": "Ряд {label}",
+      "rowSeats": "{count} мест",
+      "deleteRow": "Удалить ряд {label}",
+      "venueConfig": "Настройки площадки",
+      "venueName": "Название площадки",
+      "venueId": "ID площадки",
+      "stats": "Статистика: {sections} секций · {seats} мест",
+      "backgroundImage": "Фоновое изображение",
+      "backgroundAlt": "Фон",
+      "opacity": "Прозрачность",
+      "width": "Ширина",
+      "height": "Высота",
+      "keepAspectRatio": "Сохранять пропорции",
+      "replace": "Заменить",
+      "uploadImage": "Загрузить изображение",
+      "hideAdvanced": "▾ Скрыть расширенные",
+      "showAdvanced": "▸ Расширенные настройки"
+    },
+    "hints": {
+      "resizeMode": "Режим изменения размера: перетаскивайте внутри секции для перемещения, углы — для масштабирования, стороны — для перемещения границ, клик по стороне добавляет точку полигона.",
+      "rectangleFinish": "Кликните противоположный угол для завершения. Esc — отмена.",
+      "rectangleStart": "Кликните первый угол, чтобы начать прямоугольник.",
+      "polygonContinue": "Кликайте для добавления точек. Клик по первой точке завершит контур. Esc — отмена.",
+      "polygonStart": "Кликните, чтобы поставить первую точку полигона."
+    },
+    "errors": {
+      "invalidVenueJson": "Некорректный JSON площадки"
+    },
+    "orientation": {
+      "rowDirection": "Направление ряда",
+      "viewerDirection": "Направление зрителя"
+    },
+    "history": {
+      "deleteSelected": "Удалить выбранные объекты"
+    },
+    "toolOptions": {
+      "title": "Параметры инструмента",
+      "sectionKind": {
+        "section": "Секция",
+        "stage": "Сцена",
+        "dancefloor": "Танцпол"
+      },
+      "shape": {
+        "rectangle": "Rectangle",
+        "polygon": "Polygon"
+      },
+      "sectionResize": {
+        "title": "Изменение размера",
+        "enableTitle": "Включить активные углы/стороны для изменения размера секции",
+        "resizeOn": "Вклюечно",
+        "resizeOff": "Выключено"
+      },
+      "autoFocus": {
+        "title": "Автофокус",
+        "zoomToNewSection": "Приближать к новой секции"
+      },
+      "rowLayout": {
+        "title": "Раскладка рядов",
+        "seatsLabel": "Места:",
+        "rowsLabel": "Ряды:",
+        "totalSeatsToAdd": "Будет добавлено мест: {total}",
+        "increaseSeatsPerRowAria": "Добавить места в ряду",
+        "decreaseSeatsPerRowAria": "Убавить места в ряду",
+        "increaseRowsAria": "Добавить ряды",
+        "decreaseRowsAria": "Убавить ряды"
+      },
+      "orientation": {
+        "cardTitle": "Направление",
+        "toggleModeTitle": "Переключить режим стрелки направления",
+        "knobLabel": "Направление",
+        "knobHint": "Тяните ручку вертикально чтобы установить направление ряда.",
+        "rotateQuarterTitle": "Повернуть направление ряда на 90°",
+        "hintRowDirection": "Стрелка: направление ряда",
+        "hintViewerDirection": "Стрелка: направление зрителя"
+      },
+      "grid": {
+        "gridOptionsTitle": "Параметры сетки",
+        "grid": "Сетка",
+        "canvasGrid": "Сетка холста",
+        "sectionGrid": "Сетка секций",
+        "canvasStyleSolid": "Линия",
+        "canvasStyleDashed": "Тире",
+        "canvasStyleDotted": "Точки",
+        "sectionStyleDots": "Точки",
+        "sectionStyleCross": "Крест"
+      },
+      "motion": {
+        "editorMotionTitle": "Editor motion",
+        "basic": "Basic",
+        "advanced": "Advanced",
+        "subsectionSection": "Section",
+        "subsectionFit": "Fit",
+        "subsectionPan": "Pan",
+        "subsectionPointerScrollZoom": "Pointer scroll zoom",
+        "sectionDrawZoomJelly": "Section draw zoom jelly",
+        "sectionDrawZoomJellyHint": "Controls how floaty auto-focus feels after drawing a section.",
+        "fitZoomJelly": "Fit zoom jelly",
+        "fitZoomJellyHint": "Controls smoothness and duration of Fit action.",
+        "canvasPanInertia": "Canvas pan inertia",
+        "canvasPanInertiaHint": "Controls glide amount after you release a pan drag.",
+        "pointerScrollZoomJelly": "Pointer scroll zoom jelly",
+        "pointerScrollZoomJellyHint": "Controls how smooth pointer wheel zoom feels.",
+        "resetToDefaults": "Reset to defaults",
+        "useAdvancedOverrides": "Use advanced overrides",
+        "knobDisabledWhileAdvanced": "Disabled while advanced overrides are enabled.",
+        "drawDuration": "Draw duration",
+        "drawDurationHint": "Animation duration in milliseconds.",
+        "centerPull": "Center pull",
+        "centerPullHint": "How strongly section draw focus moves toward section center.",
+        "zoomBoost": "Zoom boost",
+        "zoomBoostHint": "Additional zoom applied during section draw focus.",
+        "sectionOvershoot": "Overshoot",
+        "sectionOvershootHint": "Spring amount near the end of section auto-focus.",
+        "fitDuration": "Duration",
+        "fitDurationHint": "Animation duration for Fit action.",
+        "fitOvershoot": "Overshoot",
+        "fitOvershootHint": "Spring amount near the end of Fit movement.",
+        "inertiaCarry": "Inertia carry",
+        "inertiaCarryHint": "Velocity retained at pan release.",
+        "inertiaFriction": "Inertia friction",
+        "inertiaFrictionHint": "Per-frame damping (higher = longer glide).",
+        "stopSpeed": "Stop speed",
+        "stopSpeedHint": "Stop threshold in px/ms x1000.",
+        "velocityBlend": "Velocity blend",
+        "velocityBlendHint": "How quickly release velocity follows latest drag samples.",
+        "stopDelta": "Stop delta",
+        "stopDeltaHint": "Treat movement below this px x1000 as stopped while dragging.",
+        "releaseIdle": "Release idle",
+        "releaseIdleHint": "If pointer pauses this long before release, inertia is dropped.",
+        "pointerScrollDuration": "Duration",
+        "pointerScrollDurationHint": "Wheel zoom easing duration.",
+        "pointerScrollStrength": "Strength",
+        "pointerScrollStrengthHint": "Per-frame zoom blend amount (higher = snappier response).",
+        "pointerScrollSensitivity": "Sensitivity",
+        "pointerScrollSensitivityHint": "Wheel delta divisor (higher = less sensitive).",
+        "applyToBasic": "Apply to basic",
+        "applyToBasicTitle": "Recalculate basic knobs from advanced settings"
+      }
+    }
   }
 }

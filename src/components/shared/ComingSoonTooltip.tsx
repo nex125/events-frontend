@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
 import { dsMotion } from '@ds';
 
 export function ComingSoonTooltip() {
+  const t = useTranslations('navbar');
   const [open, setOpen] = useState(false);
 
   return (
@@ -15,7 +17,7 @@ export function ComingSoonTooltip() {
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        aria-label="Личный кабинет"
+        aria-label={t('accountAriaLabel')}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         className="flex items-center justify-center w-8 h-8 text-[var(--ds-on-surface-variant)] hover:text-[var(--ds-primary)] transition-colors"
@@ -39,7 +41,7 @@ export function ComingSoonTooltip() {
             <div className="relative bg-[var(--ds-surface)]/80 backdrop-blur-xl px-4 py-2 rounded-[var(--ds-radius-functional)] shadow-md ds-ghost-border">
               <div className="absolute left-1/2 -translate-x-1/2 -top-[5px] w-2.5 h-2.5 rotate-45 bg-[var(--ds-surface)]/80 backdrop-blur-xl border-l border-t border-[var(--ds-ghost-border)]" />
               <span className="relative ds-body-sm text-[var(--ds-on-surface)] whitespace-nowrap">
-                Скоро
+                {t('comingSoonTooltip')}
               </span>
             </div>
           </motion.div>

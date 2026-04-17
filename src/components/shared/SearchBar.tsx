@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { dsMotion } from '@ds';
 import Link from 'next/link';
-import { formatEventDateShort } from '@/lib/datetime';
 import { listEvents } from '@/lib/api';
 import type { Event } from '@/types/event';
 
 export function SearchBar() {
+  const t = useTranslations('navbar');
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
   const [results, setResults] = useState<Event[]>([]);
@@ -103,7 +104,7 @@ export function SearchBar() {
               }
             }}
             onFocus={() => setFocused(true)}
-            placeholder="Поиск событий..."
+            placeholder={t('searchPlaceholder')}
             className="bg-[var(--ds-surface-container-low)] border-none rounded-[var(--ds-radius-pill)] py-2 pl-10 pr-6 ds-body-sm w-64 text-[var(--ds-on-surface)] placeholder:text-[var(--ds-on-surface-variant)] focus:outline-none focus:ring-1 focus:ring-[var(--ds-primary-ring-soft)] transition-all"
           />
         </div>
@@ -147,7 +148,7 @@ export function SearchBar() {
                         {event.title}
                       </p>
                       <p className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-                        {formatEventDateShort(event.datetimeUtc)} ·{' '}
+                        {event.displayDateShort} ·{' '}
                         {event.location}
                       </p>
                     </div>

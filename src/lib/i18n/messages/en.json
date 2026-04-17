@@ -4,13 +4,47 @@
     "description": "Up-to-date event information and ticket purchasing",
     "skipToContent": "Skip to content"
   },
+  "eventsCatalog": {
+    "pageTitle": "All events | Ticketok",
+    "pageDescription": "Catalog of all events on Ticketok",
+    "catalogLabel": "Catalog",
+    "allEventsTitle": "All events",
+    "searchResultsPrefix": "Search results:",
+    "searchResultsEvents": "{count, plural, one {# event} other {# events}}",
+    "allCategories": "All categories",
+    "noEventsFound": "No events found"
+  },
+  "eventPage": {
+    "notFoundTitle": "Event not found"
+  },
+  "innerCircle": {
+    "eyebrow": "Inner circle",
+    "headline": "Access to what others do not get.",
+    "description": "Subscribe to our newsletter for secret events, early ticket access, and exclusive experiences.",
+    "emailPlaceholder": "email@address.com",
+    "subscribe": "Subscribe",
+    "errorEmailRequired": "Enter your email",
+    "errorInvalidEmail": "Invalid email",
+    "errorSubscribeFailed": "Could not subscribe. Please try again later.",
+    "successTitleExisting": "You are already on the list",
+    "successTitleNew": "You are on the list",
+    "successSubtitleReactivated": "Subscription restored. Expect news soon.",
+    "successSubtitleDefault": "Stay tuned — we will reach out first."
+  },
+  "pagination": {
+    "navAriaLabel": "Pagination",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
+  },
   "navbar": {
     "home": "Home",
     "allEvents": "All events",
     "closeMenu": "Close menu",
     "openMenu": "Open menu",
     "searchPlaceholder": "Search events...",
-    "search": "Search"
+    "search": "Search",
+    "accountAriaLabel": "Account",
+    "comingSoonTooltip": "Coming soon"
   },
   "footer": {
     "privacy": "Privacy",
@@ -91,5 +125,264 @@
     "legendTitle": "Legend",
     "statusesTitle": "Statuses",
     "categoriesTitle": "Categories"
+  },
+  "seatmapEditor": {
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "add": "Add",
+      "close": "Close",
+      "remove": "Remove",
+      "mixed": "Mixed"
+    },
+    "toolbar": {
+      "tools": {
+        "pan": "Pan",
+        "select": "Select",
+        "addSection": "Section",
+        "addRow": "Row",
+        "addSeat": "Seat"
+      },
+      "undo": "Undo",
+      "undoTitle": "Undo (Ctrl+Z)",
+      "redo": "Redo",
+      "redoTitle": "Redo (Ctrl+Shift+Z)",
+      "fit": "Fit",
+      "fitTitle": "Fit to view",
+      "grid": "Grid",
+      "gridTitle": "Show grid options",
+      "hints": "Hints",
+      "hintsTitle": "Toggle inline editor hints",
+      "settings": "Settings",
+      "settingsTitle": "Editor settings",
+      "save": "Save",
+      "saveTitle": "Export venue as JSON",
+      "load": "Load",
+      "loadTitle": "Import venue from JSON",
+      "shortcuts": {
+        "ariaLabel": "Keyboard shortcuts",
+        "title": "Keyboard shortcuts",
+        "addSection": "Add Section",
+        "addRow": "Add Row",
+        "addSeat": "Add Seat",
+        "togglePan": "Toggle Pan"
+      }
+    },
+    "layerPanel": {
+      "title": "Layers",
+      "ariaLabel": "Venue sections",
+      "sectionMeta": "{rows} rows, {seats} seats",
+      "empty": "No sections yet. Use the Add Section tool."
+    },
+    "statusManager": {
+      "title": "Seat Statuses",
+      "pickStatusColor": "Pick status color",
+      "enableEditForColor": "Enable edit to change color",
+      "availableCannotBeRemoved": "Available status cannot be removed",
+      "deleteStatus": "Delete status",
+      "pickNewStatusColor": "Pick new status color",
+      "statusName": "Status name",
+      "addCustomStatus": "Add custom status"
+    },
+    "categoryManager": {
+      "title": "Pricing categories",
+      "pickCategoryColor": "Pick category color",
+      "enableEditModeForColor": "Enable edit mode to change color",
+      "atLeastOneCategory": "At least one category is required",
+      "deleteCategory": "Delete category",
+      "pickNewCategoryColor": "Pick new category color",
+      "categoryName": "Category name",
+      "managePrices": "Manage prices",
+      "categoryPrices": "Category prices",
+      "failedToLoadPrices": "Failed to load prices.",
+      "loadLatestPrices": "Load latest prices from backend",
+      "backendSyncNotConfigured": "Backend price sync is not configured",
+      "syncing": "Syncing...",
+      "syncWithBackend": "Sync with backend",
+      "backendReadOnlyNote": "Backend prices are read-only. Override temporarily uses a custom category price for this seatmap.",
+      "syncStatus": "Sync status:",
+      "disableOverride": "Disable override",
+      "enableOverride": "Enable override",
+      "increaseOverridePrice": "Increase override price",
+      "decreaseOverridePrice": "Decrease override price",
+      "applyOverridePrice": "Apply override price",
+      "revertOverrideChanges": "Revert override changes",
+      "status": {
+        "notSynced": "Not synced",
+        "syncing": "Syncing...",
+        "synced": "Synced",
+        "error": "Error"
+      },
+      "table": {
+        "category": "Category",
+        "backend": "Backend",
+        "override": "Override",
+        "overridePrice": "Override price",
+        "effectivePrice": "Effective price"
+      }
+    },
+    "propertyPanel": {
+      "noVenueLoaded": "No venue loaded",
+      "seatConfig": "Seat Config ({count} selected)",
+      "deleteSelectedTitle": "Delete selected objects",
+      "deleteSelected": "Delete Selected",
+      "seatStatus": "Seat Status",
+      "selectedSeats": "Selected Seats ({count})",
+      "seatItem": "{section} · Row {row}, Seat {seat}",
+      "deleteSeat": "Delete seat",
+      "sectionConfig": "Section / Stage / Dancefloor Config{suffix}",
+      "labelApplyAll": "Label (apply to all selected)",
+      "mixedLabels": "Mixed labels",
+      "categoryApplyAll": "Category (apply to all selected)",
+      "notApplicableForStage": "Not applicable for stage",
+      "stageSelectionExcluded": "Stage selection is excluded from category changes.",
+      "label": "Label",
+      "category": "Category",
+      "stageNoPricingCategory": "Stage does not use pricing category.",
+      "stageNoRowsSeats": "Stage areas do not support rows or seats.",
+      "dancefloorNote": "Dancefloor works as one selectable area seat. Resize the section shape to adjust its footprint.",
+      "rowsMeta": "Rows ({rows}) · {seats} seats",
+      "addSingleSeatTitle": "Add a single seat to the last row",
+      "addSeat": "+ Seat",
+      "rowLabel": "Row {label}",
+      "rowSeats": "{count} seats",
+      "deleteRow": "Delete row {label}",
+      "venueConfig": "Venue Config",
+      "venueName": "Venue Name",
+      "venueId": "Venue ID",
+      "stats": "Stats: {sections} sections · {seats} seats",
+      "backgroundImage": "Background Image",
+      "backgroundAlt": "Background",
+      "opacity": "Opacity",
+      "width": "Width",
+      "height": "Height",
+      "keepAspectRatio": "Keep aspect ratio",
+      "replace": "Replace",
+      "uploadImage": "Upload Image",
+      "hideAdvanced": "▾ Hide advanced",
+      "showAdvanced": "▸ Advanced settings"
+    },
+    "hints": {
+      "resizeMode": "Resize mode: drag inside section to move it, drag corners to resize, drag sides to move edges, click a side to add a polygon point.",
+      "rectangleFinish": "Click opposite corner to finish. Esc to cancel.",
+      "rectangleStart": "Click first corner to start rectangle.",
+      "polygonContinue": "Click to add points. Click first point to close. Esc to cancel.",
+      "polygonStart": "Click to place first polygon point."
+    },
+    "errors": {
+      "invalidVenueJson": "Invalid venue JSON file"
+    },
+    "orientation": {
+      "rowDirection": "Row direction",
+      "viewerDirection": "Viewer direction"
+    },
+    "history": {
+      "deleteSelected": "Delete selected objects"
+    },
+    "toolOptions": {
+      "title": "Tool Options",
+      "sectionKind": {
+        "section": "Section",
+        "stage": "Stage",
+        "dancefloor": "Dancefloor"
+      },
+      "shape": {
+        "rectangle": "Rectangle",
+        "polygon": "Polygon"
+      },
+      "sectionResize": {
+        "title": "Section resize",
+        "enableTitle": "Enable section corner/side resizing",
+        "resizeOn": "Resize On",
+        "resizeOff": "Resize Off"
+      },
+      "autoFocus": {
+        "title": "Auto focus",
+        "zoomToNewSection": "Zoom to new section"
+      },
+      "rowLayout": {
+        "title": "Row layout",
+        "seatsLabel": "Seats:",
+        "rowsLabel": "Rows:",
+        "totalSeatsToAdd": "Total seats to add: {total}",
+        "increaseSeatsPerRowAria": "Increase seats per row",
+        "decreaseSeatsPerRowAria": "Decrease seats per row",
+        "increaseRowsAria": "Increase rows",
+        "decreaseRowsAria": "Decrease rows"
+      },
+      "orientation": {
+        "cardTitle": "Orientation",
+        "toggleModeTitle": "Toggle arrow orientation mode",
+        "knobLabel": "Orientation",
+        "knobHint": "Drag vertically on the knob to set row orientation.",
+        "rotateQuarterTitle": "Rotate row direction by 90 degrees",
+        "hintRowDirection": "Arrow: row direction (viewer +90°)",
+        "hintViewerDirection": "Arrow: viewer direction (0° = up, 90° = right)"
+      },
+      "grid": {
+        "gridOptionsTitle": "Grid options",
+        "grid": "Grid",
+        "canvasGrid": "Canvas grid",
+        "sectionGrid": "Section grid",
+        "canvasStyleSolid": "Solid",
+        "canvasStyleDashed": "Dashed",
+        "canvasStyleDotted": "Dotted",
+        "sectionStyleDots": "Dots",
+        "sectionStyleCross": "Cross"
+      },
+      "motion": {
+        "editorMotionTitle": "Editor motion",
+        "basic": "Basic",
+        "advanced": "Advanced",
+        "subsectionSection": "Section",
+        "subsectionFit": "Fit",
+        "subsectionPan": "Pan",
+        "subsectionPointerScrollZoom": "Pointer scroll zoom",
+        "sectionDrawZoomJelly": "Section draw zoom jelly",
+        "sectionDrawZoomJellyHint": "Controls how floaty auto-focus feels after drawing a section.",
+        "fitZoomJelly": "Fit zoom jelly",
+        "fitZoomJellyHint": "Controls smoothness and duration of Fit action.",
+        "canvasPanInertia": "Canvas pan inertia",
+        "canvasPanInertiaHint": "Controls glide amount after you release a pan drag.",
+        "pointerScrollZoomJelly": "Pointer scroll zoom jelly",
+        "pointerScrollZoomJellyHint": "Controls how smooth pointer wheel zoom feels.",
+        "resetToDefaults": "Reset to defaults",
+        "useAdvancedOverrides": "Use advanced overrides",
+        "knobDisabledWhileAdvanced": "Disabled while advanced overrides are enabled.",
+        "drawDuration": "Draw duration",
+        "drawDurationHint": "Animation duration in milliseconds.",
+        "centerPull": "Center pull",
+        "centerPullHint": "How strongly section draw focus moves toward section center.",
+        "zoomBoost": "Zoom boost",
+        "zoomBoostHint": "Additional zoom applied during section draw focus.",
+        "sectionOvershoot": "Overshoot",
+        "sectionOvershootHint": "Spring amount near the end of section auto-focus.",
+        "fitDuration": "Duration",
+        "fitDurationHint": "Animation duration for Fit action.",
+        "fitOvershoot": "Overshoot",
+        "fitOvershootHint": "Spring amount near the end of Fit movement.",
+        "inertiaCarry": "Inertia carry",
+        "inertiaCarryHint": "Velocity retained at pan release.",
+        "inertiaFriction": "Inertia friction",
+        "inertiaFrictionHint": "Per-frame damping (higher = longer glide).",
+        "stopSpeed": "Stop speed",
+        "stopSpeedHint": "Stop threshold in px/ms x1000.",
+        "velocityBlend": "Velocity blend",
+        "velocityBlendHint": "How quickly release velocity follows latest drag samples.",
+        "stopDelta": "Stop delta",
+        "stopDeltaHint": "Treat movement below this px x1000 as stopped while dragging.",
+        "releaseIdle": "Release idle",
+        "releaseIdleHint": "If pointer pauses this long before release, inertia is dropped.",
+        "pointerScrollDuration": "Duration",
+        "pointerScrollDurationHint": "Wheel zoom easing duration.",
+        "pointerScrollStrength": "Strength",
+        "pointerScrollStrengthHint": "Per-frame zoom blend amount (higher = snappier response).",
+        "pointerScrollSensitivity": "Sensitivity",
+        "pointerScrollSensitivityHint": "Wheel delta divisor (higher = less sensitive).",
+        "applyToBasic": "Apply to basic",
+        "applyToBasicTitle": "Recalculate basic knobs from advanced settings"
+      }
+    }
   }
 }

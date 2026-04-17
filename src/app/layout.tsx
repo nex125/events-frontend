@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Manrope, Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -19,12 +20,15 @@ const inter = Inter({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'Ticketok - Билеты на события',
-  description: 'Актуальная информация о предстоящих событиях и возможность покупки билетов',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('layout');
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -32,6 +36,7 @@ export default function RootLayout({
   const locale = DEFAULT_LOCALE;
   const localeTag = resolveLocaleTag();
   const messages = getI18nMessages(locale);
+  const t = await getTranslations('layout');
 
   return (
     <html
@@ -42,7 +47,7 @@ export default function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <a href="#main" className="ds-skip-link">
-            {locale === 'ru' ? 'Перейти к содержимому' : 'Skip to content'}
+            {t('skipToContent')}
           </a>
           <Navbar />
           <main id="main">{children}</main>

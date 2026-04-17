@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { EventCard } from '@/components/shared/EventCard';
 import { Pagination } from '@/components/shared/Pagination';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
@@ -17,6 +18,7 @@ export function AllEventsContent({
   totalPages,
   currentPage,
 }: AllEventsContentProps) {
+  const t = useTranslations('eventsCatalog');
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -30,7 +32,7 @@ export function AllEventsContent({
       {events.length === 0 && (
         <div className="py-20 text-center">
           <p className="ds-body-lg text-[var(--ds-on-surface-variant)]">
-            Событий не найдено
+            {t('noEventsFound')}
           </p>
         </div>
       )}

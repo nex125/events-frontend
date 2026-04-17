@@ -1,11 +1,21 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { ApiRequestError, getEventCategories, listEvents } from '@/lib/api';
 import { AllEventsContent } from './AllEventsContent';
 import { DateFilters } from './DateFilters';
 
 export const dynamic = 'force-dynamic';
 const FETCH_TIMEOUT_MS = 8000;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('eventsCatalog');
+  return {
+    title: t('pageTitle'),
+    description: t('pageDescription'),
+  };
+}
 
 interface AllEventsPageProps {
   searchParams: Promise<{
@@ -17,11 +27,6 @@ interface AllEventsPageProps {
   }>;
 }
 
-export const metadata = {
-  title: 'Все события | Ticketok',
-  description: 'Каталог всех событий на Ticketok',
-};
-
 const PER_PAGE = 6;
 const DEFAULT_EVENTS_META = {
   page: 1,
@@ -31,6 +36,7 @@ const DEFAULT_EVENTS_META = {
 };
 
 export default async function AllEventsPage({ searchParams }: AllEventsPageProps) {
+  const t = await getTranslations('eventsCatalog');
   const { q, page, category, dateFrom, dateTo } = await searchParams;
   const query = q?.trim() ?? '';
   const selectedCategory = category?.trim() ?? '';
@@ -82,15 +88,14 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <span className="ds-label-sm text-[var(--ds-primary)] block mb-4 tracking-[0.3em]">
-                Каталог
+                {t('catalogLabel')}
               </span>
               <h1 className="ds-display-lg font-extrabold tracking-tighter text-[var(--ds-on-surface)]">
-                Все события
+                {t('allEventsTitle')}
               </h1>
               {query && (
                 <p className="ds-body-md text-[var(--ds-on-surface-variant)] mt-4">
-                  Результаты поиска: «{query}» — {meta.total}{' '}
-                  {meta.total === 1 ? 'событие' : 'событий'}
+                  {t('searchResultsPrefix')} «{query}» — {t('searchResultsEvents', { count: meta.total })}
                 </p>
               )}
             </div>
@@ -114,7 +119,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
                     : 'px-4 py-2 rounded-[var(--ds-radius-pill)] ds-label-sm ds-accent-primary'
                 }
               >
-                Все категории
+                {t('allCategories')}
               </Link>
               {categories.map((item) => (
                 <Link
