@@ -65,7 +65,7 @@ export default async function EventPage({ params }: EventPageProps) {
           <div className="lg:col-span-8 space-y-16">
             <EventDetails event={event} />
             {venue ? (
-              <VenueSeatmap venue={venue} />
+              <VenueSeatmap venue={venue} venueId={event.venueId} />
             ) : (
               <div className="rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container)] p-6">
                 <h3 className="ds-heading-sm mb-2">Схема зала недоступна</h3>
@@ -81,6 +81,7 @@ export default async function EventPage({ params }: EventPageProps) {
               <BookingCard
                 seatCategories={seatCategories}
                 venue={venue}
+                venueId={event.venueId}
                 eventId={event.id}
               />
             ) : null}

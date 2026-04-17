@@ -10,6 +10,7 @@ import { SeatmapLegend } from './SeatmapLegend';
 
 interface VenueSeatmapProps {
   venue: Venue;
+  venueId?: string;
 }
 
 function mapBackendStatus(status: string): SeatStatus {
@@ -99,11 +100,13 @@ function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
   );
 }
 
-export function VenueSeatmap({ venue }: VenueSeatmapProps) {
+export function VenueSeatmap({ venue, venueId }: VenueSeatmapProps) {
+  const liveVenueId = venueId?.trim() || venue.id;
+
   return (
     <div className="aspect-[16/9] rounded-[var(--ds-radius-structural)] overflow-hidden">
       <SeatmapProvider venue={venue}>
-        <LiveSeatStatusSync venueId={venue.id} />
+        <LiveSeatStatusSync venueId={liveVenueId} />
         <PreviewSeatmapCanvas venue={venue} />
       </SeatmapProvider>
     </div>

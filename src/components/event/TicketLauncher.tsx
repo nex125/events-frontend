@@ -30,6 +30,7 @@ interface TicketLauncherProps {
   isOpen: boolean;
   onClose: () => void;
   venue: Venue;
+  venueId?: string;
   eventId: string;
 }
 
@@ -76,10 +77,12 @@ export function TicketLauncher({
   isOpen,
   onClose,
   venue,
+  venueId,
   eventId,
 }: TicketLauncherProps) {
   const t = useTranslations('ticketLauncher');
   const tSeatmap = useTranslations('ticketLauncher.seatmap');
+  const backendVenueId = venueId?.trim() || venue.id;
   const seatmapMessages = useMemo<SeatmapViewerMessageOverrides>(
     () => ({
       uncategorizedCategoryName: tSeatmap('uncategorizedCategoryName'),
@@ -152,24 +155,24 @@ export function TicketLauncher({
     const preflight = async () => {
       try {
         await createTicketokSession({
-          venueId: venue.id,
+          venueId: backendVenueId,
         });
         await checkTicketokSession({
-          venueId: venue.id,
+          venueId: backendVenueId,
         });
-        await getTicketokProductsSnapshot(venue.id);
+        await getTicketokProductsSnapshot(backendVenueId);
       } catch {
         // Queue loop below remains the source of truth for user-facing retries.
       }
     };
 
     void preflight();
-  }, [isOpen, venue.id]);
+  }, [backendVenueId, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const eventSource = connectMercure(liveVenue.id, (seatId, status) => {
+    const eventSource = connectMercure(backendVenueId, (seatId, status) => {
       const mappedStatus = mapBackendStatus(status);
       seatStatusByIdRef.current.set(seatId, mappedStatus);
       setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, mappedStatus));
@@ -178,7 +181,7 @@ export function TicketLauncher({
     return () => {
       eventSource.close();
     };
-  }, [isOpen, liveVenue.id]);
+  }, [backendVenueId, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -241,11 +244,11 @@ export function TicketLauncher({
       setPendingSeatIds((prev) => new Set(prev).add(seatId));
       try {
         if (currentStatus === 'available') {
-          await lockSeat(seatId, clientId, venue.id);
+          await lockSeat(seatId, clientId, backendVenueId);
           seatStatusByIdRef.current.set(seatId, 'locked');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'locked'));
         } else {
-          await releaseSeat(seatId, clientId, venue.id);
+          await releaseSeat(seatId, clientId, backendVenueId);
           seatStatusByIdRef.current.set(seatId, 'available');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'available'));
         }
@@ -259,7 +262,7 @@ export function TicketLauncher({
         });
       }
     },
-    [cartStatus, clientId, liveVenue, venue.id],
+    [backendVenueId, cartStatus, clientId, liveVenue],
   );
 
   const handleCartEvent = useCallback(
@@ -277,7 +280,7 @@ export function TicketLauncher({
       try {
         const response = await proceedCart({
           userId: clientId,
-          venueId: venue.id,
+          venueId: backendVenueId,
           seats: selectedSeatIds,
         });
         setCartStatus('success');
@@ -289,7 +292,7 @@ export function TicketLauncher({
         setCartMessage(message);
       }
     },
-    [cartStatus, clientId, t, venue.id],
+    [backendVenueId, cartStatus, clientId, t],
   );
 
   const modal = (

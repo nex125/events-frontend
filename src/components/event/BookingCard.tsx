@@ -12,12 +12,14 @@ import { DEFAULT_CURRENCY, resolveLocaleTag } from '@/lib/i18n/config';
 interface BookingCardProps {
   seatCategories: SeatCategory[];
   venue: Venue;
+  venueId?: string;
   eventId: string;
 }
 
 export function BookingCard({
   seatCategories,
   venue,
+  venueId,
   eventId,
 }: BookingCardProps) {
   const t = useTranslations('bookingCard');
@@ -116,6 +118,7 @@ export function BookingCard({
           isOpen={widgetOpen}
           onClose={() => setWidgetOpen(false)}
           venue={venue}
+          venueId={venueId}
           eventId={eventId}
         />
       </div>
