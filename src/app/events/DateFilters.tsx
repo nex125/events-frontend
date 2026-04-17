@@ -52,6 +52,18 @@ function formatDateLabel(date: Date, locale: string): string {
   }).format(date);
 }
 
+function getToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function clampToTodayOrLater(date: Date | undefined): Date | undefined {
+  if (!date) return undefined;
+  const today = getToday();
+  return date < today ? today : date;
+}
+
 function DatePickerField({
   id,
   label,
@@ -140,28 +152,31 @@ export function DateFilters({
   const t = useTranslations('dates');
   const locale = resolveLocaleTag();
   const router = useRouter();
+  const today = useMemo(() => getToday(), []);
   const [fromDate, setFromDate] = useState<Date | undefined>(() =>
-    parseDateParam(dateFrom),
+    clampToTodayOrLater(parseDateParam(dateFrom)),
   );
-  const [toDate, setToDate] = useState<Date | undefined>(() => parseDateParam(dateTo));
+  const [toDate, setToDate] = useState<Date | undefined>(() =>
+    clampToTodayOrLater(parseDateParam(dateTo)),
+  );
   const [openPicker, setOpenPicker] = useState<'from' | 'to' | null>(null);
 
   useEffect(() => {
-    setFromDate(parseDateParam(dateFrom));
+    setFromDate(clampToTodayOrLater(parseDateParam(dateFrom)));
   }, [dateFrom]);
 
   useEffect(() => {
-    setToDate(parseDateParam(dateTo));
+    setToDate(clampToTodayOrLater(parseDateParam(dateTo)));
   }, [dateTo]);
 
   const fromDisabled = useMemo<Matcher | Matcher[] | undefined>(
-    () => (toDate ? { after: toDate } : undefined),
-    [toDate],
+    () => (toDate ? [{ before: today }, { after: toDate }] : { before: today }),
+    [toDate, today],
   );
 
   const toDisabled = useMemo<Matcher | Matcher[] | undefined>(
-    () => (fromDate ? { before: fromDate } : undefined),
-    [fromDate],
+    () => ({ before: fromDate ?? today }),
+    [fromDate, today],
   );
 
   const buildCatalogUrl = (nextFrom?: Date, nextTo?: Date): string => {
@@ -209,8 +224,9 @@ export function DateFilters({
             disabled={fromDisabled}
             locale={locale}
             onChange={(nextDate) => {
-              setFromDate(nextDate);
-              if (nextDate && toDate && nextDate > toDate) {
+              const safeDate = clampToTodayOrLater(nextDate);
+              setFromDate(safeDate);
+              if (safeDate && toDate && safeDate > toDate) {
                 setToDate(undefined);
               }
             }}
@@ -225,7 +241,7 @@ export function DateFilters({
             onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'to' : null)}
             disabled={toDisabled}
             locale={locale}
-            onChange={setToDate}
+            onChange={(nextDate) => setToDate(clampToTodayOrLater(nextDate))}
           />
         </div>
 

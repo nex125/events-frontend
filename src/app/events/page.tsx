@@ -35,13 +35,34 @@ const DEFAULT_EVENTS_META = {
   totalPages: 1,
 };
 
+function formatTodayParam(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default async function AllEventsPage({ searchParams }: AllEventsPageProps) {
   const t = await getTranslations('eventsCatalog');
   const { q, page, category, dateFrom, dateTo } = await searchParams;
   const query = q?.trim() ?? '';
   const selectedCategory = category?.trim() ?? '';
+  const todayParam = formatTodayParam();
   const selectedDateFrom = dateFrom?.trim() ?? '';
   const selectedDateTo = dateTo?.trim() ?? '';
+  const normalizedDateFrom =
+    selectedDateFrom.length > 0
+      ? (selectedDateFrom < todayParam ? todayParam : selectedDateFrom)
+      : '';
+  const normalizedDateTo =
+    selectedDateTo.length > 0 && selectedDateTo >= todayParam
+      ? selectedDateTo
+      : '';
+  const effectiveDateTo =
+    normalizedDateTo && normalizedDateFrom && normalizedDateTo < normalizedDateFrom
+      ? ''
+      : normalizedDateTo;
   const currentPage = Math.max(1, parseInt(page ?? '1', 10) || 1);
 
   const [eventsResult, categories] = await Promise.all([
@@ -49,11 +70,11 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
       {
         q: query || undefined,
         category: selectedCategory || undefined,
-        dateFrom: selectedDateFrom || undefined,
-        dateTo: selectedDateTo || undefined,
+        dateFrom: normalizedDateFrom || todayParam,
+        dateTo: effectiveDateTo || undefined,
         page: currentPage,
         limit: PER_PAGE,
-        sort: 'date_desc',
+        sort: 'date_asc',
       },
       { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     )
@@ -75,8 +96,8 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
     const params = new URLSearchParams();
     if (query) params.set('q', query);
     if (nextCategory) params.set('category', nextCategory);
-    if (includeDateRange && selectedDateFrom) params.set('dateFrom', selectedDateFrom);
-    if (includeDateRange && selectedDateTo) params.set('dateTo', selectedDateTo);
+    if (includeDateRange && selectedDateFrom && normalizedDateFrom) params.set('dateFrom', normalizedDateFrom);
+    if (includeDateRange && selectedDateTo && effectiveDateTo) params.set('dateTo', effectiveDateTo);
     const qs = params.toString();
     return qs ? `/events?${qs}` : '/events';
   }
@@ -103,8 +124,8 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
             <DateFilters
               query={query}
               selectedCategory={selectedCategory}
-              dateFrom={selectedDateFrom}
-              dateTo={selectedDateTo}
+              dateFrom={selectedDateFrom ? normalizedDateFrom : ''}
+              dateTo={selectedDateTo ? effectiveDateTo : ''}
               validationError={validationError}
             />
           </div>
