@@ -8,6 +8,7 @@ import { TicketLauncher } from './TicketLauncher';
 import type { SeatCategory } from '@/types/event';
 import type { Venue } from '@nex125/seatmap-core';
 import { resolveLocaleTag } from '@/lib/i18n/config';
+import { shouldShowCategoryPricesInLegend } from '@/lib/seatmapLegend';
 
 interface BookingCardProps {
   seatCategories: SeatCategory[];
@@ -40,6 +41,7 @@ export function BookingCard({
   };
 
   const [widgetOpen, setWidgetOpen] = useState(false);
+  const showPricesInLegend = shouldShowCategoryPricesInLegend(venue);
 
   const minPrice =
     seatCategories.length > 0
@@ -78,7 +80,9 @@ export function BookingCard({
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="ds-heading-sm">{formatPrice(cat.price)}</span>
+                  {!showPricesInLegend && (
+                    <span className="ds-heading-sm">{formatPrice(cat.price)}</span>
+                  )}
                   <p className="ds-label-sm text-[var(--ds-on-surface-variant)]">
                     {cat.available > 0 ? (
                       <span className="text-[var(--ds-primary)]">
@@ -98,7 +102,7 @@ export function BookingCard({
       )}
 
       <div className="pt-4 border-t border-[var(--ds-ghost-border)] space-y-4">
-        {minPrice && (
+        {!showPricesInLegend && minPrice && (
           <div className="flex justify-between items-center">
             <span className="ds-body-sm text-[var(--ds-on-surface-variant)]">
               {t('from')}
