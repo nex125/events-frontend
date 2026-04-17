@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, X } from 'lucide-react';
+import { Calendar, ChevronDown, Filter, MapPin, X } from 'lucide-react';
 import { DayPicker, type Matcher } from 'react-day-picker';
 import { useTranslations } from 'next-intl';
 import styles from './DateFilters.module.css';
@@ -11,6 +11,7 @@ import { resolveLocaleTag } from '@/lib/i18n/config';
 interface DateFiltersProps {
   query: string;
   selectedCategory: string;
+  selectedCity: string;
   dateFrom: string;
   dateTo: string;
   validationError?: string | null;
@@ -145,14 +146,18 @@ function DatePickerField({
 export function DateFilters({
   query,
   selectedCategory,
+  selectedCity,
   dateFrom,
   dateTo,
   validationError,
 }: DateFiltersProps) {
+  const tCatalog = useTranslations('eventsCatalog');
   const t = useTranslations('dates');
   const locale = resolveLocaleTag();
   const router = useRouter();
   const today = useMemo(() => getToday(), []);
+  const hasActiveFilters = Boolean(selectedCity || dateFrom || dateTo);
+  const [city, setCity] = useState(selectedCity);
   const [fromDate, setFromDate] = useState<Date | undefined>(() =>
     clampToTodayOrLater(parseDateParam(dateFrom)),
   );
@@ -160,6 +165,11 @@ export function DateFilters({
     clampToTodayOrLater(parseDateParam(dateTo)),
   );
   const [openPicker, setOpenPicker] = useState<'from' | 'to' | null>(null);
+  const [isOpen, setIsOpen] = useState(hasActiveFilters || Boolean(validationError));
+
+  useEffect(() => {
+    setCity(selectedCity);
+  }, [selectedCity]);
 
   useEffect(() => {
     setFromDate(clampToTodayOrLater(parseDateParam(dateFrom)));
@@ -168,6 +178,12 @@ export function DateFilters({
   useEffect(() => {
     setToDate(clampToTodayOrLater(parseDateParam(dateTo)));
   }, [dateTo]);
+
+  useEffect(() => {
+    if (hasActiveFilters || validationError) {
+      setIsOpen(true);
+    }
+  }, [hasActiveFilters, validationError]);
 
   const fromDisabled = useMemo<Matcher | Matcher[] | undefined>(
     () => (toDate ? [{ before: today }, { after: toDate }] : { before: today }),
@@ -179,10 +195,15 @@ export function DateFilters({
     [fromDate, today],
   );
 
-  const buildCatalogUrl = (nextFrom?: Date, nextTo?: Date): string => {
+  const buildCatalogUrl = (
+    nextCity?: string,
+    nextFrom?: Date,
+    nextTo?: Date,
+  ): string => {
     const params = new URLSearchParams();
     if (query) params.set('q', query);
     if (selectedCategory) params.set('category', selectedCategory);
+    if (nextCity?.trim()) params.set('city', nextCity.trim());
     if (nextFrom) params.set('dateFrom', formatDateParam(nextFrom));
     if (nextTo) params.set('dateTo', formatDateParam(nextTo));
 
@@ -191,68 +212,110 @@ export function DateFilters({
   };
 
   return (
-    <div className="w-full lg:w-auto lg:min-w-[24rem]">
-      <div className="rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container-low)] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="ds-label-sm tracking-[0.2em] text-[var(--ds-primary)]">
-            {t('label')}
+    <div className="relative w-full lg:min-w-[24rem]">
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="flex min-h-11 items-center gap-3 rounded-[var(--ds-radius-pill)] border border-[var(--ds-primary-border)] bg-[var(--ds-primary-wash)] px-5 py-2.5 text-[var(--ds-on-surface)] transition-colors hover:bg-[var(--ds-primary-wash-strong)] lg:ml-auto"
+        aria-expanded={isOpen}
+      >
+        <span className="ds-icon-primary rounded-[var(--ds-radius-functional)] p-2">
+          <Filter className="h-4 w-4" />
+        </span>
+        <span className="ds-label-sm tracking-[0.16em]">
+          {tCatalog('filtersButton')}
+        </span>
+        {hasActiveFilters && (
+          <span className="rounded-[var(--ds-radius-pill)] bg-[var(--ds-primary)] px-2 py-0.5 text-[10px] font-semibold text-[var(--ds-on-primary)]">
+            {[selectedCity ? 1 : 0, dateFrom ? 1 : 0, dateTo ? 1 : 0].reduce((sum, value) => sum + value, 0)}
           </span>
-          {(fromDate || toDate) && (
-            <button
-              type="button"
-              onClick={() => {
-                setFromDate(undefined);
-                setToDate(undefined);
-                router.push(buildCatalogUrl(undefined, undefined));
+        )}
+        <ChevronDown
+          className={`h-4 w-4 text-[var(--ds-on-surface-variant)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="mt-4 rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container-low)] p-4 lg:absolute lg:right-0 lg:top-full lg:z-[var(--z-dropdown)] lg:mt-3 lg:w-[24rem]">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="ds-label-sm tracking-[0.2em] text-[var(--ds-primary)]">
+              {t('label')}
+            </span>
+            {(city || fromDate || toDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCity('');
+                  setFromDate(undefined);
+                  setToDate(undefined);
+                  router.push(buildCatalogUrl('', undefined, undefined));
+                }}
+                className="inline-flex items-center gap-1 text-xs text-[var(--ds-on-surface-variant)] transition-colors hover:text-[var(--ds-on-surface)]"
+              >
+                <X className="h-3.5 w-3.5" />
+                {t('clear')}
+              </button>
+            )}
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="cityFilter" className="ds-label-sm text-[var(--ds-on-surface-variant)]">
+                {tCatalog('cityLabel')}
+              </label>
+              <div className="relative">
+                <input
+                  id="cityFilter"
+                  type="text"
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  placeholder={tCatalog('cityPlaceholder')}
+                  className="h-10 w-full rounded-[var(--ds-radius-functional)] border border-[var(--ds-outline-variant)] bg-[var(--ds-surface)] pl-10 pr-3 text-sm text-[var(--ds-on-surface)] outline-none transition-colors placeholder:text-[var(--ds-on-surface-variant)] focus:border-[var(--ds-primary-border-strong)]"
+                />
+                <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ds-on-surface-variant)]" />
+              </div>
+            </div>
+
+            <DatePickerField
+              id="dateFrom"
+              label={t('from')}
+              value={fromDate}
+              placeholder={t('placeholder')}
+              open={openPicker === 'from'}
+              onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'from' : null)}
+              disabled={fromDisabled}
+              locale={locale}
+              onChange={(nextDate) => {
+                const safeDate = clampToTodayOrLater(nextDate);
+                setFromDate(safeDate);
+                if (safeDate && toDate && safeDate > toDate) {
+                  setToDate(undefined);
+                }
               }}
-              className="inline-flex items-center gap-1 text-xs text-[var(--ds-on-surface-variant)] transition-colors hover:text-[var(--ds-on-surface)]"
-            >
-              <X className="h-3.5 w-3.5" />
-              {t('clear')}
-            </button>
-          )}
+            />
+
+            <DatePickerField
+              id="dateTo"
+              label={t('to')}
+              value={toDate}
+              placeholder={t('placeholder')}
+              open={openPicker === 'to'}
+              onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'to' : null)}
+              disabled={toDisabled}
+              locale={locale}
+              onChange={(nextDate) => setToDate(clampToTodayOrLater(nextDate))}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push(buildCatalogUrl(city, fromDate, toDate))}
+            className="mt-4 w-full rounded-[var(--ds-radius-pill)] px-4 py-2 ds-label-sm ds-accent-primary"
+          >
+            {t('apply')}
+          </button>
         </div>
-
-        <div className="grid gap-3">
-          <DatePickerField
-            id="dateFrom"
-            label={t('from')}
-            value={fromDate}
-            placeholder={t('placeholder')}
-            open={openPicker === 'from'}
-            onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'from' : null)}
-            disabled={fromDisabled}
-            locale={locale}
-            onChange={(nextDate) => {
-              const safeDate = clampToTodayOrLater(nextDate);
-              setFromDate(safeDate);
-              if (safeDate && toDate && safeDate > toDate) {
-                setToDate(undefined);
-              }
-            }}
-          />
-
-          <DatePickerField
-            id="dateTo"
-            label={t('to')}
-            value={toDate}
-            placeholder={t('placeholder')}
-            open={openPicker === 'to'}
-            onOpenChange={(nextOpen) => setOpenPicker(nextOpen ? 'to' : null)}
-            disabled={toDisabled}
-            locale={locale}
-            onChange={(nextDate) => setToDate(clampToTodayOrLater(nextDate))}
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => router.push(buildCatalogUrl(fromDate, toDate))}
-          className="mt-4 w-full rounded-[var(--ds-radius-pill)] px-4 py-2 ds-label-sm ds-accent-primary"
-        >
-          {t('apply')}
-        </button>
-      </div>
+      )}
 
       {validationError ? (
         <p className="mt-3 ds-body-sm text-[var(--ds-error)]">{validationError}</p>

@@ -22,6 +22,7 @@ interface AllEventsPageProps {
     q?: string;
     page?: string;
     category?: string;
+    city?: string;
     dateFrom?: string;
     dateTo?: string;
   }>;
@@ -35,6 +36,23 @@ const DEFAULT_EVENTS_META = {
   totalPages: 1,
 };
 
+function matchesEventQuery(event: Awaited<ReturnType<typeof listEvents>>['data'][number], query: string): boolean {
+  const needle = query.trim().toLocaleLowerCase();
+  if (!needle) return true;
+
+  return [
+    event.title,
+    event.subtitle,
+    event.description,
+    event.longDescription,
+    event.location,
+    event.category,
+    ...(event.tags ?? []),
+  ]
+    .filter((value): value is string => typeof value === 'string' && value.length > 0)
+    .some((value) => value.toLocaleLowerCase().includes(needle));
+}
+
 function formatTodayParam(): string {
   const now = new Date();
   const year = now.getFullYear();
@@ -45,9 +63,10 @@ function formatTodayParam(): string {
 
 export default async function AllEventsPage({ searchParams }: AllEventsPageProps) {
   const t = await getTranslations('eventsCatalog');
-  const { q, page, category, dateFrom, dateTo } = await searchParams;
+  const { q, page, category, city, dateFrom, dateTo } = await searchParams;
   const query = q?.trim() ?? '';
   const selectedCategory = category?.trim() ?? '';
+  const selectedCity = city?.trim() ?? '';
   const todayParam = formatTodayParam();
   const selectedDateFrom = dateFrom?.trim() ?? '';
   const selectedDateTo = dateTo?.trim() ?? '';
@@ -64,16 +83,21 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
       ? ''
       : normalizedDateTo;
   const currentPage = Math.max(1, parseInt(page ?? '1', 10) || 1);
+  const usesBackendCityFilter = selectedCity.length > 0;
+  const needsLocalQueryFilter = usesBackendCityFilter && query.length > 0;
+  const requestLimit = usesBackendCityFilter ? 500 : PER_PAGE;
+  const requestPage = usesBackendCityFilter ? 1 : currentPage;
+  const requestQuery = usesBackendCityFilter ? selectedCity : query;
 
   const [eventsResult, categories] = await Promise.all([
     listEvents(
       {
-        q: query || undefined,
+        q: requestQuery || undefined,
         category: selectedCategory || undefined,
         dateFrom: normalizedDateFrom || todayParam,
         dateTo: effectiveDateTo || undefined,
-        page: currentPage,
-        limit: PER_PAGE,
+        page: requestPage,
+        limit: requestLimit,
         sort: 'date_asc',
       },
       { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
@@ -88,14 +112,32 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
     getEventCategories({ next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }),
   ]);
 
-  const pageEvents = eventsResult.response?.data ?? [];
-  const meta = eventsResult.response?.meta ?? DEFAULT_EVENTS_META;
+  const allEvents = eventsResult.response?.data ?? [];
+  const filteredEvents = needsLocalQueryFilter
+    ? allEvents.filter((event) => matchesEventQuery(event, query))
+    : allEvents;
+  const filteredTotal = filteredEvents.length;
+  const filteredTotalPages = Math.max(1, Math.ceil(filteredTotal / PER_PAGE));
+  const resolvedPage = usesBackendCityFilter ? Math.min(currentPage, filteredTotalPages) : currentPage;
+  const pageSliceStart = (resolvedPage - 1) * PER_PAGE;
+  const pageEvents = usesBackendCityFilter
+    ? filteredEvents.slice(pageSliceStart, pageSliceStart + PER_PAGE)
+    : allEvents;
+  const meta = usesBackendCityFilter
+    ? {
+      page: resolvedPage,
+      limit: PER_PAGE,
+      total: filteredTotal,
+      totalPages: filteredTotalPages,
+    }
+    : (eventsResult.response?.meta ?? DEFAULT_EVENTS_META);
   const validationError = eventsResult.validationError;
 
   function buildCatalogUrl(nextCategory?: string, includeDateRange = true): string {
     const params = new URLSearchParams();
     if (query) params.set('q', query);
     if (nextCategory) params.set('category', nextCategory);
+    if (selectedCity) params.set('city', selectedCity);
     if (includeDateRange && selectedDateFrom && normalizedDateFrom) params.set('dateFrom', normalizedDateFrom);
     if (includeDateRange && selectedDateTo && effectiveDateTo) params.set('dateTo', effectiveDateTo);
     const qs = params.toString();
@@ -106,7 +148,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
     <div className="pt-32 pb-20 px-[var(--ds-page-gutter)]">
       <div className="max-w-[80rem] mx-auto">
         <header className="mb-16">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="ds-label-sm text-[var(--ds-primary)] block mb-4 tracking-[0.3em]">
                 {t('catalogLabel')}
@@ -114,20 +156,24 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
               <h1 className="ds-display-lg font-extrabold tracking-tighter text-[var(--ds-on-surface)]">
                 {t('allEventsTitle')}
               </h1>
-              {query && (
+              {(query || selectedCity) && (
                 <p className="ds-body-md text-[var(--ds-on-surface-variant)] mt-4">
-                  {t('searchResultsPrefix')} «{query}» — {t('searchResultsEvents', { count: meta.total })}
+                  {query ? `${t('searchResultsPrefix')} «${query}» — ` : ''}
+                  {t('searchResultsEvents', { count: meta.total })}
                 </p>
               )}
             </div>
 
-            <DateFilters
-              query={query}
-              selectedCategory={selectedCategory}
-              dateFrom={selectedDateFrom ? normalizedDateFrom : ''}
-              dateTo={selectedDateTo ? effectiveDateTo : ''}
-              validationError={validationError}
-            />
+            <div className="lg:flex lg:justify-end lg:self-end">
+              <DateFilters
+                query={query}
+                selectedCategory={selectedCategory}
+                selectedCity={selectedCity}
+                dateFrom={selectedDateFrom ? normalizedDateFrom : ''}
+                dateTo={selectedDateTo ? effectiveDateTo : ''}
+                validationError={validationError}
+              />
+            </div>
           </div>
 
           {categories.length > 0 && (
