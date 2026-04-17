@@ -5,7 +5,6 @@ import { Fingerprint } from 'lucide-react';
 import { dsMotion } from '@ds';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import type { Event } from '@/types/event';
-import { formatEventDateShort, formatEventTime } from '@/lib/datetime';
 
 interface TicketPromoProps {
   event: Event;
@@ -33,9 +32,9 @@ function buildDecorativeTicketNumber(event: Event): string {
 export function TicketPromo({ event }: TicketPromoProps) {
   const decorativeTicketNumber = buildDecorativeTicketNumber(event);
   const ticketHeadline = event.title.toLocaleUpperCase('ru-RU');
-  const ticketMeta = `${event.location} · ${formatEventDateShort(
-    event.datetimeUtc,
-  )} · ${formatEventTime(event.datetimeUtc)}`;
+  const ticketMeta = event.displayScheduleShort
+    ? `${event.location} · ${event.displayScheduleShort}`
+    : event.location;
 
   return (
     <section className="ds-section overflow-hidden">

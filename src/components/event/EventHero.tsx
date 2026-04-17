@@ -4,10 +4,6 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { dsMotion } from '@ds';
 import type { Event } from '@/types/event';
-import {
-  formatEventDateLong,
-  formatEventTime,
-} from '@/lib/datetime';
 import { getEventImageSrc } from '@/lib/images';
 
 interface EventHeroProps {
@@ -44,8 +40,7 @@ export function EventHero({ event }: EventHeroProps) {
               Эксклюзивное событие
             </span>
             <span className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-              {formatEventDateLong(event.datetimeUtc)} ·{' '}
-              {formatEventTime(event.datetimeUtc)}
+              {event.displayScheduleLong}
             </span>
           </motion.div>
 

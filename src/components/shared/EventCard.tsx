@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { MapPin } from 'lucide-react';
 import type { Event } from '@/types/event';
 import { cn } from '@ds/utils/cn';
-import { formatEventDateShort } from '@/lib/datetime';
 import { getEventImageSrc } from '@/lib/images';
 
 interface EventCardProps {
@@ -28,7 +27,7 @@ export function EventCard({ event }: EventCardProps) {
         />
         <div className="absolute top-4 right-4 ds-glass ds-ghost-border rounded-[var(--ds-radius-pill)] px-3 py-1">
           <span className="ds-label-sm text-[var(--ds-primary)]">
-            {formatEventDateShort(event.datetimeUtc)}
+            {event.displayDateShort}
           </span>
         </div>
       </div>

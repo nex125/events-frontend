@@ -8,6 +8,15 @@ export interface Event {
   description: string;
   longDescription?: string;
   datetimeUtc: string;
+  datetimeEndUtc?: string;
+  displayDateShort?: string;
+  displayDateLong?: string;
+  displayTime?: string;
+  displayScheduleShort?: string;
+  displayScheduleLong?: string;
+  displayEndDateShort?: string;
+  displayEndDateLong?: string;
+  displayEndTime?: string;
   location: string;
   image: string;
   videoUrl?: string;
