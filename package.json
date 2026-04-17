@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "bun@1.2.13",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "i18n:check": "bun run scripts/check-i18n.ts",
