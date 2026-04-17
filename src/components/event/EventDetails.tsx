@@ -19,15 +19,6 @@ export function EventDetails({ event }: EventDetailsProps) {
             <p className="ds-body-md text-[var(--ds-on-surface-variant)] leading-relaxed">
               {event.longDescription || event.description}
             </p>
-            {event.organizerName && (
-              <div className="rounded-[var(--ds-radius-functional)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container-low)] p-4">
-                <p className="ds-label-sm text-[var(--ds-on-surface-variant)] mb-2">Организатор</p>
-                <p className="ds-heading-sm text-[var(--ds-on-surface)]">{event.organizerName}</p>
-                {event.organizerDescription && (
-                  <p className="ds-body-sm text-[var(--ds-on-surface-variant)] mt-2">{event.organizerDescription}</p>
-                )}
-              </div>
-            )}
             {event.duration && (
               <div className="flex items-center gap-8 py-4">
                 <div className="flex flex-col">
@@ -106,6 +97,16 @@ export function EventLocationNotes({ event }: EventDetailsProps) {
             </ul>
           </div>
         )}
+        {event.organizerName && (
+            <div className="rounded-[var(--ds-radius-functional)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container-low)] p-4">
+              <p className="ds-label-sm text-[var(--ds-on-surface-variant)] mb-2">Организатор</p>
+              <p className="ds-heading-sm text-[var(--ds-on-surface)]">{event.organizerName}</p>
+              {event.organizerDescription && (
+                  <p className="ds-body-sm text-[var(--ds-on-surface-variant)] mt-2">{event.organizerDescription}</p>
+              )}
+            </div>
+        )}
+
       </div>
     </ScrollReveal>
   );

@@ -74,21 +74,6 @@ export function EventHero({ event }: EventHeroProps) {
           >
             {event.description}
           </motion.p>
-
-          {event.organizerName && (
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: dsMotion.duration.slow,
-                ease: dsMotion.ease.default,
-                delay: 0.4,
-              }}
-              className="ds-label-md text-[var(--ds-on-surface-variant)]"
-            >
-              Организатор: <span className="text-[var(--ds-on-surface)]">{event.organizerName}</span>
-            </motion.p>
-          )}
         </div>
       </div>
     </section>

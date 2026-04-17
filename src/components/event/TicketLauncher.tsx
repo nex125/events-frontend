@@ -62,6 +62,31 @@ type SeatmapViewerMessageOverrides = {
   cartProceedButton: string;
 };
 
+function buildSeatmapMessages(
+  tSeatmap: ReturnType<typeof useTranslations<'ticketLauncher.seatmap'>>,
+): SeatmapViewerMessageOverrides {
+  return {
+    uncategorizedCategoryName: tSeatmap('uncategorizedCategoryName'),
+    sectionFallbackLabel: tSeatmap('sectionFallbackLabel'),
+    tableLabel: (tableLabel: string) => tSeatmap('tableLabel', { tableLabel }),
+    legendAriaLabel: tSeatmap('legendAriaLabel'),
+    legendStatusesTitle: tSeatmap('legendStatusesTitle'),
+    legendPricesTitle: tSeatmap('legendPricesTitle'),
+    cartChipLabel: (count: number) => tSeatmap('cartChipLabel', { count }),
+    cartAriaLabel: tSeatmap('cartAriaLabel'),
+    cartHeaderTitle: tSeatmap('cartHeaderTitle'),
+    cartCloseLabel: tSeatmap('cartCloseLabel'),
+    cartEmptyState: tSeatmap('cartEmptyState'),
+    cartGroupMeta: (count: number, unitPrice: string) => tSeatmap('cartGroupMeta', { count, unitPrice }),
+    cartRemoveOneAriaLabel: (categoryName: string) => tSeatmap('cartRemoveOneAriaLabel', { categoryName }),
+    cartAddOneAriaLabel: (categoryName: string) => tSeatmap('cartAddOneAriaLabel', { categoryName }),
+    cartRemoveSeatTitle: tSeatmap('cartRemoveSeatTitle'),
+    cartRemoveSeatAriaLabel: (seatLabel: string) => tSeatmap('cartRemoveSeatAriaLabel', { seatLabel }),
+    cartSummary: (count: number, totalCost: string) => tSeatmap('cartSummary', { count, totalCost }),
+    cartProceedButton: tSeatmap('cartProceedButton'),
+  };
+}
+
 function getOrCreateClientId(): string {
   if (typeof window === 'undefined') {
     return 'events-frontend-user';
@@ -88,26 +113,7 @@ export function TicketLauncher({
   const tSeatmap = useTranslations('ticketLauncher.seatmap');
   const backendVenueId = venueId?.trim() || venue.id;
   const seatmapMessages = useMemo<SeatmapViewerMessageOverrides>(
-    () => ({
-      uncategorizedCategoryName: tSeatmap('uncategorizedCategoryName'),
-      sectionFallbackLabel: tSeatmap('sectionFallbackLabel'),
-      tableLabel: (tableLabel: string) => tSeatmap('tableLabel', { tableLabel }),
-      legendAriaLabel: tSeatmap('legendAriaLabel'),
-      legendStatusesTitle: tSeatmap('legendStatusesTitle'),
-      legendPricesTitle: tSeatmap('legendPricesTitle'),
-      cartChipLabel: (count: number) => tSeatmap('cartChipLabel', { count }),
-      cartAriaLabel: tSeatmap('cartAriaLabel'),
-      cartHeaderTitle: tSeatmap('cartHeaderTitle'),
-      cartCloseLabel: tSeatmap('cartCloseLabel'),
-      cartEmptyState: tSeatmap('cartEmptyState'),
-      cartGroupMeta: (count: number, unitPrice: string) => tSeatmap('cartGroupMeta', { count, unitPrice }),
-      cartRemoveOneAriaLabel: (categoryName: string) => tSeatmap('cartRemoveOneAriaLabel', { categoryName }),
-      cartAddOneAriaLabel: (categoryName: string) => tSeatmap('cartAddOneAriaLabel', { categoryName }),
-      cartRemoveSeatTitle: tSeatmap('cartRemoveSeatTitle'),
-      cartRemoveSeatAriaLabel: (seatLabel: string) => tSeatmap('cartRemoveSeatAriaLabel', { seatLabel }),
-      cartSummary: (count: number, totalCost: string) => tSeatmap('cartSummary', { count, totalCost }),
-      cartProceedButton: tSeatmap('cartProceedButton'),
-    }),
+    () => buildSeatmapMessages(tSeatmap),
     [tSeatmap],
   );
   const locale = resolveLocaleTag();
