@@ -14,7 +14,7 @@ export function PulseFeed({ events }: PulseFeedProps) {
     <section className="ds-section bg-[var(--ds-surface-container-low)]">
       <div className="ds-section-inner">
         <div className="mb-20 text-center">
-          <h2 className="ds-display-md font-bold tracking-tighter mb-4 italic">
+          <h2 className="ds-display-md font-bold tracking-tighter mb-4">
             Афиша
           </h2>
           <p className="ds-label-sm text-[var(--ds-on-surface-variant)] tracking-[0.4em]">
