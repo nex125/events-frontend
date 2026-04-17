@@ -24,6 +24,7 @@ import {
   releaseSeat,
 } from '@/lib/api';
 import { resolveLocaleTag } from '@/lib/i18n/config';
+import { SeatmapLegend } from './SeatmapLegend';
 
 interface TicketLauncherProps {
   isOpen: boolean;
@@ -340,7 +341,7 @@ export function TicketLauncher({
 
               <div className="flex-1 overflow-hidden">
                 {queueState.phase === 'ready' ? (
-                  <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
+                  <div className="ticket-launcher-seatmap relative h-full" aria-busy={cartStatus === 'loading'}>
                     <SeatmapViewer
                       key={`${venue.id}-${viewerResetToken}`}
                       className={seatmapViewerSharedThemeRootClassName}
@@ -350,6 +351,11 @@ export function TicketLauncher({
                       onCartEvent={handleCartEvent}
                       showLabels
                       {...seatmapViewerI18nProps}
+                    />
+                    <SeatmapLegend
+                      venue={liveVenue}
+                      title={tSeatmap('legendPricesTitle')}
+                      className="pointer-events-none absolute top-3 left-3 z-10 max-w-[220px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-3 text-xs leading-tight text-[var(--ds-on-surface)]"
                     />
                     {cartStatus === 'loading' && (
                       <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-10">
@@ -477,4 +483,3 @@ function updateVenueSeatStatus(
 
   return venue;
 }
-

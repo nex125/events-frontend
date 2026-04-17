@@ -21,6 +21,9 @@ export interface Event {
   image: string;
   videoUrl?: string;
   category: string;
+  organizerId?: string;
+  organizerName?: string;
+  organizerDescription?: string | null;
   tags: string[];
   duration?: string;
   ageRestriction?: string;

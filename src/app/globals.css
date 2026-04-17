@@ -8,3 +8,7 @@
   --font-display-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-body-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
+
+.ticket-launcher-seatmap .seatmap-viewer__legend {
+  display: none;
+}

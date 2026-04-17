@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "i18n:check": "bun run scripts/check-i18n.ts",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start"
   },
   "dependencies": {
