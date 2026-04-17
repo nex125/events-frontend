@@ -9,6 +9,8 @@
     "pageDescription": "Catalog of all events on Ticketok",
     "catalogLabel": "Catalog",
     "allEventsTitle": "All events",
+    "recommendedLabel": "Recommended",
+    "recommendedTitle": "Recommended events",
     "filtersButton": "Filter",
     "cityLabel": "City",
     "cityPlaceholder": "Enter city name",

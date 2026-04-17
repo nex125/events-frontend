@@ -267,6 +267,7 @@ export interface ListEventsResponse {
 
 export interface HomepageResponse {
   posterEvents: Event[];
+  recommendedEvents: Event[];
 }
 
 export async function listEvents(

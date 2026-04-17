@@ -2,9 +2,11 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { ApiRequestError, getEventCategories, listEvents } from '@/lib/api';
+import { ApiRequestError, getEventCategories, getHomepageContent, listEvents } from '@/lib/api';
+import { buildContentFetchInit } from '@/lib/fetchPolicy';
 import { AllEventsContent } from './AllEventsContent';
 import { DateFilters } from './DateFilters';
+import { RecommendedEventsSection } from './RecommendedEventsSection';
 
 export const dynamic = 'force-dynamic';
 const FETCH_TIMEOUT_MS = 8000;
@@ -89,7 +91,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
   const requestPage = usesBackendCityFilter ? 1 : currentPage;
   const requestQuery = usesBackendCityFilter ? selectedCity : query;
 
-  const [eventsResult, categories] = await Promise.all([
+  const [eventsResult, categories, homepageContent] = await Promise.all([
     listEvents(
       {
         q: requestQuery || undefined,
@@ -100,7 +102,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
         limit: requestLimit,
         sort: 'date_asc',
       },
-      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
+      buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
     )
       .then((response) => ({ response, validationError: null as string | null }))
       .catch((error: unknown) => {
@@ -109,7 +111,11 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
         }
         throw error;
       }),
-    getEventCategories({ next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }),
+    getEventCategories(buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS))),
+    getHomepageContent(buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS))).catch(() => ({
+      posterEvents: [],
+      recommendedEvents: [],
+    })),
   ]);
 
   const allEvents = eventsResult.response?.data ?? [];
@@ -204,6 +210,8 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
             </div>
           )}
         </header>
+
+        <RecommendedEventsSection events={homepageContent.recommendedEvents} />
 
         <Suspense>
           <AllEventsContent

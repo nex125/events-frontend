@@ -2,6 +2,7 @@ import { HeroSection } from '@/components/home/HeroSection';
 import { FeaturedEvents } from '@/components/home/FeaturedEvents';
 import { PulseFeed } from '@/components/home/PulseFeed';
 import { InnerCircle } from '@/components/home/InnerCircle';
+import { buildContentFetchInit } from '@/lib/fetchPolicy';
 import { getHomepageContent, listEvents } from '@/lib/api';
 import { fetchSeatInfo } from '@/lib/seatInfo';
 import type { Event } from '@/types/event';
@@ -15,11 +16,11 @@ export default async function HomePage() {
   const [featuredResult, homepageResult] = await Promise.all([
     listEvents(
       { featured: true, sort: 'featured', limit: 5 },
-      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
+      buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
     ).catch(() => EMPTY_LIST),
     getHomepageContent(
-      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
-    ).catch(() => ({ posterEvents: [] as Event[] })),
+      buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
+    ).catch(() => ({ posterEvents: [] as Event[], recommendedEvents: [] as Event[] })),
   ]);
 
   const featured = featuredResult.data;
@@ -29,7 +30,7 @@ export default async function HomePage() {
   const seatInfo = heroEvent
     ? await fetchSeatInfo(
       heroEvent.slug,
-      { next: { revalidate: 60 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
+      buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
     ).catch(() => [])
     : [];
   const minPrice =

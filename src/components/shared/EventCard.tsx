@@ -9,11 +9,45 @@ interface EventCardProps {
   event: Event;
 }
 
+function normalizeDateLabel(label: string): string {
+  return label.replace(/\./g, '').replace(/\s+/g, ' ').trim();
+}
+
+function splitDayAndMonth(label: string): { day: string; month: string } | null {
+  const normalized = normalizeDateLabel(label);
+  const match = normalized.match(/^(\d{1,2})\s+(.+)$/u);
+
+  if (!match) {
+    return null;
+  }
+
+  return { day: match[1], month: match[2].trim() };
+}
+
+function buildDateLabel(event: Event): string | undefined {
+  const startLabel = event.displayDateShort ? normalizeDateLabel(event.displayDateShort) : '';
+  const endLabel = event.displayEndDateShort ? normalizeDateLabel(event.displayEndDateShort) : '';
+
+  if (!startLabel) {
+    return undefined;
+  }
+
+  if (!endLabel || endLabel === startLabel) {
+    return startLabel;
+  }
+
+  const startParts = splitDayAndMonth(startLabel);
+  const endParts = splitDayAndMonth(endLabel);
+
+  if (startParts && endParts && startParts.month === endParts.month) {
+    return `${startParts.day} - ${endParts.day} ${startParts.month}`;
+  }
+
+  return `${startLabel} - ${endLabel}`;
+}
+
 export function EventCard({ event }: EventCardProps) {
-  const dateLabel =
-    event.displayDateShort && event.displayEndDateShort && event.displayEndDateShort !== event.displayDateShort
-      ? `${event.displayDateShort} - ${event.displayEndDateShort}`
-      : event.displayDateShort;
+  const dateLabel = buildDateLabel(event);
 
   return (
     <Link

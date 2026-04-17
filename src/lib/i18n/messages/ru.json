@@ -9,6 +9,8 @@
     "pageDescription": "Каталог всех событий на Ticketok",
     "catalogLabel": "Каталог",
     "allEventsTitle": "Все события",
+    "recommendedLabel": "Рекомендованные",
+    "recommendedTitle": "Рекомендованные события",
     "filtersButton": "Фильтр",
     "cityLabel": "Город",
     "cityPlaceholder": "Введите название города",
