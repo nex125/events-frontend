@@ -34,12 +34,12 @@ export function EventHero({ event }: EventHeroProps) {
               ease: dsMotion.ease.default,
               delay: 0.1,
             }}
-            className="flex items-center gap-4"
+            className="flex flex-wrap items-center gap-3"
           >
             <span className="ds-accent-primary ds-chip ds-label-sm px-3 py-1">
               Эксклюзивное событие
             </span>
-            <span className="ds-label-sm text-[var(--ds-on-surface-variant)]">
+            <span className="ds-label-sm rounded-full border border-[color:var(--ds-primary-border)] bg-[color:color-mix(in_srgb,var(--ds-surface-container-low)_78%,transparent)] px-3 py-1.5 text-[var(--ds-on-surface)] shadow-[0_12px_32px_-18px_rgba(var(--ds-shadow-rgb),0.7)] backdrop-blur-md">
               {event.displayScheduleLong}
             </span>
           </motion.div>

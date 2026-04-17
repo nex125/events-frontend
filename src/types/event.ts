@@ -37,7 +37,7 @@ export interface SeatCategory {
   name: string;
   color: string;
   price: number;
-  currency: 'BYN';
+  currency: string;
   available: number;
   total: number;
 }

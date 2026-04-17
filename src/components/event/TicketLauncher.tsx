@@ -30,6 +30,7 @@ interface TicketLauncherProps {
   isOpen: boolean;
   onClose: () => void;
   venue: Venue;
+  currency: string;
   venueId?: string;
   eventId: string;
   ticketokEventId?: string;
@@ -78,6 +79,7 @@ export function TicketLauncher({
   isOpen,
   onClose,
   venue,
+  currency,
   venueId,
   eventId,
   ticketokEventId,
@@ -358,6 +360,7 @@ export function TicketLauncher({
                       className={seatmapViewerSharedThemeRootClassName}
                       classNames={seatmapViewerSharedThemeClassNames}
                       venue={liveVenue}
+                      currency={currency}
                       onSeatClick={handleSeatClick}
                       onCartEvent={handleCartEvent}
                       showLabels
@@ -365,6 +368,7 @@ export function TicketLauncher({
                     />
                     <SeatmapLegend
                       venue={liveVenue}
+                      currency={currency}
                       title={tSeatmap('legendPricesTitle')}
                       className="pointer-events-none absolute top-3 left-3 z-10 max-w-[220px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-3 text-xs leading-tight text-[var(--ds-on-surface)]"
                     />

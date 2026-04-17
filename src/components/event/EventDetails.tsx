@@ -41,7 +41,7 @@ export function EventDetails({ event }: EventDetailsProps) {
                     <div className="w-px h-8 bg-[var(--ds-ghost-border)]" />
                     <div className="flex flex-col">
                       <span className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-                        Возраст
+                        Возрастное ограничение
                       </span>
                       <span className="ds-heading-sm">
                         {event.ageRestriction}

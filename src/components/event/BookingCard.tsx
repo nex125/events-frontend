@@ -7,10 +7,11 @@ import { Button } from '@ds';
 import { TicketLauncher } from './TicketLauncher';
 import type { SeatCategory } from '@/types/event';
 import type { Venue } from '@nex125/seatmap-core';
-import { DEFAULT_CURRENCY, resolveLocaleTag } from '@/lib/i18n/config';
+import { resolveLocaleTag } from '@/lib/i18n/config';
 
 interface BookingCardProps {
   seatCategories: SeatCategory[];
+  currency: string;
   venue: Venue;
   venueId?: string;
   eventId: string;
@@ -19,6 +20,7 @@ interface BookingCardProps {
 
 export function BookingCard({
   seatCategories,
+  currency,
   venue,
   venueId,
   eventId,
@@ -27,7 +29,7 @@ export function BookingCard({
   const t = useTranslations('bookingCard');
   const locale = resolveLocaleTag();
   const formatPrice = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: DEFAULT_CURRENCY }).format(value);
+    new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
   const pluralSeats = (n: number): string => {
     const mod10 = n % 10;
     const mod100 = n % 100;
@@ -120,6 +122,7 @@ export function BookingCard({
           isOpen={widgetOpen}
           onClose={() => setWidgetOpen(false)}
           venue={venue}
+          currency={currency}
           venueId={venueId}
           eventId={eventId}
           ticketokEventId={ticketokEventId}

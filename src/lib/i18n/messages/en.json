@@ -280,6 +280,12 @@
     "history": {
       "deleteSelected": "Delete selected objects"
     },
+    "defaults": {
+      "sectionLabel": "{suffix}",
+      "stageLabel": "Stage",
+      "dancefloorLabel": "Dancefloor",
+      "dancefloorRowLabel": "DF"
+    },
     "toolOptions": {
       "title": "Tool Options",
       "sectionKind": {

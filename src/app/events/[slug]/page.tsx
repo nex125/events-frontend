@@ -8,6 +8,7 @@ import { EventDetails, EventLocationNotes } from '@/components/event/EventDetail
 import { BookingCard } from '@/components/event/BookingCard';
 import { TicketPromo } from '@/components/event/TicketPromo';
 import { VenueSeatmap } from '@/components/event/VenueSeatmap';
+import { DEFAULT_CURRENCY } from '@/lib/i18n/config';
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -51,6 +52,7 @@ export default async function EventPage({ params }: EventPageProps) {
   });
 
   const seatCategories = await fetchSeatInfo(slug, { next: { revalidate: 60 } });
+  const seatCurrency = seatCategories.find((category) => category.currency.trim().length > 0)?.currency ?? DEFAULT_CURRENCY;
 
   const venue = event.venueEventId
     ? await getVenueEventGrid(event.venueEventId).catch(() => null)
@@ -65,7 +67,7 @@ export default async function EventPage({ params }: EventPageProps) {
           <div className="lg:col-span-8 space-y-16">
             <EventDetails event={event} />
             {venue ? (
-              <VenueSeatmap venue={venue} venueId={event.venueId} />
+              <VenueSeatmap venue={venue} currency={seatCurrency} venueId={event.venueId} />
             ) : (
               <div className="rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[var(--ds-surface-container)] p-6">
                 <h3 className="ds-heading-sm mb-2">Схема зала недоступна</h3>
@@ -80,6 +82,7 @@ export default async function EventPage({ params }: EventPageProps) {
             {venue ? (
               <BookingCard
                 seatCategories={seatCategories}
+                currency={seatCurrency}
                 venue={venue}
                 venueId={event.venueId}
                 eventId={event.id}

@@ -10,6 +10,7 @@ import { SeatmapLegend } from './SeatmapLegend';
 
 interface VenueSeatmapProps {
   venue: Venue;
+  currency?: string;
   venueId?: string;
 }
 
@@ -43,7 +44,7 @@ function LiveSeatStatusSync({ venueId }: { venueId: string }) {
   return null;
 }
 
-function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
+function PreviewSeatmapCanvas({ venue, currency }: { venue: Venue; currency?: string }) {
   const t = useTranslations('venueSeatmap');
   const { viewport } = useSeatmapContext();
   const [isDragging, setIsDragging] = useState(false);
@@ -93,6 +94,7 @@ function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
 
       <SeatmapLegend
         venue={venue}
+        currency={currency}
         title={t('legendTitle')}
         className="pointer-events-none absolute top-2 left-2 z-10 max-w-[170px] rounded-md border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-2 text-[11px] leading-tight text-[var(--ds-on-surface)] md:top-3 md:left-3 md:max-w-[220px] md:rounded-lg md:p-3 md:text-xs"
       />
@@ -100,14 +102,14 @@ function PreviewSeatmapCanvas({ venue }: { venue: Venue }) {
   );
 }
 
-export function VenueSeatmap({ venue, venueId }: VenueSeatmapProps) {
+export function VenueSeatmap({ venue, currency, venueId }: VenueSeatmapProps) {
   const liveVenueId = venueId?.trim() || venue.id;
 
   return (
     <div className="aspect-[16/9] rounded-[var(--ds-radius-structural)] overflow-hidden">
       <SeatmapProvider venue={venue}>
         <LiveSeatStatusSync venueId={liveVenueId} />
-        <PreviewSeatmapCanvas venue={venue} />
+        <PreviewSeatmapCanvas venue={venue} currency={currency} />
       </SeatmapProvider>
     </div>
   );

@@ -280,6 +280,12 @@
     "history": {
       "deleteSelected": "Удалить выбранные объекты"
     },
+    "defaults": {
+      "sectionLabel": "{suffix}",
+      "stageLabel": "Сцена",
+      "dancefloorLabel": "Танцпол",
+      "dancefloorRowLabel": "ТП"
+    },
     "toolOptions": {
       "title": "Параметры инструмента",
       "sectionKind": {

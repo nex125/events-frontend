@@ -7,14 +7,15 @@ import { getEffectiveCategoryPrice, shouldShowCategoryPricesInLegend } from '@/l
 interface SeatmapLegendProps {
   venue: Venue;
   title: string;
+  currency?: string;
   className?: string;
 }
 
-export function SeatmapLegend({ venue, title, className }: SeatmapLegendProps) {
+export function SeatmapLegend({ venue, title, currency = DEFAULT_CURRENCY, className }: SeatmapLegendProps) {
   const locale = resolveLocaleTag();
   const showCategoryPrices = shouldShowCategoryPricesInLegend(venue);
   const formatPrice = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: DEFAULT_CURRENCY }).format(value);
+    new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 
   if (venue.categories.length === 0) {
     return null;
