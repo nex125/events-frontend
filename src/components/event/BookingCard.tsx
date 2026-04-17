@@ -14,6 +14,7 @@ interface BookingCardProps {
   venue: Venue;
   venueId?: string;
   eventId: string;
+  ticketokEventId?: string;
 }
 
 export function BookingCard({
@@ -21,6 +22,7 @@ export function BookingCard({
   venue,
   venueId,
   eventId,
+  ticketokEventId,
 }: BookingCardProps) {
   const t = useTranslations('bookingCard');
   const locale = resolveLocaleTag();
@@ -120,6 +122,7 @@ export function BookingCard({
           venue={venue}
           venueId={venueId}
           eventId={eventId}
+          ticketokEventId={ticketokEventId}
         />
       </div>
     </div>

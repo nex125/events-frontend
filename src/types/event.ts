@@ -2,6 +2,8 @@ export interface Event {
   id: string;
   venueId?: string;
   venueEventId?: string;
+  source?: string;
+  sourceEventId?: string;
   slug: string;
   title: string;
   subtitle?: string;

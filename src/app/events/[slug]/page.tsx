@@ -83,6 +83,7 @@ export default async function EventPage({ params }: EventPageProps) {
                 venue={venue}
                 venueId={event.venueId}
                 eventId={event.id}
+                ticketokEventId={event.sourceEventId}
               />
             ) : null}
           </div>

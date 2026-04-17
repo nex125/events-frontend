@@ -32,6 +32,7 @@ interface TicketLauncherProps {
   venue: Venue;
   venueId?: string;
   eventId: string;
+  ticketokEventId?: string;
 }
 
 interface QueueState {
@@ -79,6 +80,7 @@ export function TicketLauncher({
   venue,
   venueId,
   eventId,
+  ticketokEventId,
 }: TicketLauncherProps) {
   const t = useTranslations('ticketLauncher');
   const tSeatmap = useTranslations('ticketLauncher.seatmap');
@@ -112,6 +114,10 @@ export function TicketLauncher({
     [locale, seatmapMessages],
   );
   const clientId = useMemo(() => getOrCreateClientId(), []);
+  const backendEventId = useMemo(() => {
+    const parsed = Number.parseInt(ticketokEventId?.trim() ?? '', 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  }, [ticketokEventId]);
   const [queueState, setQueueState] = useState<QueueState>({
     phase: 'checking',
     remainingMs: 0,
@@ -156,18 +162,20 @@ export function TicketLauncher({
       try {
         await createTicketokSession({
           venueId: backendVenueId,
+          eventId: backendEventId,
         });
         await checkTicketokSession({
           venueId: backendVenueId,
+          eventId: backendEventId,
         });
-        await getTicketokProductsSnapshot(backendVenueId);
+        await getTicketokProductsSnapshot(backendVenueId, backendEventId);
       } catch {
         // Queue loop below remains the source of truth for user-facing retries.
       }
     };
 
     void preflight();
-  }, [backendVenueId, isOpen]);
+  }, [backendEventId, backendVenueId, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;

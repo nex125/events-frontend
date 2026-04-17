@@ -473,9 +473,14 @@ export async function checkTicketokSession(
 
 export async function getTicketokProductsSnapshot(
   venueId: string,
+  eventId?: number,
   init?: RequestInit,
 ): Promise<TicketokProductsSnapshotResponse> {
-  const query = new URLSearchParams({ venueId }).toString();
+  const params = new URLSearchParams({ venueId });
+  if (typeof eventId === 'number' && Number.isFinite(eventId) && eventId > 0) {
+    params.set('eventId', String(eventId));
+  }
+  const query = params.toString();
   return apiFetch<TicketokProductsSnapshotResponse>(`${getBoProxyBaseUrl()}/products/snapshot?${query}`, init);
 }
 
