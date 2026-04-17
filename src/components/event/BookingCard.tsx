@@ -57,50 +57,6 @@ export function BookingCard({
         </p>
       </div>
 
-      {seatCategories.length > 0 && (
-        <div className="space-y-3">
-          <span className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-            {t('seatCategories')}
-          </span>
-          <div className="space-y-2">
-            {seatCategories.map((cat) => (
-              <div
-                key={cat.name}
-                className="flex justify-between items-center py-3 border-b border-[var(--ds-ghost-border)]"
-              >
-                <div className="flex items-center gap-2">
-                  {cat.color && (
-                    <span
-                      className="inline-block w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: cat.color }}
-                    />
-                  )}
-                  <span className="ds-body-sm text-[var(--ds-on-surface)]">
-                    {cat.name}
-                  </span>
-                </div>
-                <div className="text-right">
-                  {!showPricesInLegend && (
-                    <span className="ds-heading-sm">{formatPrice(cat.price)}</span>
-                  )}
-                  <p className="ds-label-sm text-[var(--ds-on-surface-variant)]">
-                    {cat.available > 0 ? (
-                      <span className="text-[var(--ds-primary)]">
-                        {pluralSeats(cat.available)} {t('availableSuffix')}
-                      </span>
-                    ) : (
-                      <span className="text-[var(--ds-outline-variant)]">
-                        {t('soldOut')}
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="pt-4 border-t border-[var(--ds-ghost-border)] space-y-4">
         {!showPricesInLegend && minPrice && (
           <div className="flex justify-between items-center">
