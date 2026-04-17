@@ -10,6 +10,11 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
+  const dateLabel =
+    event.displayDateShort && event.displayEndDateShort && event.displayEndDateShort !== event.displayDateShort
+      ? `${event.displayDateShort} - ${event.displayEndDateShort}`
+      : event.displayDateShort;
+
   return (
     <Link
       href={`/events/${event.slug}`}
@@ -27,7 +32,7 @@ export function EventCard({ event }: EventCardProps) {
         />
         <div className="absolute top-4 right-4 ds-glass ds-ghost-border rounded-[var(--ds-radius-pill)] px-3 py-1">
           <span className="ds-label-sm text-[var(--ds-primary)]">
-            {event.displayDateShort}
+            {dateLabel}
           </span>
         </div>
       </div>
