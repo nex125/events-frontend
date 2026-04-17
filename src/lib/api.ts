@@ -265,6 +265,10 @@ export interface ListEventsResponse {
   };
 }
 
+export interface HomepageResponse {
+  posterEvents: Event[];
+}
+
 export async function listEvents(
   params: ListEventsParams = {},
   init?: RequestInit,
@@ -307,6 +311,10 @@ export async function getSeatCategoriesByEventSlug(
 
 export async function getEventCategories(init?: RequestInit): Promise<string[]> {
   return apiFetch<string[]>('/public-events/categories', init);
+}
+
+export async function getHomepageContent(init?: RequestInit): Promise<HomepageResponse> {
+  return apiFetch<HomepageResponse>('/public-homepage', init);
 }
 
 export async function getVenueEventGrid(
