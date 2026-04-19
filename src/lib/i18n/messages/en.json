@@ -63,6 +63,14 @@
     "copyright": "All rights reserved.",
     "paymentAlt": "Visa, Mastercard, bePaid, Belcart, Google Pay"
   },
+  "staticPages": {
+    "privacyTitle": "Privacy",
+    "termsTitle": "Terms",
+    "contactsTitle": "Contacts",
+    "partnersTitle": "Partners",
+    "emptyTitle": "Page in progress",
+    "emptyDescription": "Content for this page has not been filled in yet."
+  },
   "errors": {
     "title": "Something went wrong",
     "description": "Failed to load the page. Make sure the API server is available and try again.",

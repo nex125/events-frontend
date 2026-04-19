@@ -32,12 +32,18 @@ export async function Footer() {
       telegram: '',
       vk: '',
     },
+    footerPages: {
+      privacy: '',
+      terms: '',
+      contacts: '',
+      partners: '',
+    },
   }));
   const footerLinks = [
-    { href: '#', label: t('privacy') },
-    { href: '#', label: t('terms') },
-    { href: '#', label: t('contacts') },
-    { href: '#', label: t('partners') },
+    { href: '/privacy', label: t('privacy') },
+    { href: '/terms', label: t('terms') },
+    { href: '/contacts', label: t('contacts') },
+    { href: '/partners', label: t('partners') },
   ];
   const socialLinks = [
     { href: siteInfo.socialLinks.instagram, label: t('instagram') },

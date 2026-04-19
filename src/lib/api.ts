@@ -280,6 +280,50 @@ export interface PublicSiteInfo {
     telegram: string;
     vk: string;
   };
+  footerPages: {
+    privacy: string;
+    terms: string;
+    contacts: string;
+    partners: string;
+  };
+}
+
+function normalizeString(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function normalizePublicSiteInfo(value: unknown): PublicSiteInfo {
+  const siteInfo = value && typeof value === 'object' ? value : {};
+  const socialLinks =
+    'socialLinks' in siteInfo &&
+    siteInfo.socialLinks &&
+    typeof siteInfo.socialLinks === 'object'
+      ? siteInfo.socialLinks
+      : {};
+  const footerPages =
+    'footerPages' in siteInfo &&
+    siteInfo.footerPages &&
+    typeof siteInfo.footerPages === 'object'
+      ? siteInfo.footerPages
+      : {};
+
+  return {
+    contactEmail: normalizeString('contactEmail' in siteInfo ? siteInfo.contactEmail : ''),
+    contactPhone: normalizeString('contactPhone' in siteInfo ? siteInfo.contactPhone : ''),
+    address: normalizeString('address' in siteInfo ? siteInfo.address : ''),
+    aboutText: normalizeString('aboutText' in siteInfo ? siteInfo.aboutText : ''),
+    socialLinks: {
+      instagram: normalizeString('instagram' in socialLinks ? socialLinks.instagram : ''),
+      telegram: normalizeString('telegram' in socialLinks ? socialLinks.telegram : ''),
+      vk: normalizeString('vk' in socialLinks ? socialLinks.vk : ''),
+    },
+    footerPages: {
+      privacy: normalizeString('privacy' in footerPages ? footerPages.privacy : ''),
+      terms: normalizeString('terms' in footerPages ? footerPages.terms : ''),
+      contacts: normalizeString('contacts' in footerPages ? footerPages.contacts : ''),
+      partners: normalizeString('partners' in footerPages ? footerPages.partners : ''),
+    },
+  };
 }
 
 export async function listEvents(
@@ -331,7 +375,9 @@ export async function getHomepageContent(init?: RequestInit): Promise<HomepageRe
 }
 
 export async function getPublicSiteInfo(init?: RequestInit): Promise<PublicSiteInfo> {
-  return apiFetch<PublicSiteInfo>('/public-site-info', init);
+  const response = await apiFetch<unknown>('/public-site-info', init);
+
+  return normalizePublicSiteInfo(response);
 }
 
 export async function getVenueEventGrid(

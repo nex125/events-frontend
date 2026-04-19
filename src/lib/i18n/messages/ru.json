@@ -63,6 +63,14 @@
     "copyright": "Все права защищены.",
     "paymentAlt": "Visa, Mastercard, bePaid, Belcart, Google Pay"
   },
+  "staticPages": {
+    "privacyTitle": "Конфиденциальность",
+    "termsTitle": "Условия",
+    "contactsTitle": "Контакты",
+    "partnersTitle": "Партнеры",
+    "emptyTitle": "Страница в разработке",
+    "emptyDescription": "Контент для этой страницы пока не заполнен."
+  },
   "errors": {
     "title": "Что-то пошло не так",
     "description": "Не удалось загрузить страницу. Проверьте, что API-сервер доступен, и попробуйте ещё раз.",
