@@ -9,7 +9,6 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@ds/utils/cn';
 import { dsMotion } from '@ds';
 import { SearchBar } from '@/components/shared/SearchBar';
-import { ComingSoonTooltip } from '@/components/shared/ComingSoonTooltip';
 
 export function Navbar() {
   const t = useTranslations('navbar');
@@ -67,7 +66,6 @@ export function Navbar() {
 
         <div className="flex items-center gap-4 md:gap-6">
           <SearchBar />
-          <ComingSoonTooltip />
           <button
             aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
             onClick={() => setMobileOpen((v) => !v)}
