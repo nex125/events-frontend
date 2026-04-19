@@ -21,6 +21,7 @@ export interface Event {
   displayEndTime?: string;
   location: string;
   image: string;
+  venueImage?: string;
   videoUrl?: string;
   category: string;
   organizerId?: string;

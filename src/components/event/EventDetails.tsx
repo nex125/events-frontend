@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { MapPin, Info } from 'lucide-react';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import type { Event } from '@/types/event';
@@ -75,9 +76,19 @@ export function EventLocationNotes({ event }: EventDetailsProps) {
             {event.location}
           </p>
           <div className="aspect-video bg-[var(--ds-surface-container-highest)] rounded-[var(--ds-radius-functional)] overflow-hidden grayscale opacity-50">
-            <div className="w-full h-full flex items-center justify-center">
-              <MapPin size={32} className="text-[var(--ds-on-surface-variant)]" />
-            </div>
+            {event.venueImage ? (
+              <Image
+                alt={event.location}
+                src={getEventImageSrc(event.venueImage)}
+                width={1200}
+                height={675}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <MapPin size={32} className="text-[var(--ds-on-surface-variant)]" />
+              </div>
+            )}
           </div>
         </div>
 
