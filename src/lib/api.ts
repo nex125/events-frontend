@@ -270,6 +270,18 @@ export interface HomepageResponse {
   recommendedEvents: Event[];
 }
 
+export interface PublicSiteInfo {
+  contactEmail: string;
+  contactPhone: string;
+  address: string;
+  aboutText: string;
+  socialLinks: {
+    instagram: string;
+    telegram: string;
+    vk: string;
+  };
+}
+
 export async function listEvents(
   params: ListEventsParams = {},
   init?: RequestInit,
@@ -316,6 +328,10 @@ export async function getEventCategories(init?: RequestInit): Promise<string[]> 
 
 export async function getHomepageContent(init?: RequestInit): Promise<HomepageResponse> {
   return apiFetch<HomepageResponse>('/public-homepage', init);
+}
+
+export async function getPublicSiteInfo(init?: RequestInit): Promise<PublicSiteInfo> {
+  return apiFetch<PublicSiteInfo>('/public-site-info', init);
 }
 
 export async function getVenueEventGrid(

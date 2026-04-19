@@ -1,17 +1,49 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { getPublicSiteInfo } from '@/lib/api';
+import { buildContentFetchInit } from '@/lib/fetchPolicy';
 
-export function Footer() {
-  const t = useTranslations('footer');
+const FETCH_TIMEOUT_MS = 8000;
+
+function normalizeExternalUrl(value: string): string {
+  if (!value) {
+    return '#';
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  return `https://${value}`;
+}
+
+export async function Footer() {
+  const t = await getTranslations('footer');
+  const siteInfo = await getPublicSiteInfo(
+    buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
+  ).catch(() => ({
+    contactEmail: '',
+    contactPhone: '',
+    address: '',
+    aboutText: '',
+    socialLinks: {
+      instagram: '',
+      telegram: '',
+      vk: '',
+    },
+  }));
   const footerLinks = [
     { href: '#', label: t('privacy') },
     { href: '#', label: t('terms') },
     { href: '#', label: t('contacts') },
     { href: '#', label: t('partners') },
   ];
+  const socialLinks = [
+    { href: siteInfo.socialLinks.instagram, label: t('instagram') },
+    { href: siteInfo.socialLinks.telegram, label: t('telegram') },
+    { href: siteInfo.socialLinks.vk, label: t('vk') },
+  ].filter((link) => link.href.length > 0);
 
   return (
     <footer className="relative w-full border-t border-[var(--ds-border-subtle)] bg-[var(--ds-surface)] overflow-hidden">
@@ -31,24 +63,34 @@ export function Footer() {
               Ticketok
             </Link>
             <div className="text-[var(--ds-on-surface-variant)] ds-body-sm max-w-xl text-center md:text-left space-y-1">
-              <p>
-                {t('companyName')}
-                <br />
-                {t('legalLine1')}
-                <br />
-                {t('legalLine2')}
-                <br />
-                {t('legalLine3')}
-              </p>
-              <p>
-                {t('infoLine')}{' '}
-                <a
-                  href="tel:+375292771059"
-                  className="text-[var(--ds-primary)] underline decoration-[var(--ds-primary-border)] underline-offset-2 hover:decoration-[var(--ds-primary)] transition-colors"
-                >
-                  +375 29 277-10-59
-                </a>
-              </p>
+              {siteInfo.aboutText && <p>{siteInfo.aboutText}</p>}
+              {siteInfo.address && (
+                <p>
+                  {t('address')}: {siteInfo.address}
+                </p>
+              )}
+              {siteInfo.contactPhone && (
+                <p>
+                  {t('phone')}{' '}
+                  <a
+                    href={`tel:${siteInfo.contactPhone}`}
+                    className="text-[var(--ds-primary)] underline decoration-[var(--ds-primary-border)] underline-offset-2 hover:decoration-[var(--ds-primary)] transition-colors"
+                  >
+                    {siteInfo.contactPhone}
+                  </a>
+                </p>
+              )}
+              {siteInfo.contactEmail && (
+                <p>
+                  {t('email')}{' '}
+                  <a
+                    href={`mailto:${siteInfo.contactEmail}`}
+                    className="text-[var(--ds-primary)] underline decoration-[var(--ds-primary-border)] underline-offset-2 hover:decoration-[var(--ds-primary)] transition-colors"
+                  >
+                    {siteInfo.contactEmail}
+                  </a>
+                </p>
+              )}
               <p>
                 &copy; {new Date().getFullYear()} ticketok. {t('copyright')}
               </p>
@@ -67,6 +109,21 @@ export function Footer() {
                 </Link>
               ))}
             </div>
+            {socialLinks.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-6">
+                {socialLinks.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={normalizeExternalUrl(link.href)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ds-label-sm text-[var(--ds-on-surface-variant)] hover:text-[var(--ds-tertiary)] transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
             {/* Payment system logos */}
             <Image
               src="/bepaid_logos.svg"

@@ -47,7 +47,6 @@
     "openMenu": "Open menu",
     "searchPlaceholder": "Search events...",
     "search": "Search",
-    "accountAriaLabel": "Account",
     "comingSoonTooltip": "Coming soon"
   },
   "footer": {
@@ -55,11 +54,12 @@
     "terms": "Terms",
     "contacts": "Contacts",
     "partners": "Partners",
-    "companyName": "LLC \"Levol Group\"",
-    "legalLine1": "Legal address: 211969, Republic of Belarus, Vitebsk region, Braslav, Krasnoarmeyskaya st. 1/2",
-    "legalLine2": "Tax ID 391029259. State registration certificate issued on 30.10.2024 by Braslav district executive committee.",
-    "legalLine3": "Certificate No. 2-16/706 dated 23.12.2025. Issued by the Vitebsk regional executive committee Department of Culture.",
-    "infoLine": "Info line",
+    "address": "Address",
+    "phone": "Phone:",
+    "email": "Email:",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "vk": "VK",
     "copyright": "All rights reserved.",
     "paymentAlt": "Visa, Mastercard, bePaid, Belcart, Google Pay"
   },
