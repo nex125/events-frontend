@@ -21,6 +21,11 @@ export function AllEventsContent({
   const t = useTranslations('eventsCatalog');
   return (
     <>
+      <div className="mb-8">
+        <span className="ds-label-sm text-[var(--ds-primary)] block mb-3 tracking-[0.3em]">
+          {t('allEventsTitle')}
+        </span>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {events.map((event, i) => (
           <ScrollReveal key={event.id} delay={i * dsMotion.stagger.default}>

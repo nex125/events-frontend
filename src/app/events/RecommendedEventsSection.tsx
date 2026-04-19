@@ -20,9 +20,6 @@ export function RecommendedEventsSection({ events }: RecommendedEventsSectionPro
   return (
     <section className="mt-10 mb-14">
       <div className="mb-8">
-        <span className="ds-label-sm text-[var(--ds-primary)] block mb-3 tracking-[0.3em]">
-          {t('recommendedLabel')}
-        </span>
         <h2 className="ds-display-sm font-bold tracking-tighter text-[var(--ds-on-surface)]">
           {t('recommendedTitle')}
         </h2>
