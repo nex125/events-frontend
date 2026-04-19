@@ -92,10 +92,12 @@
       "cartCloseLabel": "Close cart",
       "cartEmptyState": "No seats selected yet.",
       "cartGroupMeta": "{count} tickets - {unitPrice} each",
+      "cartGroupFee": "Base {basePrice} + service fee {serviceFee}{serviceFeePercent}",
       "cartRemoveOneAriaLabel": "Remove one seat from {categoryName}",
       "cartAddOneAriaLabel": "Add one seat to {categoryName}",
       "cartRemoveSeatTitle": "Remove seat",
       "cartRemoveSeatAriaLabel": "Remove seat {seatLabel}",
+      "cartServiceFeeSummary": "Service fee: {serviceFeeTotal}",
       "cartSummary": "{count} seats - Total {totalCost}",
       "cartProceedButton": "Proceed"
     }

@@ -54,10 +54,12 @@ type SeatmapViewerMessageOverrides = {
   cartCloseLabel: string;
   cartEmptyState: string;
   cartGroupMeta: (count: number, unitPrice: string) => string;
+  cartGroupFee: (basePrice: string, serviceFee: string, serviceFeePercent: string | null) => string;
   cartRemoveOneAriaLabel: (categoryName: string) => string;
   cartAddOneAriaLabel: (categoryName: string) => string;
   cartRemoveSeatTitle: string;
   cartRemoveSeatAriaLabel: (seatLabel: string) => string;
+  cartServiceFeeSummary: (serviceFeeTotal: string) => string;
   cartSummary: (count: number, totalCost: string) => string;
   cartProceedButton: string;
 };
@@ -78,10 +80,17 @@ function buildSeatmapMessages(
     cartCloseLabel: tSeatmap('cartCloseLabel'),
     cartEmptyState: tSeatmap('cartEmptyState'),
     cartGroupMeta: (count: number, unitPrice: string) => tSeatmap('cartGroupMeta', { count, unitPrice }),
+    cartGroupFee: (basePrice: string, serviceFee: string, serviceFeePercent: string | null) =>
+      tSeatmap('cartGroupFee', {
+        basePrice,
+        serviceFee,
+        serviceFeePercent: serviceFeePercent ? ` (${serviceFeePercent})` : '',
+      }),
     cartRemoveOneAriaLabel: (categoryName: string) => tSeatmap('cartRemoveOneAriaLabel', { categoryName }),
     cartAddOneAriaLabel: (categoryName: string) => tSeatmap('cartAddOneAriaLabel', { categoryName }),
     cartRemoveSeatTitle: tSeatmap('cartRemoveSeatTitle'),
     cartRemoveSeatAriaLabel: (seatLabel: string) => tSeatmap('cartRemoveSeatAriaLabel', { seatLabel }),
+    cartServiceFeeSummary: (serviceFeeTotal: string) => tSeatmap('cartServiceFeeSummary', { serviceFeeTotal }),
     cartSummary: (count: number, totalCost: string) => tSeatmap('cartSummary', { count, totalCost }),
     cartProceedButton: tSeatmap('cartProceedButton'),
   };
