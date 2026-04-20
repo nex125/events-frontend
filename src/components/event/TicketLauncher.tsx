@@ -1,12 +1,14 @@
 'use client';
 
 import type { SeatStatus, Venue } from '@nex125/seatmap-core';
+import { AVAILABLE_STATUS_ID } from '@nex125/seatmap-core';
 import {
   SeatmapViewer,
   seatmapViewerSharedThemeRootClassName,
   seatmapViewerSharedThemeClassNames,
 } from '@nex125/seatmap-viewer';
 import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
+import type { TooltipData } from '@nex125/seatmap-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +47,10 @@ type SeatmapViewerMessageOverrides = {
   uncategorizedCategoryName: string;
   sectionFallbackLabel: string;
   tableLabel: (tableLabel: string) => string;
+  tooltipSeatLabel: (rowLabel: string, seatLabel: string) => string;
+  tooltipStatusAvailable: string;
+  tooltipPriceLabel: (price: string) => string;
+  tooltipPriceUnavailable: string;
   legendAriaLabel: string;
   legendStatusesTitle: string;
   legendPricesTitle: string;
@@ -71,6 +77,10 @@ function buildSeatmapMessages(
     uncategorizedCategoryName: tSeatmap('uncategorizedCategoryName'),
     sectionFallbackLabel: tSeatmap('sectionFallbackLabel'),
     tableLabel: (tableLabel: string) => tSeatmap('tableLabel', { tableLabel }),
+    tooltipSeatLabel: (rowLabel: string, seatLabel: string) => tSeatmap('tooltipSeatLabel', { rowLabel, seatLabel }),
+    tooltipStatusAvailable: tSeatmap('tooltipStatusAvailable'),
+    tooltipPriceLabel: (price: string) => tSeatmap('tooltipPriceLabel', { price }),
+    tooltipPriceUnavailable: tSeatmap('tooltipPriceUnavailable'),
     legendAriaLabel: tSeatmap('legendAriaLabel'),
     legendStatusesTitle: tSeatmap('legendStatusesTitle'),
     legendPricesTitle: tSeatmap('legendPricesTitle'),
@@ -129,6 +139,69 @@ export function TicketLauncher({
   const seatmapViewerI18nProps = useMemo(
     () => ({ locale, messages: seatmapMessages }) as Record<string, unknown>,
     [locale, seatmapMessages],
+  );
+  const formatTooltipPrice = useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+      }).format(value),
+    [currency, locale],
+  );
+  const renderSeatmapTooltip = useCallback(
+    (data: TooltipData) => {
+      const translatedStatus =
+        data.seat.status === AVAILABLE_STATUS_ID
+          ? tSeatmap('tooltipStatusAvailable')
+          : data.seat.status === 'locked'
+            ? tSeatmap('tooltipStatusLocked')
+            : data.seat.status === 'booked'
+              ? tSeatmap('tooltipStatusBooked')
+              : data.statusName ?? data.seat.status;
+      const priceLabel =
+        typeof data.price === 'number'
+          ? tSeatmap('tooltipPriceLabel', { price: formatTooltipPrice(data.price) })
+          : tSeatmap('tooltipPriceUnavailable');
+
+      return (
+        <div
+          style={{
+            background:
+              'var(--seatmap-tooltip-surface, color-mix(in srgb, var(--seatmap-surface-container-low, #181818) 94%, transparent))',
+            border: '1px solid var(--seatmap-tooltip-border, var(--seatmap-outline, #353331))',
+            borderRadius: 10,
+            padding: '8px 14px',
+            color: 'var(--seatmap-tooltip-text, var(--seatmap-on-surface, #e5e2e1))',
+            fontSize: 13,
+            fontFamily: 'system-ui',
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{data.section.label}</div>
+          <div>{tSeatmap('tooltipSeatLabel', { rowLabel: data.row.label, seatLabel: data.seat.label })}</div>
+          <div
+            style={{
+              color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))',
+              fontSize: 12,
+              marginTop: 2,
+            }}
+          >
+            {translatedStatus}
+          </div>
+          <div
+            style={{
+              color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))',
+              fontSize: 12,
+              marginTop: 2,
+            }}
+          >
+            {priceLabel}
+          </div>
+        </div>
+      );
+    },
+    [formatTooltipPrice, tSeatmap],
   );
   const clientId = useMemo(() => getOrCreateClientId(), []);
   const backendEventId = useMemo(() => {
@@ -376,6 +449,7 @@ export function TicketLauncher({
                       classNames={seatmapViewerSharedThemeClassNames}
                       venue={liveVenue}
                       currency={currency}
+                      renderTooltip={renderSeatmapTooltip}
                       onSeatClick={handleSeatClick}
                       onCartEvent={handleCartEvent}
                       showLabels
