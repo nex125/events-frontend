@@ -308,14 +308,20 @@
     },
     "toolOptions": {
       "title": "Параметры инструмента",
+      "sectionMode": {
+        "title": "Секция"
+      },
       "sectionKind": {
+        "title": "Тип",
         "section": "Секция",
         "stage": "Сцена",
         "dancefloor": "Танцпол"
       },
       "shape": {
-        "rectangle": "Rectangle",
-        "polygon": "Polygon"
+        "title": "Форма",
+        "rectangle": "Прямоугольник",
+        "polygon": "Полигон",
+        "toggleTitle": "Переключить форму секции"
       },
       "sectionResize": {
         "title": "Изменение размера",
@@ -342,6 +348,7 @@
         "toggleModeTitle": "Переключить режим стрелки направления",
         "knobLabel": "Направление",
         "knobHint": "Тяните ручку вертикально чтобы установить направление ряда.",
+        "rotateNegativeQuarterTitle": "Повернуть направление ряда на -90°",
         "rotateQuarterTitle": "Повернуть направление ряда на 90°",
         "hintRowDirection": "Стрелка: направление ряда",
         "hintViewerDirection": "Стрелка: направление зрителя"

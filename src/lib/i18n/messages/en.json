@@ -308,14 +308,20 @@
     },
     "toolOptions": {
       "title": "Tool Options",
+      "sectionMode": {
+        "title": "Section"
+      },
       "sectionKind": {
+        "title": "Type",
         "section": "Section",
         "stage": "Stage",
         "dancefloor": "Dancefloor"
       },
       "shape": {
+        "title": "Shape",
         "rectangle": "Rectangle",
-        "polygon": "Polygon"
+        "polygon": "Polygon",
+        "toggleTitle": "Toggle section shape"
       },
       "sectionResize": {
         "title": "Section resize",
@@ -342,6 +348,7 @@
         "toggleModeTitle": "Toggle arrow orientation mode",
         "knobLabel": "Orientation",
         "knobHint": "Drag vertically on the knob to set row orientation.",
+        "rotateNegativeQuarterTitle": "Rotate row direction by -90 degrees",
         "rotateQuarterTitle": "Rotate row direction by 90 degrees",
         "hintRowDirection": "Arrow: row direction (viewer +90°)",
         "hintViewerDirection": "Arrow: viewer direction (0° = up, 90° = right)"

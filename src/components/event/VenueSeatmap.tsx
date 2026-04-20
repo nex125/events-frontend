@@ -1,11 +1,13 @@
 'use client';
 
 import { SeatmapCanvas, SeatmapProvider, TooltipOverlay, useSeatmapContext } from '@nex125/seatmap-react';
-import type { SeatStatus, Venue } from '@nex125/seatmap-core';
+import type { TooltipData } from '@nex125/seatmap-react';
+import { AVAILABLE_STATUS_ID, type SeatStatus, type Venue } from '@nex125/seatmap-core';
 import { useSeatStatus } from '@nex125/seatmap-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { connectMercure } from '@/lib/api';
 import { useTranslations } from 'next-intl';
+import { resolveLocaleTag } from '@/lib/i18n/config';
 import { SeatmapLegend } from './SeatmapLegend';
 
 interface VenueSeatmapProps {
@@ -46,13 +48,78 @@ function LiveSeatStatusSync({ venueId }: { venueId: string }) {
 
 function PreviewSeatmapCanvas({ venue, currency }: { venue: Venue; currency?: string }) {
   const t = useTranslations('venueSeatmap');
+  const tSeatmap = useTranslations('ticketLauncher.seatmap');
   const { viewport } = useSeatmapContext();
   const [isDragging, setIsDragging] = useState(false);
+  const locale = resolveLocaleTag();
   const dragStateRef = useRef<{ dragging: boolean; x: number; y: number }>({
     dragging: false,
     x: 0,
     y: 0,
   });
+  const formatTooltipPrice = useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency ?? 'BYN',
+      }).format(value),
+    [currency, locale],
+  );
+  const renderSeatmapTooltip = useCallback(
+    (data: TooltipData) => {
+      const translatedStatus =
+        data.seat.status === AVAILABLE_STATUS_ID
+          ? tSeatmap('tooltipStatusAvailable')
+          : data.seat.status === 'locked'
+            ? tSeatmap('tooltipStatusLocked')
+            : data.seat.status === 'booked'
+              ? tSeatmap('tooltipStatusBooked')
+              : data.statusName ?? data.seat.status;
+      const priceLabel =
+        typeof data.price === 'number'
+          ? tSeatmap('tooltipPriceLabel', { price: formatTooltipPrice(data.price) })
+          : tSeatmap('tooltipPriceUnavailable');
+
+      return (
+        <div
+          style={{
+            background:
+              'var(--seatmap-tooltip-surface, color-mix(in srgb, var(--seatmap-surface-container-low, #181818) 94%, transparent))',
+            border: '1px solid var(--seatmap-tooltip-border, var(--seatmap-outline, #353331))',
+            borderRadius: 10,
+            padding: '8px 14px',
+            color: 'var(--seatmap-tooltip-text, var(--seatmap-on-surface, #e5e2e1))',
+            fontSize: 13,
+            fontFamily: 'system-ui',
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>{data.section.label}</div>
+          <div>{tSeatmap('tooltipSeatLabel', { rowLabel: data.row.label, seatLabel: data.seat.label })}</div>
+          <div
+            style={{
+              color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))',
+              fontSize: 12,
+              marginTop: 2,
+            }}
+          >
+            {translatedStatus}
+          </div>
+          <div
+            style={{
+              color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))',
+              fontSize: 12,
+              marginTop: 2,
+            }}
+          >
+            {priceLabel}
+          </div>
+        </div>
+      );
+    },
+    [formatTooltipPrice, tSeatmap],
+  );
 
   return (
     <div
@@ -90,7 +157,7 @@ function PreviewSeatmapCanvas({ venue, currency }: { venue: Venue; currency?: st
         enableSeatHover
         panOnLeftClick={false}
       />
-      <TooltipOverlay />
+      <TooltipOverlay renderTooltip={renderSeatmapTooltip} />
 
       <SeatmapLegend
         venue={venue}
