@@ -3,27 +3,20 @@ import { FeaturedEvents } from '@/components/home/FeaturedEvents';
 import { PulseFeed } from '@/components/home/PulseFeed';
 import { InnerCircle } from '@/components/home/InnerCircle';
 import { buildContentFetchInit } from '@/lib/fetchPolicy';
-import { getHomepageContent, listEvents } from '@/lib/api';
+import { getHomepageContent } from '@/lib/api';
 import { fetchSeatInfo } from '@/lib/seatInfo';
 import type { Event } from '@/types/event';
 
 export const dynamic = 'force-dynamic';
 
-const EMPTY_LIST = { data: [] as Event[], meta: { page: 1, limit: 12, total: 0, totalPages: 1 } };
 const FETCH_TIMEOUT_MS = 8000;
 
 export default async function HomePage() {
-  const [featuredResult, homepageResult] = await Promise.all([
-    listEvents(
-      { featured: true, sort: 'featured', limit: 5 },
-      buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
-    ).catch(() => EMPTY_LIST),
-    getHomepageContent(
-      buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
-    ).catch(() => ({ posterEvents: [] as Event[], recommendedEvents: [] as Event[] })),
-  ]);
+  const homepageResult = await getHomepageContent(
+    buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS)),
+  ).catch(() => ({ featuredEvents: [] as Event[], posterEvents: [] as Event[], recommendedEvents: [] as Event[] }));
 
-  const featured = featuredResult.data;
+  const featured = homepageResult.featuredEvents;
   const pulseEvents = homepageResult.posterEvents;
   const heroEvent = featured[0];
 

@@ -266,6 +266,7 @@ export interface ListEventsResponse {
 }
 
 export interface HomepageResponse {
+  featuredEvents: Event[];
   posterEvents: Event[];
   recommendedEvents: Event[];
 }

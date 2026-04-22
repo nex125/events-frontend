@@ -113,6 +113,7 @@ export default async function AllEventsPage({ searchParams }: AllEventsPageProps
       }),
     getEventCategories(buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS))),
     getHomepageContent(buildContentFetchInit(AbortSignal.timeout(FETCH_TIMEOUT_MS))).catch(() => ({
+      featuredEvents: [],
       posterEvents: [],
       recommendedEvents: [],
     })),
