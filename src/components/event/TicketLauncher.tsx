@@ -17,7 +17,6 @@ import { nanoid } from 'nanoid';
 import { useTranslations } from 'next-intl';
 import {
   checkTicketokSession,
-  checkVirtualQueue,
   connectMercure,
   createTicketokSession,
   getTicketokProductsSnapshot,
@@ -43,11 +42,6 @@ interface TicketLauncherProps {
 interface CheckoutResumeState {
   bookingId: string;
   sourceEventId: number;
-}
-
-interface QueueState {
-  phase: 'checking' | 'waiting' | 'ready' | 'error';
-  remainingMs: number;
 }
 
 type SeatmapViewerMessageOverrides = {
@@ -217,10 +211,6 @@ export function TicketLauncher({
     const parsed = Number.parseInt(ticketokEventId?.trim() ?? '', 10);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
   }, [ticketokEventId]);
-  const [queueState, setQueueState] = useState<QueueState>({
-    phase: 'checking',
-    remainingMs: 0,
-  });
   const [liveVenue, setLiveVenue] = useState<Venue>(venue);
   const [cartStatus, setCartStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [cartMessage, setCartMessage] = useState('');
@@ -228,7 +218,6 @@ export function TicketLauncher({
   const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
-  const queueKeyRef = useRef<string>('');
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(liveVenue));
 
   useEffect(() => {
@@ -289,7 +278,7 @@ export function TicketLauncher({
         });
         await getTicketokProductsSnapshot(backendVenueId, backendEventId);
       } catch {
-        // Queue loop below remains the source of truth for user-facing retries.
+        // Seat selection remains available; booking actions surface request errors.
       }
     };
 
@@ -310,55 +299,6 @@ export function TicketLauncher({
     };
   }, [backendVenueId, isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    let isCancelled = false;
-    let timerId: number | null = null;
-
-    queueKeyRef.current = `${eventId}:${clientId}:${Date.now()}`;
-
-    const poll = async () => {
-      try {
-        const response = await checkVirtualQueue({
-          clientId,
-          eventId,
-          queueKey: queueKeyRef.current,
-        });
-        if (isCancelled) return;
-
-        if (response.allowed) {
-          setQueueState({ phase: 'ready', remainingMs: 0 });
-          return;
-        }
-
-        setQueueState({
-          phase: 'waiting',
-          remainingMs: response.remainingMs,
-        });
-        timerId = window.setTimeout(poll, Math.min(1000, Math.max(response.remainingMs, 250)));
-      } catch {
-        if (isCancelled) return;
-        setQueueState((prev) => ({
-          phase: 'error',
-          remainingMs: prev.remainingMs,
-        }));
-        timerId = window.setTimeout(poll, 1500);
-      }
-    };
-
-    setQueueState({ phase: 'checking', remainingMs: 0 });
-    poll();
-
-    return () => {
-      isCancelled = true;
-      if (timerId !== null) {
-        window.clearTimeout(timerId);
-      }
-    };
-  }, [clientId, eventId, isOpen]);
-
-  const remainingSeconds = Math.max(1, Math.ceil(queueState.remainingMs / 1000));
   const checkoutIframeUrl = useMemo(() => {
     if (!checkoutResumeState) {
       return null;
@@ -510,7 +450,7 @@ export function TicketLauncher({
                       loading="eager"
                     />
                   </div>
-                ) : queueState.phase === 'ready' ? (
+                ) : (
                   <div className="ticket-launcher-seatmap relative h-full" aria-busy={cartStatus === 'loading'}>
                     <SeatmapViewer
                       key={`${venue.id}-${viewerResetToken}`}
@@ -545,22 +485,6 @@ export function TicketLauncher({
                         {cartMessage}
                       </div>
                     )}
-                  </div>
-                ) : (
-                  <div className="h-full px-8 py-10 flex flex-col items-center justify-center text-center gap-4">
-                    <Ticket size={36} className="text-[var(--ds-primary)]" />
-                    <h3 className="ds-heading-sm">
-                      {queueState.phase === 'error'
-                        ? t('queueReconnect')
-                        : t('queueWaiting')}
-                    </h3>
-                    <p className="ds-body-sm text-[var(--ds-on-surface-variant)] max-w-md">
-                      {queueState.phase === 'checking'
-                        ? t('queueChecking')
-                        : queueState.phase === 'error'
-                          ? t('queueError')
-                          : t('queueEta', { seconds: remainingSeconds })}
-                    </p>
                   </div>
                 )}
               </div>

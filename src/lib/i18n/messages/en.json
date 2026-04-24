@@ -84,11 +84,6 @@
     "checkout": "Checkout",
     "checkoutIframeTitle": "Ticketok checkout",
     "ticketSelection": "Ticket selection",
-    "queueReconnect": "Reconnecting to queue...",
-    "queueWaiting": "You are in a virtual queue",
-    "queueChecking": "Checking access to seat selection.",
-    "queueError": "Temporary queue check error. Retrying automatically.",
-    "queueEta": "Please wait {seconds} sec., seat selection will open after that.",
     "seatmap": {
       "uncategorizedCategoryName": "Uncategorized",
       "sectionFallbackLabel": "Section",

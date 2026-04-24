@@ -400,15 +400,6 @@ export interface NewsletterSubscribeBody {
   email: string;
 }
 
-export interface VirtualQueueCheckResponse {
-  allowed: boolean;
-  status: 'waiting' | 'allowed';
-  waitMs: number;
-  remainingMs: number;
-  key: string;
-  stickySession?: boolean;
-}
-
 export interface ProceedCartResponse {
   bookingId: string;
   resumeId?: string;
@@ -469,25 +460,6 @@ export interface TicketokProductsSnapshotResponse {
     available: number;
     reserved: number;
   };
-}
-
-export async function checkVirtualQueue(
-  payload: {
-    clientId?: string;
-    eventId?: string;
-    queueKey?: string;
-  },
-  init?: RequestInit,
-): Promise<VirtualQueueCheckResponse> {
-  return apiFetch<VirtualQueueCheckResponse>('/ticketing/check', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    body: JSON.stringify(payload),
-    ...init,
-  });
 }
 
 export async function proceedCart(

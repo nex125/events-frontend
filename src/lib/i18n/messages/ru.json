@@ -84,11 +84,6 @@
     "checkout": "Оформление заказа",
     "checkoutIframeTitle": "Оформление заказа Ticketok",
     "ticketSelection": "Выбор билетов",
-    "queueReconnect": "Пробуем подключиться к очереди...",
-    "queueWaiting": "Вы в виртуальной очереди",
-    "queueChecking": "Проверяем доступ к выбору мест.",
-    "queueError": "Временная ошибка проверки очереди. Продолжаем попытки автоматически.",
-    "queueEta": "Ожидайте {seconds} сек., после чего откроется выбор мест.",
     "seatmap": {
       "uncategorizedCategoryName": "Без категории",
       "sectionFallbackLabel": "Секция",
