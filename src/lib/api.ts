@@ -11,9 +11,10 @@ declare const process:
       API_BASE_URL?: string;
       NEXT_PUBLIC_TICKETING_API_BASE_URL?: string;
       TICKETING_API_BASE_URL?: string;
-      BO_PROXY_BASE_URL?: string;
       NEXT_PUBLIC_MERCURE_PUBLIC_URL?: string;
       MERCURE_PUBLIC_URL?: string;
+      NEXT_PUBLIC_TICKETOK_WIDGET_SCRIPT_URL?: string;
+      NEXT_PUBLIC_TICKETOK_WIDGET_CSS_URL?: string;
     };
   };
 
@@ -92,18 +93,6 @@ function getTicketingApiBaseUrl(): string {
     (hasUsableValue(process.env.TICKETING_API_BASE_URL) && process.env.TICKETING_API_BASE_URL) ||
     (hasUsableValue(process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL) && process.env.NEXT_PUBLIC_TICKETING_API_BASE_URL) ||
     DEFAULT_TICKETING_API_BASE_URL;
-
-  return normalize(configured);
-}
-
-function getBoProxyBaseUrl(): string {
-  if (typeof window !== 'undefined') {
-    return normalize(`${window.location.origin}/bo-proxy`);
-  }
-
-  const configured =
-    (hasUsableValue(process.env.BO_PROXY_BASE_URL) && process.env.BO_PROXY_BASE_URL) ||
-    'http://events-frontend:3000/bo-proxy';
 
   return normalize(configured);
 }
@@ -391,6 +380,22 @@ export async function getVenueEventGrid(
   );
 }
 
+export interface EmbedEventContextResponse {
+  event: Event;
+  seatCategories: SeatCategory[];
+  venue: ReturnType<typeof generateVenue>;
+}
+
+export async function getEmbedEventContext(
+  slug: string,
+  init?: RequestInit,
+): Promise<EmbedEventContextResponse> {
+  return apiFetch<EmbedEventContextResponse>(
+    `/embed/events/${encodeURIComponent(slug)}/context`,
+    init,
+  );
+}
+
 export interface NewsletterSubscribeBody {
   email: string;
 }
@@ -406,6 +411,7 @@ export interface VirtualQueueCheckResponse {
 
 export interface ProceedCartResponse {
   bookingId: string;
+  resumeId?: string;
   status: string;
 }
 
@@ -473,7 +479,7 @@ export async function checkVirtualQueue(
   },
   init?: RequestInit,
 ): Promise<VirtualQueueCheckResponse> {
-  return apiFetch<VirtualQueueCheckResponse>(`${getBoProxyBaseUrl()}/check`, {
+  return apiFetch<VirtualQueueCheckResponse>('/ticketing/check', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -492,7 +498,7 @@ export async function proceedCart(
   },
   init?: RequestInit,
 ): Promise<ProceedCartResponse> {
-  return apiFetch<ProceedCartResponse>(`${getBoProxyBaseUrl()}/cart`, {
+  return apiFetch<ProceedCartResponse>('/ticketing/cart', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -512,7 +518,7 @@ export async function createTicketokSession(
   },
   init?: RequestInit,
 ): Promise<TicketokSessionCreateResponse> {
-  return apiFetch<TicketokSessionCreateResponse>(`${getBoProxyBaseUrl()}/session/create`, {
+  return apiFetch<TicketokSessionCreateResponse>('/ticketok/session/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -532,7 +538,7 @@ export async function checkTicketokSession(
   },
   init?: RequestInit,
 ): Promise<TicketokSessionCheckResponse> {
-  return apiFetch<TicketokSessionCheckResponse>(`${getBoProxyBaseUrl()}/session/check`, {
+  return apiFetch<TicketokSessionCheckResponse>('/ticketok/session/check', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -553,7 +559,7 @@ export async function getTicketokProductsSnapshot(
     params.set('eventId', String(eventId));
   }
   const query = params.toString();
-  return apiFetch<TicketokProductsSnapshotResponse>(`${getBoProxyBaseUrl()}/products/snapshot?${query}`, init);
+  return apiFetch<TicketokProductsSnapshotResponse>(`/ticketok/products-snapshot?${query}`, init);
 }
 
 export interface NewsletterSubscribeResponse {

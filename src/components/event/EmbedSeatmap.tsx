@@ -9,45 +9,39 @@ import {
 } from '@nex125/seatmap-viewer';
 import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
 import type { TooltipData } from '@nex125/seatmap-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, X } from 'lucide-react';
+import { AlertTriangle, LoaderCircle, Ticket } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  checkTicketokSession,
-  checkVirtualQueue,
   connectMercure,
-  createTicketokSession,
-  getTicketokProductsSnapshot,
   lockSeat,
   proceedCart,
   releaseSeat,
 } from '@/lib/api';
 import { resolveLocaleTag } from '@/lib/i18n/config';
+import type { SeatCategory } from '@/types/event';
 import { SeatmapLegend } from './SeatmapLegend';
 
-interface TicketLauncherProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface EmbedSeatmapProps {
+  slug: string;
+  eventId: string;
+  venueId: string;
+  sourceEventId: number;
   venue: Venue;
   currency: string;
-  venueId?: string;
-  eventId: string;
-  eventSlug: string;
-  eventSource?: string;
-  ticketokEventId?: string;
-}
-
-interface CheckoutResumeState {
-  bookingId: string;
-  sourceEventId: number;
-}
-
-interface QueueState {
-  phase: 'checking' | 'waiting' | 'ready' | 'error';
-  remainingMs: number;
+  ticketokContext: {
+    sessionToken: string;
+    state: string;
+    requestId?: string;
+    timestamp: string;
+    signature: string;
+    locale?: string;
+    currency?: string;
+    ticketId?: string;
+    expiresAt?: string;
+    returnUrl?: string;
+  };
 }
 
 type SeatmapViewerMessageOverrides = {
@@ -76,6 +70,10 @@ type SeatmapViewerMessageOverrides = {
   cartSummary: (count: number, totalCost: string) => string;
   cartProceedButton: string;
 };
+
+interface SeatmapAvailabilityState {
+  phase: 'ready' | 'error';
+}
 
 function buildSeatmapMessages(
   tSeatmap: ReturnType<typeof useTranslations<'ticketLauncher.seatmap'>>,
@@ -126,25 +124,24 @@ function getOrCreateClientId(): string {
   return id;
 }
 
-export function TicketLauncher({
-  isOpen,
-  onClose,
+export function EmbedSeatmap({
+  slug,
+  eventId,
+  venueId,
+  sourceEventId,
   venue,
   currency,
-  venueId,
-  eventId,
-  eventSlug,
-  eventSource,
-  ticketokEventId,
-}: TicketLauncherProps) {
+  ticketokContext,
+}: EmbedSeatmapProps) {
   const t = useTranslations('ticketLauncher');
   const tSeatmap = useTranslations('ticketLauncher.seatmap');
-  const backendVenueId = venueId?.trim() || venue.id;
+  const tEmbed = useTranslations('embedSeatmap');
+  const clientId = useMemo(() => getOrCreateClientId(), []);
+  const locale = resolveLocaleTag();
   const seatmapMessages = useMemo<SeatmapViewerMessageOverrides>(
     () => buildSeatmapMessages(tSeatmap),
     [tSeatmap],
   );
-  const locale = resolveLocaleTag();
   const seatmapViewerI18nProps = useMemo(
     () => ({ locale, messages: seatmapMessages }) as Record<string, unknown>,
     [locale, seatmapMessages],
@@ -189,22 +186,10 @@ export function TicketLauncher({
         >
           <div style={{ fontWeight: 600, marginBottom: 2 }}>{data.section.label}</div>
           <div>{tSeatmap('tooltipSeatLabel', { rowLabel: data.row.label, seatLabel: data.seat.label })}</div>
-          <div
-            style={{
-              color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))',
-              fontSize: 12,
-              marginTop: 2,
-            }}
-          >
+          <div style={{ color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))', fontSize: 12, marginTop: 2 }}>
             {translatedStatus}
           </div>
-          <div
-            style={{
-              color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))',
-              fontSize: 12,
-              marginTop: 2,
-            }}
-          >
+          <div style={{ color: 'var(--seatmap-tooltip-muted-text, var(--seatmap-on-surface-variant, #9a9694))', fontSize: 12, marginTop: 2 }}>
             {priceLabel}
           </div>
         </div>
@@ -212,37 +197,16 @@ export function TicketLauncher({
     },
     [formatTooltipPrice, tSeatmap],
   );
-  const clientId = useMemo(() => getOrCreateClientId(), []);
-  const backendEventId = useMemo(() => {
-    const parsed = Number.parseInt(ticketokEventId?.trim() ?? '', 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-  }, [ticketokEventId]);
-  const [queueState, setQueueState] = useState<QueueState>({
-    phase: 'checking',
-    remainingMs: 0,
+
+  const [queueState] = useState<SeatmapAvailabilityState>({
+    phase: 'ready',
   });
   const [liveVenue, setLiveVenue] = useState<Venue>(venue);
   const [cartStatus, setCartStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [cartMessage, setCartMessage] = useState('');
-  const [checkoutResumeState, setCheckoutResumeState] = useState<CheckoutResumeState | null>(null);
-  const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
-  const queueKeyRef = useRef<string>('');
-  const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(liveVenue));
-
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setCartStatus('idle');
-      setCartMessage('');
-      setCheckoutResumeState(null);
-    }
-  }, [isOpen]);
+  const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(venue));
 
   useEffect(() => {
     setLiveVenue(venue);
@@ -257,31 +221,7 @@ export function TicketLauncher({
   }, [pendingSeatIds]);
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    const preflight = async () => {
-      try {
-        await createTicketokSession({
-          venueId: backendVenueId,
-          eventId: backendEventId,
-        });
-        await checkTicketokSession({
-          venueId: backendVenueId,
-          eventId: backendEventId,
-        });
-        await getTicketokProductsSnapshot(backendVenueId, backendEventId);
-      } catch {
-        // Queue loop below remains the source of truth for user-facing retries.
-      }
-    };
-
-    void preflight();
-  }, [backendEventId, backendVenueId, isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const eventSource = connectMercure(backendVenueId, (seatId, status) => {
+    const eventSource = connectMercure(venueId, (seatId, status) => {
       const mappedStatus = mapBackendStatus(status);
       seatStatusByIdRef.current.set(seatId, mappedStatus);
       setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, mappedStatus));
@@ -290,71 +230,54 @@ export function TicketLauncher({
     return () => {
       eventSource.close();
     };
-  }, [backendVenueId, isOpen]);
+  }, [venueId]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    let isCancelled = false;
-    let timerId: number | null = null;
-
-    queueKeyRef.current = `${eventId}:${clientId}:${Date.now()}`;
-
-    const poll = async () => {
-      try {
-        const response = await checkVirtualQueue({
-          clientId,
-          eventId,
-          queueKey: queueKeyRef.current,
-        });
-        if (isCancelled) return;
-
-        if (response.allowed) {
-          setQueueState({ phase: 'ready', remainingMs: 0 });
-          return;
-        }
-
-        setQueueState({
-          phase: 'waiting',
-          remainingMs: response.remainingMs,
-        });
-        timerId = window.setTimeout(poll, Math.min(1000, Math.max(response.remainingMs, 250)));
-      } catch {
-        if (isCancelled) return;
-        setQueueState((prev) => ({
-          phase: 'error',
-          remainingMs: prev.remainingMs,
-        }));
-        timerId = window.setTimeout(poll, 1500);
-      }
-    };
-
-    setQueueState({ phase: 'checking', remainingMs: 0 });
-    poll();
-
-    return () => {
-      isCancelled = true;
-      if (timerId !== null) {
-        window.clearTimeout(timerId);
-      }
-    };
-  }, [clientId, eventId, isOpen]);
-
-  const remainingSeconds = Math.max(1, Math.ceil(queueState.remainingMs / 1000));
-  const checkoutIframeUrl = useMemo(() => {
-    if (!checkoutResumeState) {
-      return null;
+  const navigateTopLevel = useCallback((target: string) => {
+    if (typeof window === 'undefined') {
+      return;
     }
 
-    const params = new URLSearchParams({
-      eventId,
-      sourceEventId: String(checkoutResumeState.sourceEventId),
-      bookingId: checkoutResumeState.bookingId,
-      locale,
-    });
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = target;
+        return;
+      }
+    } catch {
+      // Fallback to same-frame navigation when top-level access is blocked.
+    }
 
-    return `/embed/events/${encodeURIComponent(eventSlug)}/checkout?${params.toString()}`;
-  }, [checkoutResumeState, eventId, eventSlug, locale]);
+    window.location.href = target;
+  }, []);
+
+  const continueToCheckout = useCallback(
+    (bookingId: string) => {
+      const continuationLocale = ticketokContext.locale?.trim() || locale;
+      const returnUrl = ticketokContext.returnUrl?.trim() || '';
+      if (returnUrl) {
+        try {
+          const target = new URL(returnUrl, window.location.origin);
+          target.searchParams.set('bookingId', bookingId);
+          target.searchParams.set('eventId', eventId);
+          target.searchParams.set('sourceEventId', String(sourceEventId));
+          target.searchParams.set('locale', continuationLocale);
+          navigateTopLevel(target.toString());
+          return;
+        } catch {
+          // Fall through to the internal checkout route when returnUrl is malformed.
+        }
+      }
+
+      const params = new URLSearchParams({
+        eventId,
+        sourceEventId: String(sourceEventId),
+        bookingId,
+        locale: continuationLocale,
+      });
+
+      navigateTopLevel(`/embed/events/${encodeURIComponent(slug)}/checkout?${params.toString()}`);
+    },
+    [eventId, locale, navigateTopLevel, slug, sourceEventId, ticketokContext.locale, ticketokContext.returnUrl],
+  );
 
   const handleSeatClick = useCallback(
     async (seatId: string) => {
@@ -367,16 +290,16 @@ export function TicketLauncher({
       setPendingSeatIds((prev) => new Set(prev).add(seatId));
       try {
         if (currentStatus === 'available') {
-          await lockSeat(seatId, clientId, backendVenueId);
+          await lockSeat(seatId, clientId, venueId);
           seatStatusByIdRef.current.set(seatId, 'locked');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'locked'));
         } else {
-          await releaseSeat(seatId, clientId, backendVenueId);
+          await releaseSeat(seatId, clientId, venueId);
           seatStatusByIdRef.current.set(seatId, 'available');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'available'));
         }
       } catch (error) {
-        console.error('Seat toggle failed in launcher:', error);
+        console.error('Seat toggle failed in embed seatmap:', error);
       } finally {
         setPendingSeatIds((prev) => {
           const next = new Set(prev);
@@ -385,7 +308,7 @@ export function TicketLauncher({
         });
       }
     },
-    [backendVenueId, cartStatus, clientId, liveVenue],
+    [cartStatus, clientId, liveVenue, venueId],
   );
 
   const handleCartEvent = useCallback(
@@ -403,158 +326,98 @@ export function TicketLauncher({
       try {
         const response = await proceedCart({
           userId: clientId,
-          venueId: backendVenueId,
+          venueId,
           seats: selectedSeatIds,
         });
         const resumeId = response.resumeId?.trim() || response.bookingId;
-        if (
-          eventSource === 'ticketok' &&
-          typeof backendEventId === 'number' &&
-          Number.isFinite(backendEventId) &&
-          backendEventId > 0
-        ) {
-          setCartStatus('idle');
-          setCartMessage('');
-          setCheckoutResumeState({
-            bookingId: resumeId,
-            sourceEventId: backendEventId,
-          });
-        } else {
-          setCartStatus('success');
-          setCartMessage(t('bookingCreated', { bookingId: resumeId }));
-        }
-        setViewerResetToken((current) => current + 1);
+        setCartStatus('success');
+        setCartMessage(tEmbed('cartForwarding'));
+        continueToCheckout(resumeId);
       } catch (error) {
         const message = error instanceof Error ? error.message : t('bookingFailed');
         setCartStatus('error');
         setCartMessage(message);
       }
     },
-    [backendEventId, backendVenueId, cartStatus, clientId, eventSource, t],
+    [cartStatus, clientId, continueToCheckout, t, tEmbed, venueId],
   );
 
-  const modal = (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.28 }}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
-            onClick={onClose}
-          />
+  return (
+    <section className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(223,205,114,0.18),_transparent_42%),linear-gradient(180deg,_rgba(20,20,18,0.98),_rgba(8,8,7,1))] text-[var(--ds-on-surface)]">
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl items-stretch px-4 py-4 sm:px-6 sm:py-6">
+        <div className="flex w-full flex-col overflow-hidden rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[color-mix(in_srgb,var(--ds-surface)_92%,transparent)] shadow-[var(--ds-shadow-ambient-lg)]">
+          <div className="border-b border-[var(--ds-ghost-border)] px-5 py-4 sm:px-6">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ds-on-surface-variant)]">
+              Ticketok
+            </p>
+            <h1 className="ds-heading-md tracking-tight">{tEmbed('title')}</h1>
+            <p className="mt-2 text-sm text-[var(--ds-on-surface-variant)]">
+              {tEmbed('description', { slug })}
+            </p>
+          </div>
 
-          {/* Panel — shares layoutId with the button, morphs between them */}
-          <motion.div
-            layoutId="ticket-launcher"
-            transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            className="relative z-10 bg-[var(--ds-surface)] overflow-hidden rounded-[var(--ds-radius-structural)] shadow-[var(--ds-shadow-ambient-lg)] w-full max-w-2xl"
-            style={{ height: 'min(92vh, 860px)' }}
-          >
-            {/* Close button */}
-            <motion.button
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ delay: 0.2, duration: 0.2 }}
-              onClick={onClose}
-              aria-label={t('close')}
-              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[var(--ds-surface-container-high)] hover:bg-[var(--ds-surface-container-highest)] transition-colors"
-            >
-              <X size={18} />
-            </motion.button>
+          <div className="border-b border-[var(--ds-ghost-border)] px-5 py-3 text-xs text-[var(--ds-on-surface-variant)] sm:px-6">
+            {tEmbed('contextSummary', {
+              eventId: sourceEventId,
+              state: ticketokContext.state || ticketokContext.requestId?.trim() || '-',
+              ticketId: ticketokContext.ticketId?.trim() || '0',
+            })}
+          </div>
 
-            {/* Content */}
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ delay: 0.22, duration: 0.3 }}
-              className="flex flex-col w-full h-full"
-            >
-              <div className="flex items-center gap-3 px-8 py-6 border-b border-[var(--ds-border-subtle)] shrink-0">
-                <Ticket size={22} className="text-[var(--ds-primary)]" />
-                <h2 className="ds-heading-md tracking-tight">
-                  {checkoutIframeUrl ? t('checkout') : t('ticketSelection')}
-                </h2>
-              </div>
-
-              <div className="flex-1 overflow-hidden">
-                {checkoutIframeUrl ? (
-                  <div className="h-full bg-[var(--ds-surface-container-low)]">
-                    <iframe
-                      src={checkoutIframeUrl}
-                      title={t('checkoutIframeTitle')}
-                      className="h-full w-full border-0"
-                      loading="eager"
-                    />
+          <div className="flex min-h-[min(78vh,760px)] flex-1 flex-col">
+            {queueState.phase === 'ready' ? (
+              <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
+                <SeatmapViewer
+                  className={seatmapViewerSharedThemeRootClassName}
+                  classNames={seatmapViewerSharedThemeClassNames}
+                  venue={liveVenue}
+                  currency={currency}
+                  renderTooltip={renderSeatmapTooltip}
+                  onSeatClick={handleSeatClick}
+                  onCartEvent={handleCartEvent}
+                  showLabels
+                  {...seatmapViewerI18nProps}
+                />
+                <SeatmapLegend
+                  venue={liveVenue}
+                  currency={currency}
+                  title={tSeatmap('legendPricesTitle')}
+                  className="pointer-events-none absolute top-3 left-3 z-10 max-w-[220px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-3 text-xs leading-tight text-[var(--ds-on-surface)]"
+                />
+                {cartStatus === 'loading' && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+                    <div className="rounded-xl bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]">
+                      {cartMessage}
+                    </div>
                   </div>
-                ) : queueState.phase === 'ready' ? (
-                  <div className="ticket-launcher-seatmap relative h-full" aria-busy={cartStatus === 'loading'}>
-                    <SeatmapViewer
-                      key={`${venue.id}-${viewerResetToken}`}
-                      className={seatmapViewerSharedThemeRootClassName}
-                      classNames={seatmapViewerSharedThemeClassNames}
-                      venue={liveVenue}
-                      currency={currency}
-                      renderTooltip={renderSeatmapTooltip}
-                      onSeatClick={handleSeatClick}
-                      onCartEvent={handleCartEvent}
-                      showLabels
-                      {...seatmapViewerI18nProps}
-                    />
-                    <SeatmapLegend
-                      venue={liveVenue}
-                      currency={currency}
-                      title={tSeatmap('legendPricesTitle')}
-                      className="pointer-events-none absolute top-3 left-3 z-10 max-w-[220px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-3 text-xs leading-tight text-[var(--ds-on-surface)]"
-                    />
-                    {cartStatus === 'loading' && (
-                      <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-10">
-                        <div className="rounded-xl bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]">
-                          {cartMessage}
-                        </div>
-                      </div>
-                    )}
-                    {(cartStatus === 'success' || cartStatus === 'error') && (
-                      <div
-                        className="absolute left-4 right-4 bottom-4 z-10 rounded-xl px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)] bg-[var(--ds-surface)] border border-[var(--ds-ghost-border)]"
-                        role={cartStatus === 'error' ? 'alert' : 'status'}
-                      >
-                        {cartMessage}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="h-full px-8 py-10 flex flex-col items-center justify-center text-center gap-4">
-                    <Ticket size={36} className="text-[var(--ds-primary)]" />
-                    <h3 className="ds-heading-sm">
-                      {queueState.phase === 'error'
-                        ? t('queueReconnect')
-                        : t('queueWaiting')}
-                    </h3>
-                    <p className="ds-body-sm text-[var(--ds-on-surface-variant)] max-w-md">
-                      {queueState.phase === 'checking'
-                        ? t('queueChecking')
-                        : queueState.phase === 'error'
-                          ? t('queueError')
-                          : t('queueEta', { seconds: remainingSeconds })}
-                    </p>
+                )}
+                {(cartStatus === 'success' || cartStatus === 'error') && (
+                  <div
+                    className="absolute left-4 right-4 bottom-4 z-10 rounded-xl border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]"
+                    role={cartStatus === 'error' ? 'alert' : 'status'}
+                  >
+                    {cartMessage}
                   </div>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-10 text-center">
+                <div className="rounded-full border border-red-200 bg-red-50 p-3 text-red-700">
+                  <AlertTriangle size={28} />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="ds-heading-sm">{tEmbed('seatmapUnavailable')}</h2>
+                  <p className="mx-auto max-w-xl text-sm text-[var(--ds-on-surface-variant)]">
+                    {tEmbed('seatmapUnavailableDescription')}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </section>
   );
-
-  if (typeof document === 'undefined') return null;
-  return createPortal(modal, document.body);
 }
 
 function findSeatStatus(venue: Venue, seatId: string): SeatStatus | null {

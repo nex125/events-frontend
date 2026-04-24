@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { Manrope, Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
@@ -33,6 +34,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const requestHeaders = await headers();
+  const pathname = requestHeaders.get('x-pathname') ?? '';
+  const isEmbedRoute = pathname.startsWith('/embed/');
   const locale = DEFAULT_LOCALE;
   const localeTag = resolveLocaleTag();
   const messages = getI18nMessages(locale);
@@ -46,12 +50,16 @@ export default async function RootLayout({
     >
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <a href="#main" className="ds-skip-link">
-            {t('skipToContent')}
-          </a>
-          <Navbar />
-          <main id="main">{children}</main>
-          <Footer />
+          {!isEmbedRoute ? (
+            <a href="#main" className="ds-skip-link">
+              {t('skipToContent')}
+            </a>
+          ) : null}
+          {!isEmbedRoute ? <Navbar /> : null}
+          <main id="main" className={isEmbedRoute ? 'min-h-screen' : undefined}>
+            {children}
+          </main>
+          {!isEmbedRoute ? <Footer /> : null}
         </NextIntlClientProvider>
       </body>
     </html>

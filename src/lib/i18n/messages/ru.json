@@ -81,6 +81,8 @@
     "bookingCreated": "Бронирование {bookingId} создано.",
     "bookingFailed": "Не удалось создать бронирование.",
     "close": "Закрыть",
+    "checkout": "Оформление заказа",
+    "checkoutIframeTitle": "Оформление заказа Ticketok",
     "ticketSelection": "Выбор билетов",
     "queueReconnect": "Пробуем подключиться к очереди...",
     "queueWaiting": "Вы в виртуальной очереди",
@@ -115,6 +117,29 @@
       "cartSummary": "{count} мест - Итого {totalCost}",
       "cartProceedButton": "Продолжить"
     }
+  },
+  "embedCheckout": {
+    "title": "Оформление заказа",
+    "description": "Завершаем покупку для события {slug}.",
+    "errorTitle": "Не удалось открыть оформление",
+    "validating": "Проверяем данные сессии оформления.",
+    "loadingAssets": "Загружаем виджет Ticketok.",
+    "initializing": "Открываем оплату.",
+    "invalidSourceEventId": "Источник события Ticketok не передан или имеет неверный формат.",
+    "missingResumeContext": "Отсутствует контекст продолжения оформления. Вернитесь к выбору мест и попробуйте снова.",
+    "missingWidgetConfig": "Публичные URL виджета Ticketok не настроены. Укажите NEXT_PUBLIC_TICKETOK_WIDGET_SCRIPT_URL и NEXT_PUBLIC_TICKETOK_WIDGET_CSS_URL.",
+    "assetLoadFailed": "Не удалось загрузить файлы виджета Ticketok.",
+    "widgetInitFailed": "Виджет Ticketok загрузился, но не смог инициализироваться в iframe.",
+    "widgetRenderTimeout": "Скрипты Ticketok загрузились, но интерфейс оформления не появился внутри iframe."
+  },
+  "embedSeatmap": {
+    "title": "Выбор мест",
+    "description": "Продолжаем локальный выбор мест для события {slug}.",
+    "contextSummary": "Событие Ticketok {eventId}, state {state}, билет {ticketId}.",
+    "seatmapPreparing": "Подготавливаем локальный выбор мест.",
+    "cartForwarding": "Передаем выбранные места в Ticketok.",
+    "seatmapUnavailable": "Выбор мест недоступен.",
+    "seatmapUnavailableDescription": "Проверка доступа через Ticketok не завершилась, поэтому локальный выбор мест не может быть показан."
   },
   "bookingCard": {
     "title": "Купить билеты",

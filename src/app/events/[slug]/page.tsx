@@ -86,6 +86,8 @@ export default async function EventPage({ params }: EventPageProps) {
                 venue={venue}
                 venueId={event.venueId}
                 eventId={event.id}
+                eventSlug={event.slug}
+                eventSource={event.source}
                 ticketokEventId={event.sourceEventId}
               />
             ) : null}

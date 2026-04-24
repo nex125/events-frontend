@@ -81,6 +81,8 @@
     "bookingCreated": "Booking {bookingId} created.",
     "bookingFailed": "Failed to create booking.",
     "close": "Close",
+    "checkout": "Checkout",
+    "checkoutIframeTitle": "Ticketok checkout",
     "ticketSelection": "Ticket selection",
     "queueReconnect": "Reconnecting to queue...",
     "queueWaiting": "You are in a virtual queue",
@@ -115,6 +117,29 @@
       "cartSummary": "{count} seats - Total {totalCost}",
       "cartProceedButton": "Proceed"
     }
+  },
+  "embedCheckout": {
+    "title": "Checkout",
+    "description": "Continuing purchase flow for {slug}.",
+    "errorTitle": "Unable to open checkout",
+    "validating": "Validating checkout session data.",
+    "loadingAssets": "Loading the Ticketok widget.",
+    "initializing": "Opening payment.",
+    "invalidSourceEventId": "The Ticketok source event ID is missing or invalid.",
+    "missingResumeContext": "The checkout resume context is missing. Go back to seat selection and try again.",
+    "missingWidgetConfig": "Public Ticketok widget URLs are not configured. Set NEXT_PUBLIC_TICKETOK_WIDGET_SCRIPT_URL and NEXT_PUBLIC_TICKETOK_WIDGET_CSS_URL.",
+    "assetLoadFailed": "Failed to load Ticketok widget assets.",
+    "widgetInitFailed": "The Ticketok widget loaded but could not initialize inside the iframe.",
+    "widgetRenderTimeout": "Ticketok scripts loaded, but no checkout UI appeared inside the iframe."
+  },
+  "embedSeatmap": {
+    "title": "Seat selection",
+    "description": "Continue with local seat selection for {slug}.",
+    "contextSummary": "Ticketok event {eventId}, state {state}, ticket {ticketId}.",
+    "seatmapPreparing": "Preparing local seat selection.",
+    "cartForwarding": "Sending your selected seats to Ticketok.",
+    "seatmapUnavailable": "Seat selection is unavailable.",
+    "seatmapUnavailableDescription": "Ticketok access validation did not complete, so local seat selection cannot be shown."
   },
   "bookingCard": {
     "title": "Buy tickets",
