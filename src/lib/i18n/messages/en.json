@@ -130,7 +130,8 @@
     "missingWidgetConfig": "Public Ticketok widget URLs are not configured. Set NEXT_PUBLIC_TICKETOK_WIDGET_SCRIPT_URL and NEXT_PUBLIC_TICKETOK_WIDGET_CSS_URL.",
     "assetLoadFailed": "Failed to load Ticketok widget assets.",
     "widgetInitFailed": "The Ticketok widget loaded but could not initialize inside the iframe.",
-    "widgetRenderTimeout": "Ticketok scripts loaded, but no checkout UI appeared inside the iframe."
+    "widgetRenderTimeout": "Ticketok scripts loaded, but no checkout UI appeared inside the iframe.",
+    "returnToEvent": "Return to event"
   },
   "embedSeatmap": {
     "title": "Seat selection",

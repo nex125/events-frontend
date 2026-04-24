@@ -9,7 +9,7 @@ import {
 } from '@nex125/seatmap-viewer';
 import type { SeatmapCartEvent } from '@nex125/seatmap-viewer';
 import type { TooltipData } from '@nex125/seatmap-react';
-import { AlertTriangle, LoaderCircle, Ticket } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -20,7 +20,6 @@ import {
   releaseSeat,
 } from '@/lib/api';
 import { resolveLocaleTag } from '@/lib/i18n/config';
-import type { SeatCategory } from '@/types/event';
 import { SeatmapLegend } from './SeatmapLegend';
 
 interface EmbedSeatmapProps {

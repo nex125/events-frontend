@@ -42,14 +42,6 @@ export function BookingCard({
   const locale = resolveLocaleTag();
   const formatPrice = (value: number) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
-  const pluralSeats = (n: number): string => {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    if (mod100 >= 11 && mod100 <= 19) return t('seat_many', { count: n });
-    if (mod10 === 1) return t('seat_one', { count: n });
-    if (mod10 >= 2 && mod10 <= 4) return t('seat_few', { count: n });
-    return t('seat_many', { count: n });
-  };
 
   const [widgetOpen, setWidgetOpen] = useState(false);
   const [isLaunchingTicketok, setIsLaunchingTicketok] = useState(false);

@@ -1,8 +1,9 @@
 'use client';
 
-import { AlertTriangle, LoaderCircle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, LoaderCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button } from '@ds';
 import {
   resolveWidgetConfig,
   ensureScript,
@@ -36,6 +37,20 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
   const sourceEventIdRaw = readSingleParam(searchParams.sourceEventId);
   const sourceEventId = Number.parseInt(sourceEventIdRaw, 10);
   const widgetConfig = useMemo(() => resolveWidgetConfig(), []);
+
+  const handleReturnToEvent = useCallback(() => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'ticketok-checkout-close' }, window.location.origin);
+      return;
+    }
+
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    window.location.href = `/events/${encodeURIComponent(slug)}`;
+  }, [slug]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -162,6 +177,16 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
                     {errorMessage}
                   </p>
                 </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  icon={<ArrowLeft size={16} aria-hidden="true" />}
+                  iconPosition="start"
+                  onClick={handleReturnToEvent}
+                >
+                  {t('returnToEvent')}
+                </Button>
               </div>
             ) : (
               <>

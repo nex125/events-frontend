@@ -130,7 +130,8 @@
     "missingWidgetConfig": "Публичные URL виджета Ticketok не настроены. Укажите NEXT_PUBLIC_TICKETOK_WIDGET_SCRIPT_URL и NEXT_PUBLIC_TICKETOK_WIDGET_CSS_URL.",
     "assetLoadFailed": "Не удалось загрузить файлы виджета Ticketok.",
     "widgetInitFailed": "Виджет Ticketok загрузился, но не смог инициализироваться в iframe.",
-    "widgetRenderTimeout": "Скрипты Ticketok загрузились, но интерфейс оформления не появился внутри iframe."
+    "widgetRenderTimeout": "Скрипты Ticketok загрузились, но интерфейс оформления не появился внутри iframe.",
+    "returnToEvent": "Вернуться к событию"
   },
   "embedSeatmap": {
     "title": "Выбор мест",

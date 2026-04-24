@@ -245,6 +245,24 @@ export function TicketLauncher({
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    const handleCheckoutMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (!event.data || typeof event.data !== 'object') return;
+      if ((event.data as { type?: unknown }).type !== 'ticketok-checkout-close') return;
+
+      onClose();
+    };
+
+    window.addEventListener('message', handleCheckoutMessage);
+
+    return () => {
+      window.removeEventListener('message', handleCheckoutMessage);
+    };
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     setLiveVenue(venue);
   }, [venue]);
 
