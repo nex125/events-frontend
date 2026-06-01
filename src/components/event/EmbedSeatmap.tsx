@@ -34,7 +34,6 @@ interface EmbedSeatmapProps {
     state: string;
     requestId?: string;
     timestamp: string;
-    signature: string;
     locale?: string;
     currency?: string;
     ticketId?: string;

@@ -29,7 +29,6 @@ export async function POST(
     method: 'POST',
     headers: {
       'Content-Type': contentType,
-      'X-Ticketok-Launch-Path': request.nextUrl.pathname,
     },
     body: await request.text(),
     cache: 'no-store',

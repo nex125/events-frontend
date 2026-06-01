@@ -63,7 +63,6 @@ export default async function EmbedSeatmapPage({
   const sessionToken = handoff.sessionToken ?? '';
   const state = resolveLaunchState(handoff);
   const timestamp = handoff.timestamp ?? '';
-  const signature = handoff.signature ?? '';
   const sourceEventId = Number.parseInt(event.sourceEventId?.trim() ?? '', 10);
   const handoffEventId = Number.parseInt(eventIdParam, 10);
 
@@ -75,8 +74,7 @@ export default async function EmbedSeatmapPage({
     handoffEventId !== sourceEventId ||
     sessionToken.length === 0 ||
     state.length === 0 ||
-    timestamp.length === 0 ||
-    signature.length === 0
+    timestamp.length === 0
   ) {
     notFound();
   }
@@ -99,7 +97,6 @@ export default async function EmbedSeatmapPage({
         state,
         requestId: handoff.requestId ?? '',
         timestamp,
-        signature,
         locale: resolveTicketokLocale(handoff),
         currency: handoff.currency ?? '',
         ticketId: handoff.ticketId ?? '',
