@@ -40,7 +40,6 @@ interface TicketLauncherProps {
 }
 
 interface CheckoutResumeState {
-  bookingId: string;
   sourceEventId: number;
 }
 
@@ -218,6 +217,7 @@ export function TicketLauncher({
   const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
+  const ownedSeatIdsRef = useRef<Set<string>>(new Set());
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(liveVenue));
 
   useEffect(() => {
@@ -230,6 +230,7 @@ export function TicketLauncher({
       setCartStatus('idle');
       setCartMessage('');
       setCheckoutResumeState(null);
+      ownedSeatIdsRef.current.clear();
     }
   }, [isOpen]);
 
@@ -290,6 +291,9 @@ export function TicketLauncher({
 
     const eventSource = connectMercure(backendVenueId, (seatId, status) => {
       const mappedStatus = mapBackendStatus(status);
+      if (mappedStatus !== 'locked') {
+        ownedSeatIdsRef.current.delete(seatId);
+      }
       seatStatusByIdRef.current.set(seatId, mappedStatus);
       setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, mappedStatus));
     });
@@ -307,7 +311,6 @@ export function TicketLauncher({
     const params = new URLSearchParams({
       eventId,
       sourceEventId: String(checkoutResumeState.sourceEventId),
-      bookingId: checkoutResumeState.bookingId,
       locale,
     });
 
@@ -321,15 +324,18 @@ export function TicketLauncher({
 
       const currentStatus = seatStatusByIdRef.current.get(seatId) ?? findSeatStatus(liveVenue, seatId);
       if (currentStatus !== 'available' && currentStatus !== 'locked') return;
+      if (currentStatus === 'locked' && !ownedSeatIdsRef.current.has(seatId)) return;
 
       setPendingSeatIds((prev) => new Set(prev).add(seatId));
       try {
         if (currentStatus === 'available') {
           await lockSeat(seatId, clientId, backendVenueId);
+          ownedSeatIdsRef.current.add(seatId);
           seatStatusByIdRef.current.set(seatId, 'locked');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'locked'));
         } else {
           await releaseSeat(seatId, clientId, backendVenueId);
+          ownedSeatIdsRef.current.delete(seatId);
           seatStatusByIdRef.current.set(seatId, 'available');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'available'));
         }
@@ -356,13 +362,21 @@ export function TicketLauncher({
         return;
       }
 
+      const proceedSeatIds = selectedSeatIds.filter((seatId) => ownedSeatIdsRef.current.has(seatId));
+      if (proceedSeatIds.length !== selectedSeatIds.length) {
+        setCartStatus('error');
+        setCartMessage(t('bookingFailed'));
+        setViewerResetToken((current) => current + 1);
+        return;
+      }
+
       setCartStatus('loading');
       setCartMessage(t('creatingBooking'));
       try {
         const response = await proceedCart({
           userId: clientId,
           venueId: backendVenueId,
-          seats: selectedSeatIds,
+          seats: proceedSeatIds,
         });
         const resumeId = response.resumeId?.trim() || response.bookingId;
         if (
@@ -374,7 +388,6 @@ export function TicketLauncher({
           setCartStatus('idle');
           setCartMessage('');
           setCheckoutResumeState({
-            bookingId: resumeId,
             sourceEventId: backendEventId,
           });
         } else {

@@ -19,6 +19,10 @@ import {
   proceedCart,
   releaseSeat,
 } from '@/lib/api';
+import {
+  buildEmbedCheckoutContinuation,
+  buildEmbedCheckoutTarget,
+} from '@/lib/embedCheckoutRedirect';
 import { resolveLocaleTag } from '@/lib/i18n/config';
 import { SeatmapLegend } from './SeatmapLegend';
 
@@ -202,8 +206,10 @@ export function EmbedSeatmap({
   const [liveVenue, setLiveVenue] = useState<Venue>(venue);
   const [cartStatus, setCartStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [cartMessage, setCartMessage] = useState('');
+  const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const lockSetRef = useRef<Set<string>>(new Set());
+  const ownedSeatIdsRef = useRef<Set<string>>(new Set());
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(venue));
 
   useEffect(() => {
@@ -221,6 +227,9 @@ export function EmbedSeatmap({
   useEffect(() => {
     const eventSource = connectMercure(venueId, (seatId, status) => {
       const mappedStatus = mapBackendStatus(status);
+      if (mappedStatus !== 'locked') {
+        ownedSeatIdsRef.current.delete(seatId);
+      }
       seatStatusByIdRef.current.set(seatId, mappedStatus);
       setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, mappedStatus));
     });
@@ -248,31 +257,36 @@ export function EmbedSeatmap({
   }, []);
 
   const continueToCheckout = useCallback(
-    (bookingId: string) => {
+    () => {
       const continuationLocale = ticketokContext.locale?.trim() || locale;
-      const returnUrl = ticketokContext.returnUrl?.trim() || '';
-      if (returnUrl) {
-        try {
-          const target = new URL(returnUrl, window.location.origin);
-          target.searchParams.set('bookingId', bookingId);
-          target.searchParams.set('eventId', eventId);
-          target.searchParams.set('sourceEventId', String(sourceEventId));
-          target.searchParams.set('locale', continuationLocale);
-          navigateTopLevel(target.toString());
-          return;
-        } catch {
-          // Fall through to the internal checkout route when returnUrl is malformed.
-        }
-      }
-
-      const params = new URLSearchParams({
+      const continuation = buildEmbedCheckoutContinuation({
         eventId,
-        sourceEventId: String(sourceEventId),
-        bookingId,
+        sourceEventId,
         locale: continuationLocale,
+        slug,
+        returnUrl: ticketokContext.returnUrl,
+        origin: window.location.origin,
+        referrer: document.referrer,
       });
 
-      navigateTopLevel(`/embed/events/${encodeURIComponent(slug)}/checkout?${params.toString()}`);
+      if (continuation.kind === 'postMessage' && window.parent && window.parent !== window) {
+        window.parent.postMessage(continuation.message, continuation.targetOrigin);
+        return;
+      }
+
+      if (continuation.kind === 'navigate') {
+        navigateTopLevel(continuation.target);
+        return;
+      }
+
+      navigateTopLevel(buildEmbedCheckoutTarget({
+        eventId,
+        sourceEventId,
+        locale: continuationLocale,
+        slug,
+        returnUrl: ticketokContext.returnUrl,
+        origin: window.location.origin,
+      }));
     },
     [eventId, locale, navigateTopLevel, slug, sourceEventId, ticketokContext.locale, ticketokContext.returnUrl],
   );
@@ -284,15 +298,18 @@ export function EmbedSeatmap({
 
       const currentStatus = seatStatusByIdRef.current.get(seatId) ?? findSeatStatus(liveVenue, seatId);
       if (currentStatus !== 'available' && currentStatus !== 'locked') return;
+      if (currentStatus === 'locked' && !ownedSeatIdsRef.current.has(seatId)) return;
 
       setPendingSeatIds((prev) => new Set(prev).add(seatId));
       try {
         if (currentStatus === 'available') {
           await lockSeat(seatId, clientId, venueId);
+          ownedSeatIdsRef.current.add(seatId);
           seatStatusByIdRef.current.set(seatId, 'locked');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'locked'));
         } else {
           await releaseSeat(seatId, clientId, venueId);
+          ownedSeatIdsRef.current.delete(seatId);
           seatStatusByIdRef.current.set(seatId, 'available');
           setLiveVenue((currentVenue) => updateVenueSeatStatus(currentVenue, seatId, 'available'));
         }
@@ -319,18 +336,25 @@ export function EmbedSeatmap({
         return;
       }
 
+      const proceedSeatIds = selectedSeatIds.filter((seatId) => ownedSeatIdsRef.current.has(seatId));
+      if (proceedSeatIds.length !== selectedSeatIds.length) {
+        setCartStatus('error');
+        setCartMessage(t('bookingFailed'));
+        setViewerResetToken((current) => current + 1);
+        return;
+      }
+
       setCartStatus('loading');
       setCartMessage(t('creatingBooking'));
       try {
-        const response = await proceedCart({
+        await proceedCart({
           userId: clientId,
           venueId,
-          seats: selectedSeatIds,
+          seats: proceedSeatIds,
         });
-        const resumeId = response.resumeId?.trim() || response.bookingId;
         setCartStatus('success');
         setCartMessage(tEmbed('cartForwarding'));
-        continueToCheckout(resumeId);
+        continueToCheckout();
       } catch (error) {
         const message = error instanceof Error ? error.message : t('bookingFailed');
         setCartStatus('error');
@@ -366,6 +390,7 @@ export function EmbedSeatmap({
             {queueState.phase === 'ready' ? (
               <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
                 <SeatmapViewer
+                  key={`${venue.id}-${viewerResetToken}`}
                   className={seatmapViewerSharedThemeRootClassName}
                   classNames={seatmapViewerSharedThemeClassNames}
                   venue={liveVenue}

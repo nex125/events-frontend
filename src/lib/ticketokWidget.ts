@@ -10,7 +10,6 @@ export type WidgetConfig = {
 export type WidgetInitPayload = {
   mountNode: HTMLElement;
   sourceEventId: number;
-  bookingId?: string;
   ticketId?: string;
 };
 
@@ -173,11 +172,7 @@ function prepareMountNode(payload: WidgetInitPayload): void {
   mountNode.innerHTML = '';
   mountNode.dataset.eventId = String(payload.sourceEventId);
   mountNode.dataset.ticketId = payload.ticketId?.trim() || '0';
-  if (payload.bookingId?.trim()) {
-    mountNode.dataset.bookingId = payload.bookingId;
-  } else {
-    delete mountNode.dataset.bookingId;
-  }
+  delete mountNode.dataset.bookingId;
 }
 
 export function tryOpenModal(payload: WidgetInitPayload): boolean {
@@ -192,9 +187,6 @@ export function tryOpenModal(payload: WidgetInitPayload): boolean {
   trigger.hidden = true;
   trigger.dataset.eventId = String(payload.sourceEventId);
   trigger.dataset.ticketId = payload.ticketId?.trim() || '0';
-  if (payload.bookingId?.trim()) {
-    trigger.dataset.bookingId = payload.bookingId;
-  }
 
   payload.mountNode.appendChild(trigger);
   window.openModal(trigger);

@@ -30,7 +30,6 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   const eventId = readSingleParam(searchParams.eventId);
-  const bookingId = readSingleParam(searchParams.bookingId);
   const ticketId = readSingleParam(searchParams.ticketId) || '0';
   const mode = readSingleParam(searchParams.mode) || 'checkout';
   const isLaunchMode = mode === 'launch';
@@ -67,7 +66,7 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
       return;
     }
 
-    if (eventId.length === 0 || (!isLaunchMode && bookingId.length === 0)) {
+    if (eventId.length === 0 || (!isLaunchMode && !Number.isFinite(sourceEventId))) {
       setStage('error');
       setErrorMessage(t('missingResumeContext'));
       return;
@@ -107,7 +106,6 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
           const initializedViaApi = tryInitializeWidget({
             mountNode,
             sourceEventId,
-            bookingId: bookingId || undefined,
             ticketId,
           });
           if (!initializedViaApi) {
@@ -149,7 +147,7 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
       cancelled = true;
       mountNode.innerHTML = '';
     };
-  }, [bookingId, eventId, isLaunchMode, isMounted, sourceEventId, t, ticketId, widgetConfig]);
+  }, [eventId, isLaunchMode, isMounted, sourceEventId, t, ticketId, widgetConfig]);
 
   return (
     <section className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(223,205,114,0.18),_transparent_42%),linear-gradient(180deg,_rgba(20,20,18,0.98),_rgba(8,8,7,1))] text-[var(--ds-on-surface)]">
@@ -208,7 +206,6 @@ export function EmbedCheckout({ slug, searchParams }: EmbedCheckoutProps) {
                     className="min-h-full w-full"
                     data-event-id={Number.isFinite(sourceEventId) ? String(sourceEventId) : undefined}
                     data-ticket-id={ticketId}
-                    data-booking-id={!isLaunchMode && bookingId ? bookingId : undefined}
                   />
                 </div>
               </>
