@@ -16,10 +16,7 @@ import { Ticket, X } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { useTranslations } from 'next-intl';
 import {
-  checkTicketokSession,
   connectMercure,
-  createTicketokSession,
-  getTicketokProductsSnapshot,
   lockSeat,
   proceedCart,
   releaseSeat,
@@ -263,28 +260,6 @@ export function TicketLauncher({
   useEffect(() => {
     lockSetRef.current = pendingSeatIds;
   }, [pendingSeatIds]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const preflight = async () => {
-      try {
-        await createTicketokSession({
-          venueId: backendVenueId,
-          eventId: backendEventId,
-        });
-        await checkTicketokSession({
-          venueId: backendVenueId,
-          eventId: backendEventId,
-        });
-        await getTicketokProductsSnapshot(backendVenueId, backendEventId);
-      } catch {
-        // Seat selection remains available; booking actions surface request errors.
-      }
-    };
-
-    void preflight();
-  }, [backendEventId, backendVenueId, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;

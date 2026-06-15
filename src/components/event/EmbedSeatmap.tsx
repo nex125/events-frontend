@@ -351,6 +351,7 @@ export function EmbedSeatmap({
           userId: clientId,
           venueId,
           seats: proceedSeatIds,
+          sessionToken: ticketokContext.sessionToken,
         });
         setCartStatus('success');
         setCartMessage(tEmbed('cartForwarding'));
@@ -361,7 +362,7 @@ export function EmbedSeatmap({
         setCartMessage(message);
       }
     },
-    [cartStatus, clientId, continueToCheckout, t, tEmbed, venueId],
+    [cartStatus, clientId, continueToCheckout, t, tEmbed, ticketokContext.sessionToken, venueId],
   );
 
   return (

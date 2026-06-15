@@ -19,6 +19,19 @@ function getApiBaseUrl(): string {
   return normalize(configured);
 }
 
+function readSetCookieHeaders(headers: Headers): string[] {
+  const headersWithCookies = headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+  const cookies = headersWithCookies.getSetCookie?.();
+  if (cookies && cookies.length > 0) {
+    return cookies;
+  }
+
+  const cookie = headers.get('Set-Cookie');
+  return cookie ? [cookie] : [];
+}
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ slug: string }> },
@@ -45,8 +58,7 @@ export async function POST(
   if (location) {
     headers.set('Location', location);
   }
-  const setCookie = upstream.headers.get('Set-Cookie');
-  if (setCookie) {
+  for (const setCookie of readSetCookieHeaders(upstream.headers)) {
     headers.append('Set-Cookie', setCookie);
   }
 

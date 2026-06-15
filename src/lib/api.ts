@@ -467,13 +467,14 @@ export async function proceedCart(
     userId: string;
     venueId: string;
     seats: string[];
+    sessionToken?: string;
   },
   init?: RequestInit,
 ): Promise<ProceedCartResponse> {
   return apiFetch<ProceedCartResponse>('/ticketing/cart', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       ...(init?.headers ?? {}),
     },
     body: JSON.stringify(payload),
@@ -493,7 +494,7 @@ export async function createTicketokSession(
   return apiFetch<TicketokSessionCreateResponse>('/ticketok/session/create', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       ...(init?.headers ?? {}),
     },
     body: JSON.stringify(payload),
@@ -513,7 +514,7 @@ export async function checkTicketokSession(
   return apiFetch<TicketokSessionCheckResponse>('/ticketok/session/check', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       ...(init?.headers ?? {}),
     },
     body: JSON.stringify(payload),
@@ -548,7 +549,7 @@ export async function subscribeToNewsletter(
   },
 ): Promise<NewsletterSubscribeResponse> {
   const headers = new Headers(options?.headers);
-  headers.set('Content-Type', 'application/json');
+  headers.set('Content-Type', 'application/json; charset=utf-8');
   if (options?.locale) {
     headers.set('Accept-Language', options.locale);
   }
@@ -572,7 +573,7 @@ export async function lockSeat(
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         ...(init?.headers ?? {}),
       },
       body: JSON.stringify({ userId, venueId }),
@@ -592,7 +593,7 @@ export async function releaseSeat(
     {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         ...(init?.headers ?? {}),
       },
       body: JSON.stringify({ userId, venueId }),
