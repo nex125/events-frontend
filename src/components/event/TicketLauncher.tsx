@@ -350,6 +350,7 @@ export function TicketLauncher({
       try {
         const response = await proceedCart({
           userId: clientId,
+          eventId,
           venueId: backendVenueId,
           seats: proceedSeatIds,
         });

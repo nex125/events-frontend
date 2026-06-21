@@ -349,6 +349,7 @@ export function EmbedSeatmap({
       try {
         await proceedCart({
           userId: clientId,
+          eventId,
           venueId,
           seats: proceedSeatIds,
           sessionToken: ticketokContext.sessionToken,

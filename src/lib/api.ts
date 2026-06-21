@@ -465,6 +465,7 @@ export interface TicketokProductsSnapshotResponse {
 export async function proceedCart(
   payload: {
     userId: string;
+    eventId: string;
     venueId: string;
     seats: string[];
     sessionToken?: string;
