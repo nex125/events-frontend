@@ -64,6 +64,7 @@
   --z-navbar: 50;
   --z-dropdown: 60;
   --z-tooltip: 70;
+  --z-external-widget: 200;
 }
 
 :root {

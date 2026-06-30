@@ -9,6 +9,11 @@
   --font-body-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
+body > .modal-payment,
+body > .modal {
+  z-index: var(--z-external-widget);
+}
+
 .ticket-launcher-seatmap .seatmap-viewer__legend {
   display: none;
 }
