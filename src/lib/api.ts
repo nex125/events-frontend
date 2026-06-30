@@ -421,10 +421,6 @@ export interface TicketokSessionContract {
   message?: string;
 }
 
-export interface TicketokSessionCreateResponse {
-  session: TicketokSessionContract;
-}
-
 export interface TicketokSessionCheckResponse {
   session: TicketokSessionContract;
 }
@@ -473,26 +469,6 @@ export async function proceedCart(
   init?: RequestInit,
 ): Promise<ProceedCartResponse> {
   return apiFetch<ProceedCartResponse>('/ticketing/cart', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      ...(init?.headers ?? {}),
-    },
-    body: JSON.stringify(payload),
-    ...init,
-  });
-}
-
-export async function createTicketokSession(
-  payload: {
-    venueId?: string;
-    eventId?: number;
-    language?: string;
-    forceRefresh?: boolean;
-  },
-  init?: RequestInit,
-): Promise<TicketokSessionCreateResponse> {
-  return apiFetch<TicketokSessionCreateResponse>('/ticketok/session/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
