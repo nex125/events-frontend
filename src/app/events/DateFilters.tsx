@@ -9,6 +9,7 @@ import styles from './DateFilters.module.css';
 import { resolveLocaleTag } from '@/lib/i18n/config';
 
 interface DateFiltersProps {
+  basePath?: '/events' | '/search';
   query: string;
   selectedCategory: string;
   selectedCity: string;
@@ -144,6 +145,7 @@ function DatePickerField({
 }
 
 export function DateFilters({
+  basePath = '/events',
   query,
   selectedCategory,
   selectedCity,
@@ -208,7 +210,7 @@ export function DateFilters({
     if (nextTo) params.set('dateTo', formatDateParam(nextTo));
 
     const queryString = params.toString();
-    return queryString ? `/events?${queryString}` : '/events';
+    return queryString ? `${basePath}?${queryString}` : basePath;
   };
 
   return (

@@ -7,8 +7,11 @@
   "eventsCatalog": {
     "pageTitle": "Все события | Ticketok",
     "pageDescription": "Каталог всех событий на Ticketok",
+    "searchPageTitle": "Поиск | Ticketok",
+    "searchPageDescription": "Поиск событий на Ticketok",
     "catalogLabel": "Каталог",
     "allEventsTitle": "Все события",
+    "searchTitle": "Поиск",
     "recommendedTitle": "Рекомендованные события",
     "filtersButton": "Фильтр",
     "cityLabel": "Город",

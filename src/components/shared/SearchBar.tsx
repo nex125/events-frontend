@@ -25,7 +25,7 @@ export function SearchBar() {
     (e: React.FormEvent) => {
       e.preventDefault();
       if (query.trim()) {
-        router.push(`/events?q=${encodeURIComponent(query.trim())}`);
+        router.push(`/search?q=${encodeURIComponent(query.trim())}`);
         setFocused(false);
       }
     },
@@ -155,7 +155,7 @@ export function SearchBar() {
                   </Link>
                 ))}
                 <Link
-                  href={`/events?q=${encodeURIComponent(query.trim())}`}
+                  href={`/search?q=${encodeURIComponent(query.trim())}`}
                   onClick={() => setFocused(false)}
                   className="block px-4 py-3 text-center ds-label-sm text-[var(--ds-primary)] hover:bg-[var(--ds-surface-container-high)] transition-colors border-t border-[var(--ds-ghost-border)]"
                 >

@@ -235,6 +235,7 @@ export type EventSort = 'date_desc' | 'date_asc' | 'featured';
 export interface ListEventsParams {
   q?: string;
   category?: string;
+  city?: string;
   featured?: boolean;
   status?: EventStatus;
   dateFrom?: string;
@@ -324,6 +325,7 @@ export async function listEvents(
 
   if (params.q) query.set('q', params.q);
   if (params.category) query.set('category', params.category);
+  if (params.city) query.set('city', params.city);
   if (typeof params.featured === 'boolean') {
     query.set('featured', String(params.featured));
   }

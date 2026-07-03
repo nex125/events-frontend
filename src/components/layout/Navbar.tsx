@@ -24,7 +24,7 @@ export function Navbar() {
   function handleMobileSearch(e: React.FormEvent) {
     e.preventDefault();
     if (mobileQuery.trim()) {
-      router.push(`/events?q=${encodeURIComponent(mobileQuery.trim())}`);
+      router.push(`/search?q=${encodeURIComponent(mobileQuery.trim())}`);
       setMobileOpen(false);
       setMobileQuery('');
     }
