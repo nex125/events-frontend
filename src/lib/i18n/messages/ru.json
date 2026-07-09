@@ -108,13 +108,13 @@
       "cartCloseLabel": "Закрыть корзину",
       "cartEmptyState": "Пока нет выбранных мест.",
       "cartGroupMeta": "{count} бил. - {unitPrice} / шт.",
-      "cartGroupFee": "Базовая цена {basePrice} + сервисный сбор {serviceFee}{serviceFeePercent}",
+      "cartGroupFee": "Базовая цена {basePrice} + работа сервиса {serviceFee}{serviceFeePercent}",
       "cartRemoveOneAriaLabel": "Убрать одно место из категории {categoryName}",
       "cartAddOneAriaLabel": "Добавить одно место в категорию {categoryName}",
       "cartRemoveSeatTitle": "Убрать место",
       "cartRemoveSeatAriaLabel": "Убрать место {seatLabel}",
-      "cartServiceFeeSummary": "Сервисный сбор: {serviceFeeTotal}",
-      "cartSummary": "{count} мест - Итого {totalCost}",
+      "cartServiceFeeSummary": "Работа сервиса: {serviceFeeTotal}",
+      "cartSummary": "Выбрано мест {count} - Всего {totalCost}",
       "cartProceedButton": "Продолжить"
     }
   },

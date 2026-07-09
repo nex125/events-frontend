@@ -26,6 +26,7 @@ import {
 import { resolveLocaleTag } from '@/lib/i18n/config';
 import { useMaxSeatsPerBooking } from '@/lib/useTicketingConfig';
 import { SeatmapLegend } from './SeatmapLegend';
+import { SeatmapStatusMessage } from './SeatmapStatusMessage';
 
 interface EmbedSeatmapProps {
   slug: string;
@@ -214,6 +215,12 @@ export function EmbedSeatmap({
   const selectingSeatIdsRef = useRef<Set<string>>(new Set());
   const ownedSeatIdsRef = useRef<Set<string>>(new Set());
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(venue));
+  const dismissCartError = useCallback(() => {
+    if (cartStatus !== 'error') return;
+
+    setCartStatus('idle');
+    setCartMessage('');
+  }, [cartStatus]);
 
   useEffect(() => {
     setLiveVenue(venue);
@@ -390,26 +397,12 @@ export function EmbedSeatmap({
       <div className="mx-auto flex min-h-screen w-full max-w-7xl items-stretch px-4 py-4 sm:px-6 sm:py-6">
         <div className="flex w-full flex-col overflow-hidden rounded-[var(--ds-radius-structural)] border border-[var(--ds-ghost-border)] bg-[color-mix(in_srgb,var(--ds-surface)_92%,transparent)] shadow-[var(--ds-shadow-ambient-lg)]">
           <div className="border-b border-[var(--ds-ghost-border)] px-5 py-4 sm:px-6">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ds-on-surface-variant)]">
-              Ticketok
-            </p>
             <h1 className="ds-heading-md tracking-tight">{tEmbed('title')}</h1>
-            <p className="mt-2 text-sm text-[var(--ds-on-surface-variant)]">
-              {tEmbed('description', { slug })}
-            </p>
-          </div>
-
-          <div className="border-b border-[var(--ds-ghost-border)] px-5 py-3 text-xs text-[var(--ds-on-surface-variant)] sm:px-6">
-            {tEmbed('contextSummary', {
-              eventId: sourceEventId,
-              state: ticketokContext.state || ticketokContext.requestId?.trim() || '-',
-              ticketId: ticketokContext.ticketId?.trim() || '0',
-            })}
           </div>
 
           <div className="flex min-h-[min(78vh,760px)] flex-1 flex-col">
             {queueState.phase === 'ready' ? (
-              <div className="relative h-full" aria-busy={cartStatus === 'loading'}>
+              <div className="ticket-launcher-seatmap relative h-full" aria-busy={cartStatus === 'loading'}>
                 <SeatmapViewer
                   key={`${venue.id}-${viewerResetToken}`}
                   className={seatmapViewerSharedThemeRootClassName}
@@ -438,14 +431,11 @@ export function EmbedSeatmap({
                     </div>
                   </div>
                 )}
-                {(cartStatus === 'success' || cartStatus === 'error') && (
-                  <div
-                    className="absolute left-4 right-4 bottom-4 z-10 rounded-xl border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]"
-                    role={cartStatus === 'error' ? 'alert' : 'status'}
-                  >
-                    {cartMessage}
-                  </div>
-                )}
+                <SeatmapStatusMessage
+                  status={cartStatus}
+                  message={cartMessage}
+                  onDismissError={dismissCartError}
+                />
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-4 px-8 py-10 text-center">

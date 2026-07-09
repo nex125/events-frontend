@@ -24,6 +24,7 @@ import {
 import { resolveLocaleTag } from '@/lib/i18n/config';
 import { useMaxSeatsPerBooking } from '@/lib/useTicketingConfig';
 import { SeatmapLegend } from './SeatmapLegend';
+import { SeatmapStatusMessage } from './SeatmapStatusMessage';
 
 interface TicketLauncherProps {
   isOpen: boolean;
@@ -219,6 +220,12 @@ export function TicketLauncher({
   const selectingSeatIdsRef = useRef<Set<string>>(new Set());
   const ownedSeatIdsRef = useRef<Set<string>>(new Set());
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(liveVenue));
+  const dismissCartError = useCallback(() => {
+    if (cartStatus !== 'error') return;
+
+    setCartStatus('idle');
+    setCartMessage('');
+  }, [cartStatus]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -488,14 +495,11 @@ export function TicketLauncher({
                         </div>
                       </div>
                     )}
-                    {(cartStatus === 'success' || cartStatus === 'error') && (
-                      <div
-                        className="absolute left-4 right-4 bottom-4 z-10 rounded-xl px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)] bg-[var(--ds-surface)] border border-[var(--ds-ghost-border)]"
-                        role={cartStatus === 'error' ? 'alert' : 'status'}
-                      >
-                        {cartMessage}
-                      </div>
-                    )}
+                    <SeatmapStatusMessage
+                      status={cartStatus}
+                      message={cartMessage}
+                      onDismissError={dismissCartError}
+                    />
                   </div>
                 )}
               </div>
