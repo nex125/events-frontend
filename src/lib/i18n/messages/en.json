@@ -83,6 +83,8 @@
     "creatingBooking": "Creating booking...",
     "bookingCreated": "Booking {bookingId} created.",
     "bookingFailed": "Failed to create booking.",
+    "seatLimitHint": "You can select up to {count} seats per booking.",
+    "seatLimitReached": "You can select no more than {count} seats per booking.",
     "close": "Close",
     "checkout": "Checkout",
     "checkoutIframeTitle": "Ticketok checkout",

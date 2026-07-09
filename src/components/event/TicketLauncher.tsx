@@ -22,6 +22,7 @@ import {
   releaseSeat,
 } from '@/lib/api';
 import { resolveLocaleTag } from '@/lib/i18n/config';
+import { useMaxSeatsPerBooking } from '@/lib/useTicketingConfig';
 import { SeatmapLegend } from './SeatmapLegend';
 
 interface TicketLauncherProps {
@@ -213,7 +214,9 @@ export function TicketLauncher({
   const [checkoutResumeState, setCheckoutResumeState] = useState<CheckoutResumeState | null>(null);
   const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
+  const maxSeatsPerBooking = useMaxSeatsPerBooking();
   const lockSetRef = useRef<Set<string>>(new Set());
+  const selectingSeatIdsRef = useRef<Set<string>>(new Set());
   const ownedSeatIdsRef = useRef<Set<string>>(new Set());
   const seatStatusByIdRef = useRef<Map<string, SeatStatus>>(buildSeatStatusMap(liveVenue));
 
@@ -304,6 +307,16 @@ export function TicketLauncher({
       setPendingSeatIds((prev) => new Set(prev).add(seatId));
       try {
         if (currentStatus === 'available') {
+          if (
+            ownedSeatIdsRef.current.size + selectingSeatIdsRef.current.size >=
+            maxSeatsPerBooking
+          ) {
+            setCartStatus('error');
+            setCartMessage(t('seatLimitReached', { count: maxSeatsPerBooking }));
+            return;
+          }
+
+          selectingSeatIdsRef.current.add(seatId);
           await lockSeat(seatId, clientId, backendVenueId);
           ownedSeatIdsRef.current.add(seatId);
           seatStatusByIdRef.current.set(seatId, 'locked');
@@ -317,6 +330,7 @@ export function TicketLauncher({
       } catch (error) {
         console.error('Seat toggle failed in launcher:', error);
       } finally {
+        selectingSeatIdsRef.current.delete(seatId);
         setPendingSeatIds((prev) => {
           const next = new Set(prev);
           next.delete(seatId);
@@ -324,7 +338,7 @@ export function TicketLauncher({
         });
       }
     },
-    [backendVenueId, cartStatus, clientId, liveVenue],
+    [backendVenueId, cartStatus, clientId, liveVenue, maxSeatsPerBooking, t],
   );
 
   const handleCartEvent = useCallback(
@@ -334,6 +348,11 @@ export function TicketLauncher({
 
       const selectedSeatIds = event.payload.seats.map((seat) => seat.seatId);
       if (selectedSeatIds.length === 0) {
+        return;
+      }
+      if (selectedSeatIds.length > maxSeatsPerBooking) {
+        setCartStatus('error');
+        setCartMessage(t('seatLimitReached', { count: maxSeatsPerBooking }));
         return;
       }
 
@@ -377,7 +396,7 @@ export function TicketLauncher({
         setCartMessage(message);
       }
     },
-    [backendEventId, backendVenueId, cartStatus, clientId, eventSource, t],
+    [backendEventId, backendVenueId, cartStatus, clientId, eventSource, maxSeatsPerBooking, t],
   );
 
   const modal = (
@@ -459,6 +478,9 @@ export function TicketLauncher({
                       title={tSeatmap('legendPricesTitle')}
                       className="pointer-events-none absolute top-3 left-3 z-10 max-w-[220px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-3 text-xs leading-tight text-[var(--ds-on-surface)]"
                     />
+                    <div className="pointer-events-none absolute top-3 right-3 z-10 max-w-[240px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 px-3 py-2 text-xs text-[var(--ds-on-surface-variant)]">
+                      {t('seatLimitHint', { count: maxSeatsPerBooking })}
+                    </div>
                     {cartStatus === 'loading' && (
                       <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-10">
                         <div className="rounded-xl bg-[var(--ds-surface)] px-4 py-3 text-sm shadow-[var(--ds-shadow-ambient-md)]">

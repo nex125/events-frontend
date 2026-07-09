@@ -83,6 +83,8 @@
     "creatingBooking": "Создаем бронирование...",
     "bookingCreated": "Бронирование {bookingId} создано.",
     "bookingFailed": "Не удалось создать бронирование.",
+    "seatLimitHint": "Можно выбрать до {count} мест в одном бронировании.",
+    "seatLimitReached": "В одном бронировании можно выбрать не более {count} мест.",
     "close": "Закрыть",
     "checkout": "Оформление заказа",
     "checkoutIframeTitle": "Оформление заказа Ticketok",

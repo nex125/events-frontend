@@ -146,12 +146,13 @@ function getMercurePublicUrl(): string {
 }
 
 export interface ApiError {
-  error: {
+  error?: {
     code: string;
     message: string;
     details?: unknown;
   };
-  requestId: string;
+  message?: string;
+  requestId?: string;
 }
 
 export class ApiRequestError extends Error {
@@ -205,14 +206,15 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     const apiError = await parseJsonSafely<ApiError>(response);
     const message =
-      apiError?.error.message ??
+      apiError?.error?.message ??
+      apiError?.message ??
       `Request failed with status ${response.status}.`;
 
     throw new ApiRequestError({
       status: response.status,
-      code: apiError?.error.code ?? 'HTTP_ERROR',
+      code: apiError?.error?.code ?? 'HTTP_ERROR',
       message,
-      details: apiError?.error.details,
+      details: apiError?.error?.details,
       requestId: apiError?.requestId,
     });
   }
@@ -435,6 +437,14 @@ export interface TicketokProductsSnapshotItem {
   countAvailable: number;
   countReserved: number;
   price?: number;
+}
+
+export interface TicketingConfig {
+  maxSeatsPerBooking: number;
+}
+
+export async function getTicketingConfig(init?: RequestInit): Promise<TicketingConfig> {
+  return apiFetch<TicketingConfig>('/ticketing/config', init);
 }
 
 export interface TicketokProductsSnapshotProduct {
