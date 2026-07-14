@@ -46,7 +46,7 @@ body > .modal {
   mask-size: contain;
 }
 
-.ticket-launcher-seatmap .seatmap-viewer__cart-chip:hover {
+.ticket-launcher-seatmap .seatmap-viewer__cart-chip:hover:not(:disabled) {
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--ds-primary) 82%, white 18%), color-mix(in srgb, var(--ds-primary) 94%, black 6%));
   border-color: color-mix(in srgb, var(--ds-primary) 78%, #000);
@@ -55,7 +55,7 @@ body > .modal {
     0 12px 20px -12px color-mix(in srgb, var(--ds-primary) 66%, transparent);
 }
 
-.ticket-launcher-seatmap .seatmap-viewer__cart-chip:active {
+.ticket-launcher-seatmap .seatmap-viewer__cart-chip:active:not(:disabled) {
   transform: translateY(1px) scale(0.99);
 }
 

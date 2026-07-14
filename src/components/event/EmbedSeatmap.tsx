@@ -409,6 +409,7 @@ export function EmbedSeatmap({
                   classNames={seatmapViewerSharedThemeClassNames}
                   venue={liveVenue}
                   currency={currency}
+                  maxSelectedSeats={maxSeatsPerBooking}
                   renderTooltip={renderSeatmapTooltip}
                   onSeatClick={handleSeatClick}
                   onCartEvent={handleCartEvent}
