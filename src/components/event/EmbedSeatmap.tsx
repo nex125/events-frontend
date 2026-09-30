@@ -14,16 +14,24 @@ import { nanoid } from 'nanoid';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  confirmNoPaymentBooking,
   connectMercure,
   lockSeat,
   proceedCart,
   releaseSeat,
 } from '@/lib/api';
+import type { NoPaymentBookingIntent } from '@/lib/api';
 import {
   buildEmbedCheckoutContinuation,
   buildEmbedCheckoutTarget,
 } from '@/lib/embedCheckoutRedirect';
 import { resolveLocaleTag } from '@/lib/i18n/config';
+import {
+  buildSeatCategoryMap,
+  canSelectNoPaymentSeat,
+  matchesNoPaymentRequirements,
+  postNoPaymentCompletionToParent,
+} from '@/lib/noPaymentBooking';
 import { useMaxSeatsPerBooking } from '@/lib/useTicketingConfig';
 import { SeatmapLegend } from './SeatmapLegend';
 import { SeatmapStatusMessage } from './SeatmapStatusMessage';
@@ -35,7 +43,7 @@ interface EmbedSeatmapProps {
   sourceEventId: number;
   venue: Venue;
   currency: string;
-  ticketokContext: {
+  ticketokContext?: {
     sessionToken: string;
     state: string;
     requestId?: string;
@@ -46,6 +54,7 @@ interface EmbedSeatmapProps {
     expiresAt?: string;
     returnUrl?: string;
   };
+  noPaymentIntent?: NoPaymentBookingIntent & { token: string };
 }
 
 type SeatmapViewerMessageOverrides = {
@@ -136,6 +145,7 @@ export function EmbedSeatmap({
   venue,
   currency,
   ticketokContext,
+  noPaymentIntent,
 }: EmbedSeatmapProps) {
   const t = useTranslations('ticketLauncher');
   const tSeatmap = useTranslations('ticketLauncher.seatmap');
@@ -206,11 +216,17 @@ export function EmbedSeatmap({
     phase: 'ready',
   });
   const [liveVenue, setLiveVenue] = useState<Venue>(venue);
-  const [cartStatus, setCartStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [cartMessage, setCartMessage] = useState('');
+  const [cartStatus, setCartStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
+    noPaymentIntent?.status === 'confirmed' ? 'success' : 'idle',
+  );
+  const [cartMessage, setCartMessage] = useState(
+    noPaymentIntent?.status === 'confirmed' ? tEmbed('noPaymentConfirmed') : '',
+  );
   const [viewerResetToken, setViewerResetToken] = useState(0);
   const [pendingSeatIds, setPendingSeatIds] = useState<Set<string>>(new Set());
   const maxSeatsPerBooking = useMaxSeatsPerBooking();
+  const selectionLimit = noPaymentIntent?.seatCount ?? maxSeatsPerBooking;
+  const categoryBySeatId = useMemo(() => buildSeatCategoryMap(venue), [venue]);
   const lockSetRef = useRef<Set<string>>(new Set());
   const selectingSeatIdsRef = useRef<Set<string>>(new Set());
   const ownedSeatIdsRef = useRef<Set<string>>(new Set());
@@ -233,6 +249,12 @@ export function EmbedSeatmap({
   useEffect(() => {
     lockSetRef.current = pendingSeatIds;
   }, [pendingSeatIds]);
+
+  useEffect(() => {
+    if (noPaymentIntent?.status === 'confirmed' && noPaymentIntent.completion) {
+      postNoPaymentCompletionToParent(noPaymentIntent.completion, sourceEventId);
+    }
+  }, [noPaymentIntent, sourceEventId]);
 
   useEffect(() => {
     const eventSource = connectMercure(venueId, (seatId, status) => {
@@ -268,6 +290,9 @@ export function EmbedSeatmap({
 
   const continueToCheckout = useCallback(
     () => {
+      if (!ticketokContext) {
+        return;
+      }
       const continuationLocale = ticketokContext.locale?.trim() || locale;
       const continuation = buildEmbedCheckoutContinuation({
         eventId,
@@ -298,12 +323,13 @@ export function EmbedSeatmap({
         origin: window.location.origin,
       }));
     },
-    [eventId, locale, navigateTopLevel, slug, sourceEventId, ticketokContext.locale, ticketokContext.returnUrl],
+    [eventId, locale, navigateTopLevel, slug, sourceEventId, ticketokContext],
   );
 
   const handleSeatClick = useCallback(
     async (seatId: string) => {
       if (cartStatus === 'loading') return;
+      if (noPaymentIntent && cartStatus === 'success') return;
       if (lockSetRef.current.has(seatId)) return;
 
       const currentStatus = seatStatusByIdRef.current.get(seatId) ?? findSeatStatus(liveVenue, seatId);
@@ -314,11 +340,26 @@ export function EmbedSeatmap({
       try {
         if (currentStatus === 'available') {
           if (
-            ownedSeatIdsRef.current.size + selectingSeatIdsRef.current.size >=
-            maxSeatsPerBooking
+            noPaymentIntent &&
+            !canSelectNoPaymentSeat(
+              seatId,
+              new Set([...ownedSeatIdsRef.current, ...selectingSeatIdsRef.current]),
+              categoryBySeatId,
+              noPaymentIntent.seatCategories,
+            )
           ) {
             setCartStatus('error');
-            setCartMessage(t('seatLimitReached', { count: maxSeatsPerBooking }));
+            setCartMessage(tEmbed('noPaymentCategoryLimit'));
+            return;
+          }
+          if (
+            ownedSeatIdsRef.current.size + selectingSeatIdsRef.current.size >=
+            selectionLimit
+          ) {
+            setCartStatus('error');
+            setCartMessage(noPaymentIntent
+              ? tEmbed('noPaymentExactCount', { count: selectionLimit })
+              : t('seatLimitReached', { count: selectionLimit }));
             return;
           }
 
@@ -344,7 +385,17 @@ export function EmbedSeatmap({
         });
       }
     },
-    [cartStatus, clientId, liveVenue, maxSeatsPerBooking, t, venueId],
+    [
+      cartStatus,
+      categoryBySeatId,
+      clientId,
+      liveVenue,
+      noPaymentIntent,
+      selectionLimit,
+      t,
+      tEmbed,
+      venueId,
+    ],
   );
 
   const handleCartEvent = useCallback(
@@ -356,9 +407,18 @@ export function EmbedSeatmap({
       if (selectedSeatIds.length === 0) {
         return;
       }
-      if (selectedSeatIds.length > maxSeatsPerBooking) {
+      if (noPaymentIntent && !matchesNoPaymentRequirements(
+        selectedSeatIds,
+        categoryBySeatId,
+        noPaymentIntent.seatCategories,
+      )) {
         setCartStatus('error');
-        setCartMessage(t('seatLimitReached', { count: maxSeatsPerBooking }));
+        setCartMessage(tEmbed('noPaymentExactCount', { count: noPaymentIntent.seatCount }));
+        return;
+      }
+      if (selectedSeatIds.length > selectionLimit) {
+        setCartStatus('error');
+        setCartMessage(t('seatLimitReached', { count: selectionLimit }));
         return;
       }
 
@@ -371,8 +431,21 @@ export function EmbedSeatmap({
       }
 
       setCartStatus('loading');
-      setCartMessage(t('creatingBooking'));
+      setCartMessage(noPaymentIntent ? tEmbed('noPaymentConfirming') : t('creatingBooking'));
       try {
+        if (noPaymentIntent) {
+          const response = await confirmNoPaymentBooking(noPaymentIntent.token, {
+            userId: clientId,
+            seats: proceedSeatIds,
+          });
+          setCartStatus('success');
+          setCartMessage(tEmbed('noPaymentConfirmed'));
+          postNoPaymentCompletionToParent(response, sourceEventId);
+          return;
+        }
+        if (!ticketokContext) {
+          throw new Error(t('bookingFailed'));
+        }
         await proceedCart({
           userId: clientId,
           eventId,
@@ -389,7 +462,20 @@ export function EmbedSeatmap({
         setCartMessage(message);
       }
     },
-    [cartStatus, clientId, continueToCheckout, maxSeatsPerBooking, t, tEmbed, ticketokContext.sessionToken, venueId],
+    [
+      cartStatus,
+      categoryBySeatId,
+      clientId,
+      continueToCheckout,
+      eventId,
+      noPaymentIntent,
+      selectionLimit,
+      sourceEventId,
+      t,
+      tEmbed,
+      ticketokContext,
+      venueId,
+    ],
   );
 
   return (
@@ -409,7 +495,7 @@ export function EmbedSeatmap({
                   classNames={seatmapViewerSharedThemeClassNames}
                   venue={liveVenue}
                   currency={currency}
-                  maxSelectedSeats={maxSeatsPerBooking}
+                  maxSelectedSeats={selectionLimit}
                   renderTooltip={renderSeatmapTooltip}
                   onSeatClick={handleSeatClick}
                   onCartEvent={handleCartEvent}
@@ -423,7 +509,9 @@ export function EmbedSeatmap({
                   className="pointer-events-none absolute top-3 left-3 z-10 max-w-[220px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 p-3 text-xs leading-tight text-[var(--ds-on-surface)]"
                 />
                 <div className="pointer-events-none absolute top-3 right-3 z-10 max-w-[240px] rounded-lg border border-[var(--ds-ghost-border)] bg-[var(--ds-surface)]/95 px-3 py-2 text-xs text-[var(--ds-on-surface-variant)]">
-                  {t('seatLimitHint', { count: maxSeatsPerBooking })}
+                  {noPaymentIntent
+                    ? tEmbed('noPaymentSelectionHint', { count: noPaymentIntent.seatCount })
+                    : t('seatLimitHint', { count: maxSeatsPerBooking })}
                 </div>
                 {cartStatus === 'loading' && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">

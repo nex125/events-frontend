@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ticketok no-payment booking simulator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #09090b;
+      color: #f4f4f5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 32px 18px;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(223, 205, 114, 0.14), transparent 34rem),
+        #09090b;
+    }
+
+    main {
+      width: min(880px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.55rem, 4vw, 2.25rem);
+      letter-spacing: -0.04em;
+    }
+
+    p { margin: 0; color: #a1a1aa; line-height: 1.55; }
+
+    .mode {
+      flex: 0 0 auto;
+      padding: 7px 11px;
+      border: 1px solid #3f3f46;
+      border-radius: 999px;
+      color: #d4d4d8;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      overflow: hidden;
+      border: 1px solid #27272a;
+      border-radius: 18px;
+      background: rgba(24, 24, 27, 0.92);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      padding: 24px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: #d4d4d8;
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    input, textarea, button {
+      width: 100%;
+      border: 1px solid #3f3f46;
+      border-radius: 10px;
+      font: inherit;
+    }
+
+    input, textarea {
+      padding: 11px 12px;
+      outline: none;
+      background: #09090b;
+      color: #fafafa;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #dfcd72;
+      box-shadow: 0 0 0 3px rgba(223, 205, 114, 0.12);
+    }
+
+    textarea {
+      min-height: 112px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      line-height: 1.5;
+    }
+
+    small {
+      color: #71717a;
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    button {
+      padding: 12px 16px;
+      border-color: #dfcd72;
+      background: #dfcd72;
+      color: #18181b;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { cursor: wait; opacity: 0.55; transform: none; }
+
+    .notice {
+      grid-column: 1 / -1;
+      padding: 12px 14px;
+      border: 1px solid #713f12;
+      border-radius: 10px;
+      background: rgba(120, 53, 15, 0.2);
+      color: #fcd34d;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .result {
+      display: none;
+      border-top: 1px solid #27272a;
+      padding: 24px;
+    }
+
+    .result.visible { display: block; }
+
+    .embed-preview {
+      display: none;
+      border-top: 1px solid #27272a;
+      padding: 24px;
+    }
+
+    .embed-preview.visible { display: block; }
+
+    .embed-preview h2 { margin: 0 0 12px; font-size: 1rem; }
+
+    .embed-preview iframe {
+      width: 100%;
+      min-height: 720px;
+      border: 1px solid #3f3f46;
+      border-radius: 12px;
+      background: #09090b;
+    }
+
+    .embed-message { margin-top: 12px; }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .result h2 { margin: 0; font-size: 1rem; }
+
+    .status {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #27272a;
+      color: #d4d4d8;
+      font: 700 0.75rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .status.ok { background: rgba(6, 78, 59, 0.7); color: #6ee7b7; }
+    .status.error { background: rgba(127, 29, 29, 0.65); color: #fca5a5; }
+
+    pre {
+      max-height: 420px;
+      margin: 0;
+      overflow: auto;
+      padding: 16px;
+      border-radius: 10px;
+      background: #09090b;
+      color: #e4e4e7;
+      font: 0.8rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 22px 12px; }
+      header { display: grid; }
+      form { grid-template-columns: 1fr; padding: 18px; }
+      .wide, .notice { grid-column: 1; }
+      .result { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>No-payment booking simulator</h1>
+        <p>Builds and signs the same request Ticketok sends to the complimentary booking endpoint.</p>
+      </div>
+      <div class="mode" id="frame-mode">Detecting frame</div>
+    </header>
+
+    <section class="card">
+      <form id="booking-form" autocomplete="off">
+        <div class="notice">
+          QA tool: a successful request creates a short-lived seat-selection intent and opens its embed below. Seats are booked only after the exact requested category quantities are selected and confirmed. The key secret is kept only in this page's memory and is never saved.
+        </div>
+
+        <label class="wide">
+          Endpoint
+          <input id="endpoint" name="endpoint" type="url" required
+                 value="https://qa.afisha.ticketok.by/bo/api/ticketok/bookings/no-payment"
+                 spellcheck="false">
+        </label>
+
+        <label>
+          Ticketok key ID
+          <input id="key-id" name="keyId" required
+                 value="ak_live_jtknnlbkwnj0eg4sv91nbydf"
+                 spellcheck="false">
+        </label>
+
+        <label>
+          Ticketok key secret
+          <input id="key-secret" name="keySecret" type="password" required
+                 placeholder="Enter secret at runtime" autocomplete="new-password">
+        </label>
+
+        <label class="wide">
+          Event ID
+          <input id="event-id" name="eventId" required
+                 placeholder="Ticketok source event ID or local event UUID"
+                 spellcheck="false">
+        </label>
+
+        <label class="wide">
+          Seat categories (JSON)
+          <textarea id="seat-categories" name="seatCategories" required
+                    spellcheck="false">[{"categoryId":"vip","count":1}]</textarea>
+          <small>Use one or more objects containing a categoryId and a positive integer count.</small>
+        </label>
+
+        <div class="wide">
+          <button id="submit-button" type="submit">Send signed booking request</button>
+        </div>
+      </form>
+
+      <section class="result" id="result" aria-live="polite">
+        <div class="result-head">
+          <h2>Request result</h2>
+          <span class="status" id="status">Waiting</span>
+        </div>
+        <pre id="output"></pre>
+      </section>
+
+      <section class="embed-preview" id="embed-preview">
+        <h2>Returned seat-selection embed</h2>
+        <iframe id="booking-iframe" title="No-payment seat selection"></iframe>
+        <pre class="embed-message" id="embed-message">Waiting for booking completion message.</pre>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const form = document.getElementById('booking-form');
+      const button = document.getElementById('submit-button');
+      const result = document.getElementById('result');
+      const status = document.getElementById('status');
+      const output = document.getElementById('output');
+      const embedPreview = document.getElementById('embed-preview');
+      const bookingIframe = document.getElementById('booking-iframe');
+      const embedMessage = document.getElementById('embed-message');
+      const frameMode = document.getElementById('frame-mode');
+      const encoder = new TextEncoder();
+      let activeEmbedOrigin = '';
+
+      const isEmbedded = window.parent !== window;
+      const parentOrigin = (() => {
+        const configured = new URLSearchParams(window.location.search).get('parentOrigin');
+        const candidate = configured || document.referrer;
+        if (!candidate) return '';
+        try {
+          return new URL(candidate, window.location.href).origin;
+        } catch {
+          return '';
+        }
+      })();
+      frameMode.textContent = isEmbedded ? 'Running in iframe' : 'Standalone page';
+
+      function bytesToHex(bytes) {
+        return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('');
+      }
+
+      function createNonce() {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        return bytesToHex(bytes);
+      }
+
+      async function sign(secret, canonicalRequest) {
+        if (!crypto.subtle) {
+          throw new Error('Web Crypto is unavailable. Open this page over HTTPS or on localhost.');
+        }
+
+        const key = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(secret),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign'],
+        );
+        return bytesToHex(await crypto.subtle.sign('HMAC', key, encoder.encode(canonicalRequest)));
+      }
+
+      function showResult(httpStatus, ok, payload) {
+        result.classList.add('visible');
+        status.textContent = httpStatus;
+        status.className = `status ${ok ? 'ok' : 'error'}`;
+        output.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function notifyParent(message) {
+        if (isEmbedded && parentOrigin) {
+          window.parent.postMessage(message, parentOrigin);
+        }
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        button.disabled = true;
+        button.textContent = 'Sending request…';
+
+        try {
+          const endpoint = new URL(document.getElementById('endpoint').value.trim(), window.location.href);
+          const keyId = document.getElementById('key-id').value.trim();
+          const keySecret = document.getElementById('key-secret').value;
+          const eventId = document.getElementById('event-id').value.trim();
+          const categories = JSON.parse(document.getElementById('seat-categories').value);
+
+          if (!Array.isArray(categories) || categories.length === 0) {
+            throw new Error('Seat categories must be a non-empty JSON array.');
+          }
+          for (const category of categories) {
+            if (!category || typeof category.categoryId !== 'string' || !category.categoryId.trim()) {
+              throw new Error('Every seat category must have a non-empty categoryId.');
+            }
+            if (!Number.isInteger(category.count) || category.count < 1) {
+              throw new Error('Every seat category count must be a positive integer.');
+            }
+          }
+
+          const body = JSON.stringify({ eventId, seatCategories: categories });
+          const timestamp = Math.floor(Date.now() / 1000).toString();
+          const nonce = createNonce();
+          const canonicalRequest = ['POST', endpoint.pathname, timestamp, nonce, body].join('\n');
+          const signature = await sign(keySecret, canonicalRequest);
+
+          const response = await fetch(endpoint.toString(), {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              'X-Ticketok-Key-Id': keyId,
+              'X-Ticketok-Timestamp': timestamp,
+              'X-Ticketok-Nonce': nonce,
+              'X-Ticketok-Signature': signature,
+            },
+            body,
+            cache: 'no-store',
+          });
+
+          const responseText = await response.text();
+          let responseBody;
+          try {
+            responseBody = JSON.parse(responseText);
+          } catch {
+            responseBody = responseText;
+          }
+
+          const details = {
+            request: {
+              method: 'POST',
+              url: endpoint.toString(),
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Ticketok-Key-Id': keyId,
+                'X-Ticketok-Timestamp': timestamp,
+                'X-Ticketok-Nonce': nonce,
+                'X-Ticketok-Signature': signature,
+              },
+              body: JSON.parse(body),
+            },
+            response: {
+              status: response.status,
+              statusText: response.statusText,
+              body: responseBody,
+            },
+          };
+
+          showResult(`${response.status} ${response.statusText}`.trim(), response.ok, details);
+          if (
+            response.ok &&
+            responseBody &&
+            typeof responseBody === 'object' &&
+            typeof responseBody.embedUrl === 'string'
+          ) {
+            const embedUrl = new URL(responseBody.embedUrl, endpoint.origin);
+            activeEmbedOrigin = embedUrl.origin;
+            bookingIframe.src = embedUrl.toString();
+            embedMessage.textContent = 'Waiting for booking completion message.';
+            embedPreview.classList.add('visible');
+          }
+          notifyParent({
+            type: 'ticketok-no-payment-booking-result',
+            ok: response.ok,
+            status: response.status,
+            response: responseBody,
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          showResult('Client error', false, { error: message });
+          notifyParent({
+            type: 'ticketok-no-payment-booking-result',
+            ok: false,
+            status: 0,
+            error: message,
+          });
+        } finally {
+          button.disabled = false;
+          button.textContent = 'Send signed booking request';
+        }
+      });
+
+      window.addEventListener('message', (event) => {
+        if (
+          !activeEmbedOrigin ||
+          event.origin !== activeEmbedOrigin ||
+          event.source !== bookingIframe.contentWindow ||
+          !event.data ||
+          event.data.type !== 'ticketok-no-payment-booking-complete'
+        ) {
+          return;
+        }
+
+        embedMessage.textContent = JSON.stringify(event.data, null, 2);
+      });
+    })();
+  </script>
+</body>
+</html>

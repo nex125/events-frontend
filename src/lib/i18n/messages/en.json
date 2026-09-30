@@ -139,6 +139,11 @@
     "contextSummary": "Ticketok event {eventId}, state {state}, ticket {ticketId}.",
     "seatmapPreparing": "Preparing local seat selection.",
     "cartForwarding": "Sending your selected seats to Ticketok.",
+    "noPaymentSelectionHint": "Select exactly {count} complimentary seats in the requested categories.",
+    "noPaymentCategoryLimit": "This category is not requested, or its required quantity is already selected.",
+    "noPaymentExactCount": "Select exactly {count} seats with the requested category quantities.",
+    "noPaymentConfirming": "Confirming the complimentary booking.",
+    "noPaymentConfirmed": "Complimentary booking confirmed. You may close this window.",
     "seatmapUnavailable": "Seat selection is unavailable.",
     "seatmapUnavailableDescription": "Ticketok access validation did not complete, so local seat selection cannot be shown."
   },

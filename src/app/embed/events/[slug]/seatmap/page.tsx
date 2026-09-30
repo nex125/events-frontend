@@ -2,7 +2,11 @@ import { cache } from 'react';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { ApiRequestError, getEmbedEventContext } from '@/lib/api';
+import {
+  ApiRequestError,
+  getEmbedEventContext,
+  getNoPaymentBookingIntent,
+} from '@/lib/api';
 import { DEFAULT_CURRENCY } from '@/lib/i18n/config';
 import {
   decodeLaunchPayload,
@@ -16,6 +20,7 @@ import { EmbedSeatmap } from '@/components/event/EmbedSeatmap';
 
 interface EmbedSeatmapPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 const getEvent = cache(async (slug: string) =>
@@ -39,8 +44,13 @@ export const metadata: Metadata = {
 
 export default async function EmbedSeatmapPage({
   params,
+  searchParams,
 }: EmbedSeatmapPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const noPaymentToken = typeof resolvedSearchParams.noPaymentToken === 'string'
+    ? resolvedSearchParams.noPaymentToken.trim()
+    : '';
   const context = await getEvent(slug).catch((error: unknown) => {
     if (isEventNotFoundError(error)) {
       notFound();
@@ -53,34 +63,76 @@ export default async function EmbedSeatmapPage({
     notFound();
   }
 
-  const cookieStore = await cookies();
-  const handoff = decodeLaunchPayload(cookieStore.get(`${HANDOFF_COOKIE_PREFIX}${slug}`)?.value);
-  if (!handoff || !hasRequiredLaunchFields(handoff) || isLaunchExpired(handoff)) {
+  const sourceEventId = Number.parseInt(event.sourceEventId?.trim() ?? '', 10);
+  if (!Number.isFinite(sourceEventId) || sourceEventId <= 0) {
     notFound();
   }
 
-  const eventIdParam = handoff.eventId ?? '';
-  const sessionToken = handoff.sessionToken ?? '';
-  const state = resolveLaunchState(handoff);
-  const timestamp = handoff.timestamp ?? '';
-  const sourceEventId = Number.parseInt(event.sourceEventId?.trim() ?? '', 10);
-  const handoffEventId = Number.parseInt(eventIdParam, 10);
-
+  const noPaymentIntent = noPaymentToken
+    ? await getNoPaymentBookingIntent(noPaymentToken).catch(() => null)
+    : null;
   if (
-    !Number.isFinite(sourceEventId) ||
-    sourceEventId <= 0 ||
-    !Number.isFinite(handoffEventId) ||
-    handoffEventId <= 0 ||
-    handoffEventId !== sourceEventId ||
-    sessionToken.length === 0 ||
-    state.length === 0 ||
-    timestamp.length === 0
+    noPaymentToken &&
+    (
+      !noPaymentIntent ||
+      noPaymentIntent.slug !== slug ||
+      noPaymentIntent.localEventId !== event.id ||
+      noPaymentIntent.venueId !== event.venueId
+    )
   ) {
     notFound();
   }
 
+  let ticketokContext: {
+    sessionToken: string;
+    state: string;
+    requestId: string;
+    timestamp: string;
+    locale: string;
+    currency: string;
+    ticketId: string;
+    expiresAt: string;
+    returnUrl: string;
+  } | undefined;
+
+  if (!noPaymentIntent) {
+    const cookieStore = await cookies();
+    const handoff = decodeLaunchPayload(cookieStore.get(`${HANDOFF_COOKIE_PREFIX}${slug}`)?.value);
+    if (!handoff || !hasRequiredLaunchFields(handoff) || isLaunchExpired(handoff)) {
+      notFound();
+    }
+
+    const eventIdParam = handoff.eventId ?? '';
+    const sessionToken = handoff.sessionToken ?? '';
+    const state = resolveLaunchState(handoff);
+    const timestamp = handoff.timestamp ?? '';
+    const handoffEventId = Number.parseInt(eventIdParam, 10);
+    if (
+      !Number.isFinite(handoffEventId) ||
+      handoffEventId <= 0 ||
+      handoffEventId !== sourceEventId ||
+      sessionToken.length === 0 ||
+      state.length === 0 ||
+      timestamp.length === 0
+    ) {
+      notFound();
+    }
+
+    ticketokContext = {
+      sessionToken,
+      state,
+      requestId: handoff.requestId ?? '',
+      timestamp,
+      locale: resolveTicketokLocale(handoff),
+      currency: handoff.currency ?? '',
+      ticketId: handoff.ticketId ?? '',
+      expiresAt: handoff.expiresAt ?? '',
+      returnUrl: handoff.returnUrl ?? '',
+    };
+  }
+
   const seatCurrency =
-    (handoff.currency ?? '') ||
+    (ticketokContext?.currency ?? '') ||
     context.seatCategories.find((category) => category.currency.trim().length > 0)?.currency ||
     DEFAULT_CURRENCY;
 
@@ -92,17 +144,8 @@ export default async function EmbedSeatmapPage({
       sourceEventId={sourceEventId}
       venue={context.venue}
       currency={seatCurrency}
-      ticketokContext={{
-        sessionToken,
-        state,
-        requestId: handoff.requestId ?? '',
-        timestamp,
-        locale: resolveTicketokLocale(handoff),
-        currency: handoff.currency ?? '',
-        ticketId: handoff.ticketId ?? '',
-        expiresAt: handoff.expiresAt ?? '',
-        returnUrl: handoff.returnUrl ?? '',
-      }}
+      ticketokContext={ticketokContext}
+      noPaymentIntent={noPaymentIntent ? { token: noPaymentToken, ...noPaymentIntent } : undefined}
     />
   );
 }

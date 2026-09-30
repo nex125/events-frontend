@@ -410,6 +410,35 @@ export interface ProceedCartResponse {
   status: string;
 }
 
+export interface NoPaymentSeatCategoryRequirement {
+  categoryId: string;
+  count: number;
+}
+
+export interface NoPaymentBookingResponse {
+  bookingId: string;
+  eventId: string;
+  status: 'confirmed' | string;
+  paymentRequired: false;
+  seatCount: number;
+  seats: string[];
+}
+
+export interface NoPaymentBookingIntent {
+  bookingId: string;
+  eventId: string;
+  localEventId: string;
+  sourceEventId: string;
+  venueId: string;
+  slug: string;
+  status: 'pending' | 'confirmed' | string;
+  paymentRequired: false;
+  seatCount: number;
+  seatCategories: NoPaymentSeatCategoryRequirement[];
+  expiresAt: string;
+  completion?: NoPaymentBookingResponse;
+}
+
 export interface TicketokSessionContract {
   venueId?: string;
   eventId: number;
@@ -489,6 +518,38 @@ export async function proceedCart(
     body: JSON.stringify(payload),
     ...init,
   });
+}
+
+export async function getNoPaymentBookingIntent(
+  token: string,
+  init?: RequestInit,
+): Promise<NoPaymentBookingIntent> {
+  return apiFetch<NoPaymentBookingIntent>(
+    `/ticketing/no-payment/intents/${encodeURIComponent(token)}`,
+    { cache: 'no-store', ...init },
+  );
+}
+
+export async function confirmNoPaymentBooking(
+  token: string,
+  payload: {
+    userId: string;
+    seats: string[];
+  },
+  init?: RequestInit,
+): Promise<NoPaymentBookingResponse> {
+  return apiFetch<NoPaymentBookingResponse>(
+    `/ticketing/no-payment/intents/${encodeURIComponent(token)}/confirm`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        ...(init?.headers ?? {}),
+      },
+      body: JSON.stringify(payload),
+      ...init,
+    },
+  );
 }
 
 export async function checkTicketokSession(

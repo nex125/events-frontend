@@ -139,6 +139,11 @@
     "contextSummary": "Событие Ticketok {eventId}, state {state}, билет {ticketId}.",
     "seatmapPreparing": "Подготавливаем локальный выбор мест.",
     "cartForwarding": "Передаем выбранные места в Ticketok.",
+    "noPaymentSelectionHint": "Выберите ровно {count} бесплатных мест в запрошенных категориях.",
+    "noPaymentCategoryLimit": "Эта категория не запрошена или нужное количество мест в ней уже выбрано.",
+    "noPaymentExactCount": "Выберите ровно {count} мест в запрошенных категориях.",
+    "noPaymentConfirming": "Подтверждаем бесплатное бронирование.",
+    "noPaymentConfirmed": "Бесплатное бронирование подтверждено. Это окно можно закрыть.",
     "seatmapUnavailable": "Выбор мест недоступен.",
     "seatmapUnavailableDescription": "Проверка доступа через Ticketok не завершилась, поэтому локальный выбор мест не может быть показан."
   },
