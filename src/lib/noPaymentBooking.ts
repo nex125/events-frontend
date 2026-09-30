@@ -81,9 +81,57 @@ export function canSelectNoPaymentSeat(
   return (selected.get(categoryId) ?? 0) < requiredCount;
 }
 
+export interface NoPaymentSeatDetails {
+  id: string;
+  section?: string;
+  row?: string;
+  table?: string;
+  seat?: string;
+  description: string;
+}
+
+export function buildNoPaymentSeatDetails(venue: Venue, seatIds: string[]): NoPaymentSeatDetails[] {
+  const detailsById = new Map<string, NoPaymentSeatDetails>();
+
+  for (const section of venue.sections) {
+    for (const row of section.rows) {
+      for (const seat of row.seats) {
+        const sectionLabel = section.label.trim();
+        const rowLabel = row.label.trim();
+        const seatLabel = seat.label.trim();
+        detailsById.set(seat.id, {
+          id: seat.id,
+          section: sectionLabel,
+          row: rowLabel,
+          seat: seatLabel,
+          description: [sectionLabel, rowLabel && 'Row ' + rowLabel, seatLabel && 'Seat ' + seatLabel]
+            .filter(Boolean).join(', ') || seat.id,
+        });
+      }
+    }
+  }
+
+  for (const table of venue.tables) {
+    for (const seat of table.seats) {
+      const tableLabel = table.label.trim();
+      const seatLabel = seat.label.trim();
+      detailsById.set(seat.id, {
+        id: seat.id,
+        table: tableLabel,
+        seat: seatLabel,
+        description: [tableLabel && 'Table ' + tableLabel, seatLabel && 'Seat ' + seatLabel]
+          .filter(Boolean).join(', ') || seat.id,
+      });
+    }
+  }
+
+  return seatIds.map((id) => detailsById.get(id) ?? { id, description: id });
+}
+
 export function postNoPaymentCompletionToParent(
   response: NoPaymentBookingResponse,
   sourceEventId: number,
+  venue: Venue,
 ): void {
   if (window.parent === window) return;
 
@@ -105,5 +153,6 @@ export function postNoPaymentCompletionToParent(
     paymentRequired: false,
     seatCount: response.seatCount,
     seats: response.seats,
+    seatDetails: buildNoPaymentSeatDetails(venue, response.seats),
   }, targetOrigin);
 }

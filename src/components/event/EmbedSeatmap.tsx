@@ -254,9 +254,9 @@ export function EmbedSeatmap({
 
   useEffect(() => {
     if (noPaymentIntent?.status === 'confirmed' && noPaymentIntent.completion) {
-      postNoPaymentCompletionToParent(noPaymentIntent.completion, sourceEventId);
+      postNoPaymentCompletionToParent(noPaymentIntent.completion, sourceEventId, venue);
     }
-  }, [noPaymentIntent, sourceEventId]);
+  }, [noPaymentIntent, sourceEventId, venue]);
 
   useEffect(() => {
     const eventSource = connectMercure(venueId, (seatId, status) => {
@@ -442,7 +442,7 @@ export function EmbedSeatmap({
           });
           setCartStatus('success');
           setCartMessage(tEmbed('noPaymentConfirmed'));
-          postNoPaymentCompletionToParent(response, sourceEventId);
+          postNoPaymentCompletionToParent(response, sourceEventId, venue);
           return;
         }
         if (!ticketokContext) {
@@ -483,6 +483,7 @@ export function EmbedSeatmap({
       t,
       tEmbed,
       ticketokContext,
+      venue,
       venueId,
     ],
   );
