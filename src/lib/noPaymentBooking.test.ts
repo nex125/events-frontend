@@ -18,7 +18,7 @@ const venue = {
       label: 'A',
       seats: [
         { id: 'vip-1', label: '12', categoryId: 'vip' },
-        { id: 'vip-2', label: '13', categoryId: 'vip' },
+        { id: 'vip-2', label: '13', categoryId: '' },
         { id: 'standard-1', label: '14', categoryId: 'standard' },
       ],
     }],
@@ -27,7 +27,7 @@ const venue = {
     id: 'table-1',
     label: '5',
     categoryId: 'standard',
-    seats: [{ id: 'table-seat-1', label: '2', categoryId: 'standard' }],
+    seats: [{ id: 'table-seat-1', label: '2', categoryId: '' }],
   }],
 } as unknown as Venue;
 
@@ -65,9 +65,11 @@ describe('no-payment booking seat requirements', () => {
 
 describe('no-payment completion seat details', () => {
   test('describes confirmed section and table seats in response order', () => {
-    expect(buildNoPaymentSeatDetails(venue, ['table-seat-1', 'vip-1'])).toEqual([
-      { id: 'table-seat-1', table: '5', seat: '2', description: 'Table 5, Seat 2' },
-      { id: 'vip-1', section: 'Balcony', row: 'A', seat: '12', description: 'Balcony, Row A, Seat 12' },
+    expect(buildNoPaymentSeatDetails(venue, ['table-seat-1', 'vip-1', 'vip-2', 'standard-1'])).toEqual([
+      { id: 'table-seat-1', categoryId: 'standard', table: '5', seat: '2', description: 'Table 5, Seat 2' },
+      { id: 'vip-1', categoryId: 'vip', section: 'Balcony', row: 'A', seat: '12', description: 'Balcony, Row A, Seat 12' },
+      { id: 'vip-2', categoryId: 'vip', section: 'Balcony', row: 'A', seat: '13', description: 'Balcony, Row A, Seat 13' },
+      { id: 'standard-1', categoryId: 'standard', section: 'Balcony', row: 'A', seat: '14', description: 'Balcony, Row A, Seat 14' },
     ]);
   });
 
@@ -88,9 +90,9 @@ describe('no-payment completion seat details', () => {
       }],
     };
     expect(buildNoPaymentSeatDetails(unlabeledVenue, ['missing', 'vip-1', 'vip-2'])).toEqual([
-      { id: 'missing', description: 'missing' },
-      { id: 'vip-1', section: '', row: '', seat: '12', description: 'Seat 12' },
-      { id: 'vip-2', section: '', row: '', seat: '', description: 'vip-2' },
+      { id: 'missing', categoryId: null, description: 'missing' },
+      { id: 'vip-1', categoryId: 'vip', section: '', row: '', seat: '12', description: 'Seat 12' },
+      { id: 'vip-2', categoryId: 'vip', section: '', row: '', seat: '', description: 'vip-2' },
     ]);
   });
 
@@ -121,7 +123,7 @@ describe('no-payment completion seat details', () => {
           type: 'ticketok-no-payment-booking-complete',
           sourceEventId: 321,
           seatDetails: [{
-            id: 'vip-1', section: 'Balcony', row: 'A', seat: '12',
+            id: 'vip-1', categoryId: 'vip', section: 'Balcony', row: 'A', seat: '12',
             description: 'Balcony, Row A, Seat 12',
           }],
         },

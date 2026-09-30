@@ -83,6 +83,7 @@ export function canSelectNoPaymentSeat(
 
 export interface NoPaymentSeatDetails {
   id: string;
+  categoryId: string | null;
   section?: string;
   row?: string;
   table?: string;
@@ -101,6 +102,7 @@ export function buildNoPaymentSeatDetails(venue: Venue, seatIds: string[]): NoPa
         const seatLabel = seat.label.trim();
         detailsById.set(seat.id, {
           id: seat.id,
+          categoryId: seat.categoryId || section.categoryId || null,
           section: sectionLabel,
           row: rowLabel,
           seat: seatLabel,
@@ -117,6 +119,7 @@ export function buildNoPaymentSeatDetails(venue: Venue, seatIds: string[]): NoPa
       const seatLabel = seat.label.trim();
       detailsById.set(seat.id, {
         id: seat.id,
+        categoryId: seat.categoryId || table.categoryId || null,
         table: tableLabel,
         seat: seatLabel,
         description: [tableLabel && 'Table ' + tableLabel, seatLabel && 'Seat ' + seatLabel]
@@ -125,7 +128,7 @@ export function buildNoPaymentSeatDetails(venue: Venue, seatIds: string[]): NoPa
     }
   }
 
-  return seatIds.map((id) => detailsById.get(id) ?? { id, description: id });
+  return seatIds.map((id) => detailsById.get(id) ?? { id, categoryId: null, description: id });
 }
 
 export function postNoPaymentCompletionToParent(
