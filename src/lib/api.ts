@@ -506,6 +506,7 @@ export async function proceedCart(
     venueId: string;
     seats: string[];
     sessionToken?: string;
+    idempotencyKey?: string;
   },
   init?: RequestInit,
 ): Promise<ProceedCartResponse> {

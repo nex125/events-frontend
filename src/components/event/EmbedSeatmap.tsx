@@ -21,6 +21,7 @@ import {
   releaseSeat,
 } from '@/lib/api';
 import type { NoPaymentBookingIntent } from '@/lib/api';
+import { cartAttemptFor, type CartAttempt } from '@/lib/cartIdempotency';
 import {
   buildEmbedCheckoutContinuation,
   buildEmbedCheckoutTarget,
@@ -151,6 +152,7 @@ export function EmbedSeatmap({
   const tSeatmap = useTranslations('ticketLauncher.seatmap');
   const tEmbed = useTranslations('embedSeatmap');
   const clientId = useMemo(() => getOrCreateClientId(), []);
+  const cartAttemptRef = useRef<CartAttempt | null>(null);
   const locale = resolveLocaleTag();
   const seatmapMessages = useMemo<SeatmapViewerMessageOverrides>(
     () => buildSeatmapMessages(tSeatmap),
@@ -446,13 +448,20 @@ export function EmbedSeatmap({
         if (!ticketokContext) {
           throw new Error(t('bookingFailed'));
         }
-        await proceedCart({
+        const payload = {
           userId: clientId,
           eventId,
           venueId,
           seats: proceedSeatIds,
           sessionToken: ticketokContext.sessionToken,
+        };
+        const attempt = cartAttemptFor(cartAttemptRef.current, payload);
+        cartAttemptRef.current = attempt;
+        await proceedCart({
+          ...payload,
+          idempotencyKey: attempt.key,
         });
+        cartAttemptRef.current = null;
         setCartStatus('success');
         setCartMessage(tEmbed('cartForwarding'));
         continueToCheckout();
